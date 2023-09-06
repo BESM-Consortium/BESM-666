@@ -14,4 +14,4 @@ target_sources(besm-666 PRIVATE
 add_subdirectory(third_party)
 
 enable_testing()
-add_subdirectory(t)
+add_subdirectory(test)
