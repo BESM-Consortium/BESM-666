@@ -5,7 +5,7 @@ SRC_DIR := src
 JOBS ?= 4
 
 .PHONY: all
-all: build test
+all: format build test
 
 .PHONY: format
 .SILENT: format
