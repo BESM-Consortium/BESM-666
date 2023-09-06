@@ -1,0 +1,10 @@
+threshold: 10
+errors:
+  - 28lev11@gmail.com
+alerts:
+  github:
+    - c71n93
+    - mmamayka
+    - levBagryansky
+tags:
+  - pdd

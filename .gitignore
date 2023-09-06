@@ -5,3 +5,5 @@
 # CMake build files
 build/
 
+# ide stuff
+.idea
