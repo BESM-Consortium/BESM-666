@@ -11,5 +11,7 @@ target_sources(besm-666 PRIVATE
     ./src/main.cpp
 )
 
+add_subdirectory(third_party)
+
 enable_testing()
 add_subdirectory(t)
