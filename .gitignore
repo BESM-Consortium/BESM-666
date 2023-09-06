@@ -1,0 +1,7 @@
+# YCM & clangd stuff
+.cache/
+*.gch
+
+# CMake build files
+build/
+
