@@ -10,6 +10,9 @@ add_executable(besm-666)
 target_sources(besm-666 PRIVATE
     ./src/main.cpp
 )
+target_include_directories(besm-666 PRIVATE
+    ./include
+)
 
 add_subdirectory(third_party)
 
