@@ -27,7 +27,7 @@ build: init
 
 .PHONY: test
 test: build
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test
+	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
 
 .PHONY: clean
 .SILENT: clean
