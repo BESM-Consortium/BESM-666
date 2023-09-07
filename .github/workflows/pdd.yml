@@ -3,11 +3,9 @@ name: pdd
 on:
   push:
     branches:
-      - master  # in case of renaming main to master
       - main
   pull_request:
     branches:
-      - master
       - main
 concurrency:
   group: pdd-${{ github.ref }}
