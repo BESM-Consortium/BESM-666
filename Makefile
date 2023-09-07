@@ -1,6 +1,8 @@
 
 BUILD_DIR := build
 SRC_DIR := src
+INC_DIR := include
+TEST_DIR := test
 
 JOBS ?= 4
 
@@ -14,7 +16,9 @@ init:
 .PHONY: format
 .SILENT: format
 format:
-	./tools/clang-format.sh $(SRC_DIR)
+	./tools/clang-format.sh $(PWD)/$(SRC_DIR)
+	./tools/clang-format.sh $(PWD)/$(INC_DIR)
+	./tools/clang-format.sh $(PWD)/$(TEST_DIR)
 
 .PHONY: build
 build: init
