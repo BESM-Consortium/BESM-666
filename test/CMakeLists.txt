@@ -10,7 +10,7 @@ function(besm666_test SOURCE_NAME)
         target_sources(${TARGET_NAME} PRIVATE ${SOURCE_NAME})
         target_link_libraries(${TARGET_NAME} PRIVATE besm666_testif)
         add_test(NAME ${TARGET_NAME} COMMAND ${COMMAND} ./${TARGET_NAME})
-    endfunction(aboba_test)
+    endfunction(init_test)
 
     init_test(${SOURCE_NAME} "" "")
 

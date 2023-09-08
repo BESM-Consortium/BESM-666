@@ -12,15 +12,21 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        valgrind_option:
+          - "1"
+          - "0"
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
+
     - name: install valgrind
       run: sudo apt install valgrind
+
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBESM666_ENABLE_VALGRIND=1
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBESM666_ENABLE_VALGRIND=${{matrix.valgrind_option}}
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
@@ -28,4 +34,3 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
-
