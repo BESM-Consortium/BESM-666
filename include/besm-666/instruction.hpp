@@ -1,5 +1,4 @@
-#ifndef BESM666_RISCV_INSTRUCTION_H
-#define BESM666_RISCV_INSTRUCTION_H
+#pragma once
 
 #include "besm-666/riscv-types.hpp"
 
@@ -27,5 +26,3 @@ struct Instruction {
 };
 
 } // namespace besm
-
-#endif /* BESM666_RISCV_INSTRUCTION_H */

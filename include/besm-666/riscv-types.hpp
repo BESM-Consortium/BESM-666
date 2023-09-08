@@ -1,5 +1,4 @@
-#ifndef BESM666_RISCV_TYPES_H
-#define BESM666_RISCV_TYPES_H
+#pragma once
 
 #include <cstdint>
 
@@ -29,5 +28,3 @@ using RV64UHWord = uint16_t;
 using RV64UDWord = uint64_t;
 
 } // namespace besm
-
-#endif /* BESM666_RISCV_TYPES_H */
