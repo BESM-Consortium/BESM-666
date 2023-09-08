@@ -14,7 +14,12 @@ add_library(besm666::besm666_shared ALIAS besm666_shared)
 target_sources(besm666_shared PRIVATE
     ./src/stub.cpp
 )
-target_link_libraries(besm666_shared PUBLIC besm666_include)
+target_link_libraries(besm666_shared 
+PUBLIC 
+    besm666_include
+PRIVATE
+    besm666_memory
+)
 
 add_executable(besm666)
 target_sources(besm666 PRIVATE
@@ -22,6 +27,7 @@ target_sources(besm666 PRIVATE
 )
 target_link_libraries(besm666 PRIVATE besm666::besm666_shared)
 
+add_subdirectory(./src/memory)
 add_subdirectory(third_party)
 
 enable_testing()

@@ -20,3 +20,5 @@ function(besm666_test SOURCE_NAME)
 endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
+
+add_subdirectory(./memory)
