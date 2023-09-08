@@ -6,13 +6,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 
-add_executable(besm-666)
-target_sources(besm-666 PRIVATE
-    ./src/main.cpp
+add_library(besm666_shared SHARED)
+add_library(besm666::besm666_shared ALIAS besm666_shared)
+
+target_sources(besm666_shared PRIVATE
+    ./src/stub.cpp
 )
-target_include_directories(besm-666 PRIVATE
+target_include_directories(besm666_shared PUBLIC
     ./include
 )
+
+add_executable(besm666)
+target_sources(besm666 PRIVATE
+    ./standalone/main.cpp
+)
+target_link_libraries(besm666 PRIVATE besm666::besm666_shared)
 
 add_subdirectory(third_party)
 
