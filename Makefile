@@ -23,11 +23,16 @@ format:
 
 .PHONY: build
 build: init
-	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR)
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_ENABLE_VALGRIND=0
 	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
 
 .PHONY: test
 test: build
+	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+
+.PHONY: test_val
+test_val: init
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_ENABLE_VALGRIND=1
 	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
 
 .PHONY: clean
