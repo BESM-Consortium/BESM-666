@@ -23,7 +23,7 @@ format:
 
 .PHONY: build
 build: init
-	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR)
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) $(CMAKE_FLAGS)
 	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
 
 .PHONY: test
