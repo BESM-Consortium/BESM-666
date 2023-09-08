@@ -21,7 +21,7 @@ function(besm666_test SOURCE_NAME)
 
     besm666_simple_test(${SOURCE_NAME})
 
-    if (ADD_VALGRIND)
+    if (BESM666_ENABLE_VALGRIND)
         besm666_valgrind_test(${SOURCE_NAME})
     endif ()
 endfunction(besm666_test)
