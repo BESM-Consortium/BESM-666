@@ -11,6 +11,7 @@ all: init format build test
 
 .PHONY: init
 init:
+	git submodule init
 	git submodule update
 
 .PHONY: format
