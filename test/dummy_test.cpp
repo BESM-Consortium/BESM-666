@@ -8,4 +8,6 @@ TEST(dummy, dummy_test_fail) {
 }
 */
 
-TEST(dummy, dummy_test_success) { EXPECT_TRUE(true); }
+TEST(dummy, dummy_test_success) {
+    EXPECT_TRUE(true);
+}
