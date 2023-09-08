@@ -18,6 +18,9 @@ function(besm666_valgrind_test SOURCE_NAME)
     add_test(NAME ${TARGET_NAME}_valgrind COMMAND valgrind ./${TARGET_NAME}_valgrind)
 endfunction(besm666_valgrind_test)
 
+function(besm666_test SOURCE_NAME)
+endfunction(besm666_test)
+
 besm666_simple_test(./dummy_test.cpp)
 
 besm666_valgrind_test(./dummy_test.cpp)
