@@ -1,6 +1,6 @@
 
 add_library(besm666_testif INTERFACE)
-target_link_libraries(besm666_testif INTERFACE gmock_main gmock gtest)
+target_link_libraries(besm666_testif INTERFACE besm666_shared gmock_main gmock gtest)
 
 function(besm666_test SOURCE_NAME)
     function(init_test SOURCE_NAME COMMAND POSTFIX)
@@ -20,4 +20,3 @@ function(besm666_test SOURCE_NAME)
 endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
-
