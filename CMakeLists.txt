@@ -4,17 +4,17 @@ project(BESM-666 LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
+add_library(besm666_include INTERFACE)
+target_include_directories(besm666_include INTERFACE
+    ./include
+)
 
 add_library(besm666_shared SHARED)
 add_library(besm666::besm666_shared ALIAS besm666_shared)
-
 target_sources(besm666_shared PRIVATE
     ./src/stub.cpp
 )
-target_include_directories(besm666_shared PUBLIC
-    ./include
-)
+target_link_libraries(besm666_shared PUBLIC besm666_include)
 
 add_executable(besm666)
 target_sources(besm666 PRIVATE
