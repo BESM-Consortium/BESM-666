@@ -70,16 +70,13 @@ PageAllocator::PageAllocator(PageAllocator &&other)
       pageSize_(other.pageSize_) {}
 
 void *PageAllocator::allocPage() {
-    for (auto &chunk : chunks_) {
-        void *page = chunk.allocPage();
-        if (page != nullptr) {
-            return page;
-        }
+    void *page = chunks_.empty() ? nullptr : chunks_.back().allocPage();
+    if (page == nullptr) {
+        chunks_.emplace_back(chunkSize_, pageSize_);
+        return chunks_.back().allocPage();
+    } else {
+        return page;
     }
-
-    chunks_.emplace_back(chunkSize_, pageSize_);
-
-    return chunks_.back().allocPage();
 }
 
 } // namespace besm::mem
