@@ -12,3 +12,5 @@ endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
 besm666_test(./reg/gprf-tests.cpp)
+
+add_subdirectory(./memory)
