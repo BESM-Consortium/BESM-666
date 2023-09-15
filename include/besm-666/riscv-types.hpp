@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "besm-666/autogen/encoding.out.h"
+
 namespace besm {
 
 using RV64Char = int8_t;
