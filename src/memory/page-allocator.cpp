@@ -30,8 +30,6 @@ PageAllocator::Chunk::Chunk(size_t chunkSize, size_t pageSize)
     rower_ = data_ = reinterpret_cast<char *>(data);
     size_ = tdMmapSize;
     pageSize_ = pageSize;
-
-    std::cout << size_ << ' ' << pageSize_ << std::endl;
 }
 
 PageAllocator::Chunk::Chunk(Chunk &&other)

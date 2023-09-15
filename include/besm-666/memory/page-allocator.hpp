@@ -19,22 +19,23 @@ namespace besm::mem {
  */
 class PageAllocator : public INonCopyable {
 public:
-    static constexpr size_t DefaultChunkSize = 1024 * 1024 + 2; // 2MB
-
-    class Chunk;
+    static constexpr size_t DefaultChunkSize = 1024 * 1024 * 2; // 2MB
 
     /**
      * \param [in] chunkSize amount of memory could be allocated in
      *  one time
      * \param [in] pageSize simulated device page size
      */
-    PageAllocator(size_t chunkSize, size_t pageSize);
+    PageAllocator(size_t pageSize,
+                  size_t chunkSize = PageAllocator::DefaultChunkSize);
     PageAllocator(PageAllocator &&other);
     ~PageAllocator() = default;
 
     void *allocPage();
 
 private:
+    class Chunk;
+
     std::vector<Chunk> chunks_;
     size_t chunkSize_;
     size_t pageSize_;
