@@ -15,6 +15,7 @@ add_library(besm666::besm666_shared ALIAS besm666_shared)
 target_sources(besm666_shared PRIVATE
     ./src/stub.cpp
 )
+
 target_link_libraries(besm666_shared 
 PUBLIC 
     besm666_include
