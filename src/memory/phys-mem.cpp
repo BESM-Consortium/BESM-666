@@ -71,7 +71,13 @@ bool operator<(PhysMemPagemap::PageId lhs, PhysMemPagemap::Page rhs) {
 PhysMem::PhysMem(PhysMemPagemap &&pagemap) : pagemap_(std::move(pagemap)) {}
 
 PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
-    : pagemap_(pageSize, allocatorChunkSize) {}
+    : pagemap_(pageSize, allocatorChunkSize)
+#ifndef NDEBUG
+      ,
+      wasAlreadyBuilt_(false)
+#endif
+{
+}
 
 PhysMemBuilder &PhysMemBuilder::loadContArea(RV64Ptr address, void const *data,
                                              RV64Size size) {
@@ -82,6 +88,12 @@ PhysMemBuilder &PhysMemBuilder::loadContArea(RV64Ptr address, void const *data,
     return *this;
 }
 
-PhysMem PhysMemBuilder::build() { return PhysMem(std::move(pagemap_)); }
+PhysMem PhysMemBuilder::build() {
+#ifndef NDEBUG
+    assert(!wasAlreadyBuilt_);
+    wasAlreadyBuilt_ = true;
+#endif
+    return PhysMem(std::move(pagemap_));
+}
 
 } // namespace besm::mem

@@ -82,6 +82,10 @@ public:
 
 private:
     PhysMemPagemap pagemap_;
+
+#ifndef NDEBUG
+    bool wasAlreadyBuilt_;
+#endif
 };
 
 } // namespace besm::mem
