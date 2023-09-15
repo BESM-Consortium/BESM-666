@@ -53,7 +53,6 @@ void *PageAllocator::Chunk::allocPage() noexcept {
     } else {
         void *page = rower_;
         rower_ += pageSize_;
-        ;
         return page;
     }
 }
