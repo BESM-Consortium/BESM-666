@@ -26,8 +26,8 @@ public:
     RV64UChar loadByte(RV64Ptr address);
 
 private:
-    RV64Size addr2PageId(RV64Ptr address);
-    RV64Size addr2PageOffset(RV64Ptr address);
+    RV64Size addr2PageId(RV64Ptr address) const;
+    RV64Size addr2PageOffset(RV64Ptr address) const;
     Pagemap::iterator touchAddress(RV64Ptr address);
     void *translate(RV64Ptr address);
 

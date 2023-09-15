@@ -30,10 +30,10 @@ RV64UChar PhysMemPagemap::loadByte(RV64Ptr address) {
     return *pos;
 }
 
-RV64Size PhysMemPagemap::addr2PageId(RV64Ptr address) {
+RV64Size PhysMemPagemap::addr2PageId(RV64Ptr address) const {
     return address / pageSize_;
 }
-RV64Size PhysMemPagemap::addr2PageOffset(RV64Ptr address) {
+RV64Size PhysMemPagemap::addr2PageOffset(RV64Ptr address) const {
     return address & (pageSize_ - 1);
 }
 
