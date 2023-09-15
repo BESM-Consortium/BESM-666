@@ -14,7 +14,7 @@ namespace besm::mem {
 //  (RISCV64 in our case)
 
 /**
- * \brief PagePool class is repsonsible for memory allocation on target
+ * \brief PageAllocator class is repsonsible for memory allocation on target
  *  device, forming simulated device pages & giving them to the user
  */
 class PageAllocator : public INonCopyable {
