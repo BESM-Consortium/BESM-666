@@ -14,6 +14,7 @@ class GPRF {
 public:
     // x0 - x31 + PC
     static constexpr size_t Size = 33;
+    static constexpr Register PC = 32;
 
     inline void write(Register regId, RV64DWord value);
     inline RV64DWord read(Register regId) const;
