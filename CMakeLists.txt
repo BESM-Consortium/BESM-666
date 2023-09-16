@@ -5,10 +5,33 @@ project(BESM-666 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(Python3 REQUIRED)
+
+file(GLOB BESM666_RISCV_ISA_FILES 
+    ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/rv64_*)
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+    COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+    COMMENT "Creating include/besm-666/autogen directory"
+)
+add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py -c 
+        ${BESM666_RISCV_ISA_FILES}
+    DEPENDS ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+    DEPENDS ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py 
+    DEPENDS ${BESM666_RISCV_ISA_FILES}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+    COMMENT "Generating RICSV instruction encoding info."
+)
+add_custom_target(besm666_riscv_isa DEPENDS 
+    ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h)
+
 add_library(besm666_include INTERFACE)
 target_include_directories(besm666_include INTERFACE
     ./include
 )
+add_dependencies(besm666_include besm666_riscv_isa)
 
 add_library(besm666_shared SHARED)
 add_library(besm666::besm666_shared ALIAS besm666_shared)
@@ -22,6 +45,7 @@ PUBLIC
 PRIVATE
     besm666_memory
 )
+
 
 add_executable(besm666)
 target_sources(besm666 PRIVATE
