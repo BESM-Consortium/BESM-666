@@ -36,4 +36,8 @@ add_subdirectory(./src/elf)
 add_subdirectory(third_party)
 
 enable_testing()
+include (CTest)
+if (BESM666_ENABLE_VALGRIND)
+    set(CMAKE_CTEST_ARGUMENTS --test-action memcheck)
+endif ()
 add_subdirectory(test)

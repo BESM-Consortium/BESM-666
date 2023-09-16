@@ -14,23 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        valgrind_option:
-          - "1"
-          - "0"
+        ctect_option:
+          - "-DBESM666_ENABLE_VALGRIND=1"
+          - "-DBESM666_ENABLE_VALGRIND=0"
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
 
     - name: install valgrind
-      run: sudo apt install valgrind
+      run: sudo apt update && sudo apt install -y valgrind
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBESM666_ENABLE_VALGRIND=${{matrix.valgrind_option}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{matrix.ctect_option}}
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
+      run: make test

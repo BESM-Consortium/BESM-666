@@ -13,8 +13,8 @@ class PhysMemPagemap : public INonCopyable {
 public:
     using PageId = RV64Size;
     struct Page {
-        RV64Size id;
-        char *mem;
+        RV64Size const id;
+        char *const mem;
     };
     using Pagemap = std::set<Page, std::less<>>;
 
@@ -26,12 +26,12 @@ public:
     RV64UChar loadByte(RV64Ptr address);
 
 private:
-    RV64Size addr2PageId(RV64Ptr address);
-    RV64Size addr2PageOffset(RV64Ptr address);
+    RV64Size addr2PageId(RV64Ptr address) const;
+    RV64Size addr2PageOffset(RV64Ptr address) const;
     Pagemap::iterator touchAddress(RV64Ptr address);
     void *translate(RV64Ptr address);
 
-    size_t pageSize_;
+    size_t const pageSize_;
     PageAllocator allocator_;
     Pagemap pagemap_;
 };
@@ -82,6 +82,10 @@ public:
 
 private:
     PhysMemPagemap pagemap_;
+
+#ifndef NDEBUG
+    bool wasAlreadyBuilt_;
+#endif
 };
 
 } // namespace besm::mem
