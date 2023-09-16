@@ -6,23 +6,23 @@ namespace besm {
 
 using Register = uint8_t;
 using Opcode = uint8_t;
-using Immidiate = uint64_t;
+using Immidiate = uint32_t;
 
 enum class OperandType { UNUSED, REGISTER, IMMIDIATE };
 
-struct Operand {
-    OperandType type;
-    union {
-        Register reg;
-        Immidiate imm;
-    };
-};
-
 struct Instruction {
-    Opcode opcode;
-    Operand op1;
-    Operand op2;
-    Operand op3;
+    const Register rd;
+    const Register rs1;
+    const Register rs2;
+    const Immidiate immidiate;
+
+    /*
+     * @todo #10:90m Optimize opcode and funct to one entity.
+     *  Maybe it is better to create enum describing all opcode and
+     *  funct combinations.
+     */
+    const uint8_t opcode;
+    const uint8_t funct;
 };
 
 } // namespace besm
