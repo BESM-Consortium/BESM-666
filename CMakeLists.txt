@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(besm666_include INTERFACE)
 target_include_directories(besm666_include INTERFACE
     ./include
+    ./third_party/ELFIO #TODO: to add elfio as to target_link_libraries
 )
 
 add_library(besm666_shared SHARED)
@@ -16,11 +17,11 @@ target_sources(besm666_shared PRIVATE
     ./src/stub.cpp
 )
 
-target_link_libraries(besm666_shared 
-PUBLIC 
+target_link_libraries(besm666_shared
+PUBLIC
     besm666_include
-    elfio::elfio
 PRIVATE
+    elfio::elfio
     besm666_memory
     besm666_elf
 )
@@ -32,7 +33,7 @@ target_sources(besm666 PRIVATE
 target_link_libraries(besm666 PRIVATE besm666::besm666_shared)
 
 add_subdirectory(./src/memory)
-add_subdirectory(./src/elf)
+add_subdirectory(./src/utils)
 add_subdirectory(third_party)
 
 enable_testing()

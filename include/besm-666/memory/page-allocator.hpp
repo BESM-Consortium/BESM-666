@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-#include "besm-666/non-copyable.hpp"
+#include "besm-666/utils/non-copyable.hpp"
 
 namespace besm::mem {
 
