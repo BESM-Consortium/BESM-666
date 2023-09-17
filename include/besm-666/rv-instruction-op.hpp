@@ -1,5 +1,4 @@
-#ifndef BESM_666_RV_INSTRUCTION_OP_HPP
-#define BESM_666_RV_INSTRUCTION_OP_HPP
+#pragma once
 
 namespace besm {
 
@@ -66,4 +65,3 @@ enum InstructionOp {
 };
 
 }
-#endif // BESM_666_RV_INSTRUCTION_OP_HPP
