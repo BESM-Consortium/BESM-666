@@ -1,7 +1,7 @@
 #pragma once
 
 #include "besm-666/riscv-types.hpp"
-#include "rv_instruction_commands.hpp"
+#include "rv-instruction-op.hpp"
 
 namespace besm {
 
