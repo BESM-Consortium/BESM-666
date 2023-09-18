@@ -4,6 +4,10 @@
 
 namespace besm::dec {
 
+/*
+ * @todo #10:90m Generate this file instead of copypaste from the current raw generator.
+ */
+
 struct Cell {
     const format_t format;
     const InstructionOp operation;
