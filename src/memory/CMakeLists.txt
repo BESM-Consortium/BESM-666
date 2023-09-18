@@ -7,4 +7,5 @@ target_sources(besm666_memory PRIVATE
 )
 target_link_libraries(besm666_memory PRIVATE
     besm666_include
+    besm666_elf
 )
