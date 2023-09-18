@@ -5,7 +5,8 @@
 namespace besm::dec {
 
 /*
- * @todo #10:90m Generate this file instead of copypaste from the current raw generator.
+ * @todo #10:90m Generate this file instead of copypaste from the current raw
+ * generator.
  */
 
 struct Cell {

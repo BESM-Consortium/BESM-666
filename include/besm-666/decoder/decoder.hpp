@@ -67,8 +67,6 @@ private:
         const uint16_t func7 = (word & FUNC7_MASK) >> (FUNC7_SHIFT - 3);
         const uint16_t func10 = func7 | func3;
         assert(func10 < 0b10000000000);
-        printf("opcode = %i, func3 = %i, func7 = %i, func10 = %i\n", opcode,
-               func3, func7, func10);
         InstructionOp operation = NON_OP;
         switch (opcode) {
         case 0b0110011:
@@ -117,7 +115,6 @@ private:
                 break;
             case 0b0000000101:
                 operation = SRLW;
-                printf("operation = SRLW\n");
                 break;
             case 0b0100000101:
                 operation = SRAW;
@@ -125,7 +122,6 @@ private:
             }
             break;
         }
-        // printf("rs2 = %i\n", (word & RS2_MASK) >> RS2_SHIFT);
         return Instruction{
             .rd = static_cast<Register>((word & RD_MASK) >> RD_SHIFT),
             .rs1 = static_cast<Register>((word & RS1_MASK) >> RS1_SHIFT),

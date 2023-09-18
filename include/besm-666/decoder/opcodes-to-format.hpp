@@ -6,7 +6,8 @@ namespace besm::dec {
 
 enum format_t { ILLEGAL, R, I, S, B, U, J };
 
-// @todo #10:90m Generate this file instead of copypaste from the current raw generator.
+// @todo #10:90m Generate this file with matrix instead of copypaste from the
+// current raw generator.
 
 constexpr static uint8_t OPCODE2FORMAT[128] = {
     ILLEGAL, ILLEGAL, ILLEGAL, I,       ILLEGAL, ILLEGAL, ILLEGAL, ILLEGAL,
