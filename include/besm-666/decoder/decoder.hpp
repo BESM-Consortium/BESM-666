@@ -1,6 +1,5 @@
 #pragma once
-#include "besm-666/decoder/IllegalOpcodeException.hpp"
-#include "besm-666/decoder/operations-matrix.hpp"
+#include "besm-666/autogen/operations-matrix.hpp"
 #include "besm-666/instruction.hpp"
 #include <cassert>
 #include <cstdlib>
@@ -8,18 +7,18 @@
 
 namespace besm::dec {
 
-constexpr RV64Word OPCODE_MASK = 0b01111111;
-
-constexpr int FUNC3_shift = 12;
-constexpr RV64Word FUNC3_MASK = 0b111 << FUNC3_shift;
-constexpr int RD_SHIFT = 7;
-constexpr RV64Word RD_MASK = 0b11111 << RD_SHIFT;
-constexpr int RS1_SHIFT = 15;
-constexpr RV64Word RS1_MASK = 0b11111 << RS1_SHIFT;
-constexpr int RS2_SHIFT = 20;
-constexpr RV64Word RS2_MASK = 0b11111 << RS2_SHIFT;
-
 class Decoder {
+
+private:
+    static constexpr RV64UWord OPCODE_MASK = 0b01111111;
+    static constexpr int FUNC3_shift = 12;
+    static constexpr RV64UWord FUNC3_MASK = 0b111 << FUNC3_shift;
+    static constexpr int RD_SHIFT = 7;
+    static constexpr RV64UWord RD_MASK = 0b11111 << RD_SHIFT;
+    static constexpr int RS1_SHIFT = 15;
+    static constexpr RV64UWord RS1_MASK = 0b11111 << RS1_SHIFT;
+    static constexpr int RS2_SHIFT = 20;
+    static constexpr RV64UWord RS2_MASK = 0b11111 << RS2_SHIFT;
 
 public:
     /**
@@ -27,13 +26,13 @@ public:
      * @param word word.
      * @return {@link Instruction} struct.
      */
-    besm::Instruction parse(const RV64Word word) {
+    besm::Instruction parse(const RV64UWord word) const {
         const Opcode opcode = word & OPCODE_MASK;
         const uint8_t func3 = (word & FUNC3_MASK) >> FUNC3_shift;
         assert(opcode < 128);
         assert(func3 < 8);
         const Cell *cell = &(SUPER_MEGA_MATRIX[opcode][func3]);
-        const format_t format = cell->format;
+        const Format format = cell->format;
         const InstructionOp operation = cell->operation;
         switch (format) {
         case R:
@@ -55,15 +54,14 @@ public:
             return parse_J(word, operation);
             break;
         }
-        throw IllegalOpcodeException(
-            std::string("Opcode cannot be %i", opcode));
+        return Instruction{.operation = NON_OP};
     }
 
 private:
-    static inline Instruction parse_R(const RV64Word word, const Opcode opcode,
+    static inline Instruction parse_R(const RV64UWord word, const Opcode opcode,
                                       const uint8_t func3) {
         constexpr int FUNC7_SHIFT = 25;
-        constexpr RV64Word FUNC7_MASK = 0b1111111 << FUNC7_SHIFT;
+        constexpr RV64UWord FUNC7_MASK = 0b1111111 << FUNC7_SHIFT;
         const uint16_t func7 = (word & FUNC7_MASK) >> (FUNC7_SHIFT - 3);
         const uint16_t func10 = func7 | func3;
         assert(func10 < 0b10000000000);
@@ -135,7 +133,7 @@ private:
      * just a stub. We need to implement every of them and test.
      * ALARM: pay attention to 0b1110011 opcode.
      */
-    static inline Instruction parse_I(const RV64Word word,
+    static inline Instruction parse_I(const RV64UWord word,
                                       const InstructionOp operation,
                                       const Opcode opcode) {
         return Instruction{};
@@ -145,7 +143,7 @@ private:
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of S format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_S(const RV64Word word,
+    static inline Instruction parse_S(const RV64UWord word,
                                       const InstructionOp operation) {
         return Instruction{};
     }
@@ -154,7 +152,7 @@ private:
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of B format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_B(const RV64Word word,
+    static inline Instruction parse_B(const RV64UWord word,
                                       const InstructionOp operation) {
         return Instruction{};
     }
@@ -163,7 +161,7 @@ private:
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of U format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_U(const RV64Word word,
+    static inline Instruction parse_U(const RV64UWord word,
                                       const InstructionOp operation) {
         return Instruction{};
     }
@@ -172,7 +170,7 @@ private:
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of J format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_J(const RV64Word word,
+    static inline Instruction parse_J(const RV64UWord word,
                                       const InstructionOp operation) {
         return Instruction{};
     }
