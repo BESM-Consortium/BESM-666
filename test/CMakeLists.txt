@@ -12,4 +12,7 @@ endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
 
-add_subdirectory(./memory)
+set(DIRS memory utils)
+foreach(DIR ${DIRS})
+    add_subdirectory(${DIR})
+endforeach()

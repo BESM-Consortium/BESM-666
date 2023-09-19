@@ -81,7 +81,7 @@ PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
 
 PhysMemBuilder &PhysMemBuilder::loadElf(const std::filesystem::path &elfPath) {
     for (const auto &seg :
-         besm::elf::ElfParser(elfPath).getLoadableSegments()) {
+         besm::utl::ElfParser(elfPath).getLoadableSegments()) {
         this->loadContArea(seg.address, seg.data, seg.size);
     }
     return *this;

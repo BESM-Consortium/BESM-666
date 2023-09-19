@@ -23,7 +23,7 @@ PUBLIC
 PRIVATE
     elfio::elfio
     besm666_memory
-    besm666_elf
+    besm666_utl
 )
 
 add_executable(besm666)

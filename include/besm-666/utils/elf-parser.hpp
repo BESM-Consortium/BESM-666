@@ -9,7 +9,7 @@
 #include "besm-666/utils/non-copyable.hpp"
 #include "elfio/elfio.hpp"
 
-namespace besm::elf {
+namespace besm::utl {
 
 class ElfParser final {
 public:

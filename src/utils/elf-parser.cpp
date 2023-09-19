@@ -1,6 +1,6 @@
 #include "besm-666/utils/elf-parser.hpp"
 
-namespace besm::elf {
+namespace besm::utl {
 
 ElfParser::ElfParser(const std::filesystem::path &elfPath) {
     if (!reader_.load(elfPath)) {
@@ -36,4 +36,4 @@ ElfParser::getLoadableSegments() {
 
 BadElf::BadElf(const std::string &msg) : runtime_error(msg) {}
 const char *BadElf::what() const noexcept { return runtime_error::what(); }
-} // namespace besm::elf
+} // namespace besm::utl
