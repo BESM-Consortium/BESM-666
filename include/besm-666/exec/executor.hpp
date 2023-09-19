@@ -12,7 +12,7 @@ public:
 
     void exec(Instruction instr);
 
-    inline reg::GPRF const& getState() const { return gprf_; }
+    inline reg::GPRF const &getState() const { return gprf_; }
 
 private:
     void exec_ADDI(Instruction instr);
@@ -21,6 +21,9 @@ private:
     void exec_ANDI(Instruction instr);
     void exec_ORI(Instruction instr);
     void exec_XORI(Instruction instr);
+    void exec_SLLI(Instruction instr);
+    void exec_SRLI(Instruction instr);
+    void exec_SRAI(Instruction instr);
     void exec_LUI(Instruction instr);
     void exec_AUIPC(Instruction instr);
     void exec_ADD(Instruction instr);
@@ -54,7 +57,14 @@ private:
     void exec_SW(Instruction instr) {}
 
     // Does nothing in in-order implementation
-    void exec_FENCE(Instruction instr) {}
+    void exec_FENCE(Instruction instr) { this->nextPC(); }
+    void exec_FENCE_TSO(Instruction instr) { this->nextPC(); }
+
+    // Will be implemented after CSR system release
+    void exec_ECALL(Instruction instr) { this->nextPC(); }
+    void exec_EBREAK(Instruction instr) { this->nextPC(); }
+
+    void nextPC();
 
     reg::GPRF gprf_;
 };
