@@ -16,7 +16,7 @@ struct Cell {
     const InstructionOp operation;
 };
 
-constexpr static Cell SUPER_MEGA_MATRIX[128][8] = {
+constexpr static Cell INSTR_WHO[128][8] = {
     {
         {ILLEGAL, NON_OP},
         {ILLEGAL, NON_OP},
