@@ -124,7 +124,7 @@ private:
             .rd = static_cast<Register>((word & RD_MASK) >> RD_SHIFT),
             .rs1 = static_cast<Register>((word & RS1_MASK) >> RS1_SHIFT),
             .rs2 = static_cast<Register>((word & RS2_MASK) >> RS2_SHIFT),
-            .immidiate = IMMIDIATE_POISON,
+            .immidiate = Instruction::IMMIDIATE_POISON,
             .operation = operation};
     }
 
