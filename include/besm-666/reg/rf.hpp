@@ -49,6 +49,8 @@ public:
     static constexpr const size_t PC = 32;
     static constexpr size_t Size = 33;
 
+    inline GPRF() { registers_[PC] = 0; }
+
     inline void write(Register regId, RV64UDWord value);
     inline RV64UDWord read(Register regId) const;
 
