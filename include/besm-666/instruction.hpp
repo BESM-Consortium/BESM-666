@@ -5,16 +5,16 @@
 
 namespace besm {
 
-using Register = uint8_t;
 using Opcode = uint8_t;
+using Register = uint8_t;
 using Immidiate = uint32_t;
 
 struct Instruction {
-    const Register rd;
-    const Register rs1;
-    const Register rs2;
-    const Immidiate immidiate;
-    const InstructionOp operation;
+    Register rd;
+    Register rs1;
+    Register rs2;
+    Immidiate immidiate;
+    InstructionOp operation;
 };
 
 } // namespace besm
