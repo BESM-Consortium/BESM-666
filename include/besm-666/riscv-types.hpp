@@ -21,9 +21,9 @@ using RV64Ptr = uint64_t;
 using RV64Size = uint64_t;
 using RV64PtrDiff = int64_t;
 
-using RV64Word = uint32_t;
-using RV64HWord = uint16_t;
-using RV64DWord = uint64_t;
+using RV64Word = int32_t;
+using RV64HWord = int16_t;
+using RV64DWord = int64_t;
 
 using RV64UWord = uint32_t;
 using RV64UHWord = uint16_t;
