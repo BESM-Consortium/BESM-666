@@ -1,10 +1,9 @@
 #pragma once
 
+#include "operations-matrix.hpp"
 #include <cstdint>
 
 namespace besm::dec {
-
-enum format_t { ILLEGAL, R, I, S, B, U, J };
 
 // @todo #10:90m Generate this file with matrix instead of copypaste from the
 // current raw generator.

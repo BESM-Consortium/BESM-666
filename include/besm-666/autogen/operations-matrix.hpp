@@ -1,6 +1,6 @@
 #pragma once
+#include "besm-666/decoder/decoder.hpp"
 #include "besm-666/rv-instruction-op.hpp"
-#include "opcodes-to-format.hpp"
 
 namespace besm::dec {
 
@@ -9,8 +9,10 @@ namespace besm::dec {
  * generator.
  */
 
+enum Format { ILLEGAL, R, I, S, B, U, J };
+
 struct Cell {
-    const format_t format;
+    const Format format;
     const InstructionOp operation;
 };
 
