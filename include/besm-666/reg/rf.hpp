@@ -47,7 +47,7 @@ public:
     static constexpr const size_t X30 = 30;
     static constexpr const size_t X31 = 31;
     static constexpr const size_t PC = 32;
-    static constexpr size_t Size = 33;
+    static constexpr const size_t Size = 33;
 
     inline GPRF() { registers_[PC] = 0; }
 
@@ -55,7 +55,7 @@ public:
     inline RV64UDWord read(Register regId) const;
 
 private:
-    std::array<Register, GPRF::Size> registers_;
+    std::array<RV64UDWord, GPRF::Size> registers_;
 };
 
 inline void GPRF::write(Register regId, RV64UDWord value) {
@@ -65,7 +65,7 @@ inline void GPRF::write(Register regId, RV64UDWord value) {
 
 inline RV64UDWord GPRF::read(Register regId) const {
     assert(regId < Size);
-    return regId == 0 ? 0 : registers_[regId];
+    return regId == X0 ? 0 : registers_[regId];
 }
 
 } // namespace besm::reg
