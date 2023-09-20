@@ -15,6 +15,8 @@ struct Instruction {
     const Register rs2;
     const Immidiate immidiate;
     const InstructionOp operation;
+
+    static constexpr Immidiate IMMIDIATE_POISON = UINT32_MAX;
 };
 
 } // namespace besm
