@@ -12,7 +12,7 @@ endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
 
-set(DIRS memory utils)
+set(DIRS memory utils elfgen)
 foreach(DIR ${DIRS})
     add_subdirectory(${DIR})
 endforeach()

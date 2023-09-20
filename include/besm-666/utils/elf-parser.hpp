@@ -22,10 +22,14 @@ public:
         Arch = ELFIO::EM_RISCV
     };
 
-    struct LoadableSegment {
+    struct LoadableSegment: INonCopyable {
         RV64Ptr address;
         void const *data;
         RV64Size size;
+
+        LoadableSegment(RV64Ptr address, void const *data, RV64Size size);
+        LoadableSegment(LoadableSegment &&other);
+        LoadableSegment &operator=(LoadableSegment &&other);
     };
 
     ElfParser(const std::filesystem::path &elfPath);
