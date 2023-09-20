@@ -17,8 +17,6 @@ protected:
     void TearDown() override {}
 };
 
-TEST(Decoder, decodes_simple_instruction) { EXPECT_TRUE(true); }
-
 TEST_F(Decoder_R, decodes_ADD) {
     auto instance =
         besm::Instruction{.rd = 0b11111,
