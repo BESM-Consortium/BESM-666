@@ -2,19 +2,40 @@
 #include "besm-666/autogen/encoding.out.h"
 #include <gtest/gtest.h>
 
-using besm::Instruction;
+using namespace besm;
 
-static bool equal_R(const Instruction lhs, const Instruction rhs) {
-    return lhs.operation == rhs.operation && lhs.rd == rhs.rd &&
-           lhs.rs1 == rhs.rs1 && lhs.rs2 == rhs.rs2;
-}
-
-class Decoder_R : public ::testing::Test {
+class DecoderCommon : public ::testing::Test {
 protected:
     const besm::dec::Decoder decoder{};
+
+    [[nodiscard]] virtual bool equal(Instruction lhs, Instruction rhs) = 0;
     void SetUp() override {}
 
     void TearDown() override {}
+};
+
+class Decoder_R : public DecoderCommon {
+protected:
+    bool equal(const Instruction lhs, const Instruction rhs) override {
+        return lhs.operation == rhs.operation && lhs.rd == rhs.rd &&
+               lhs.rs1 == rhs.rs1 && lhs.rs2 == rhs.rs2;
+    }
+};
+
+class Decoder_U : public DecoderCommon {
+protected:
+    bool equal(const Instruction lhs, const Instruction rhs) override {
+        return lhs.operation == rhs.operation && lhs.immidiate == rhs.immidiate;
+    }
+
+    static Instruction buildInstr(Register rd, Immidiate imm,
+                                  InstructionOp operation) {
+        return {.rd = rd,
+                .rs1 = 0b0,
+                .rs2 = 0b0,
+                .immidiate = imm,
+                .operation = operation};
+    }
 };
 
 TEST_F(Decoder_R, decodes_ADD) {
@@ -30,7 +51,7 @@ TEST_F(Decoder_R, decodes_ADD) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SUB) {
@@ -46,7 +67,7 @@ TEST_F(Decoder_R, decodes_SUB) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SLL) {
@@ -62,7 +83,7 @@ TEST_F(Decoder_R, decodes_SLL) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SLT) {
@@ -78,7 +99,7 @@ TEST_F(Decoder_R, decodes_SLT) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SLTU) {
@@ -94,7 +115,7 @@ TEST_F(Decoder_R, decodes_SLTU) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_XOR) {
@@ -110,7 +131,7 @@ TEST_F(Decoder_R, decodes_XOR) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SRL) {
@@ -126,7 +147,7 @@ TEST_F(Decoder_R, decodes_SRL) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SRA) {
@@ -142,7 +163,7 @@ TEST_F(Decoder_R, decodes_SRA) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_OR) {
@@ -158,7 +179,7 @@ TEST_F(Decoder_R, decodes_OR) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_AND) {
@@ -174,7 +195,7 @@ TEST_F(Decoder_R, decodes_AND) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_ADDW) {
@@ -190,7 +211,7 @@ TEST_F(Decoder_R, decodes_ADDW) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SUBW) {
@@ -206,7 +227,7 @@ TEST_F(Decoder_R, decodes_SUBW) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SLLW) {
@@ -222,7 +243,7 @@ TEST_F(Decoder_R, decodes_SLLW) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SRLW) {
@@ -238,7 +259,7 @@ TEST_F(Decoder_R, decodes_SRLW) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SRAW) {
@@ -254,7 +275,7 @@ TEST_F(Decoder_R, decodes_SRAW) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_EQ(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_TRUE(equal_R(parsed, instance));
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_R, decodes_SUBW_fails) {
@@ -270,5 +291,36 @@ TEST_F(Decoder_R, decodes_SUBW_fails) {
     EXPECT_EQ(instance.rs1, parsed.rs1);
     EXPECT_NE(instance.rs2, parsed.rs2);
     EXPECT_EQ(instance.rd, parsed.rd);
-    EXPECT_FALSE(equal_R(parsed, instance));
+    EXPECT_FALSE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_U, LUI1) {
+    const auto instance = buildInstr(0b10000, 0b01000101001001001100, LUI);
+    Instruction parsed = decoder.parse(0b01000101001001001100100000110111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_U, LUI2) {
+    const auto instance = buildInstr(0b01101, 0b01011011001110000100, LUI);
+    Instruction parsed = decoder.parse(0b01011011001110000100011010110111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_U, AUIPC1) {
+    const auto instance = buildInstr(0b11000, 0b01010101101111101101, AUIPC);
+    Instruction parsed = decoder.parse(0b01010101101111101101110000010111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_U, AUIPC2) {
+    const auto instance = buildInstr(0b00001, 0b10100100011000111010, AUIPC);
+    Instruction parsed = decoder.parse(0b10100100011000111010000010010111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_U, NOT_AUIPC) {
+    const auto instance = buildInstr(0b00001, 0b00100100011000111010, AUIPC);
+    // should  be 0b10100100011000111010, not 0b00100100011000111010
+    Instruction parsed = decoder.parse(0b10100100011000111010000010010111);
+    EXPECT_FALSE(equal(parsed, instance));
 }
