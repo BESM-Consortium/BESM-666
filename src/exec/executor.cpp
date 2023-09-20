@@ -4,7 +4,7 @@
 #include <iostream>
 namespace besm::exec {
 
-void Executor::exec(Instruction instr) {
+void Executor::exec(Instruction const instr) {
     switch (instr.operation) {
     // RV32I
     case ADDI:
@@ -172,7 +172,7 @@ void Executor::exec(Instruction instr) {
     }
 }
 
-void Executor::exec_ADDI(Instruction instr) {
+void Executor::exec_ADDI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord res = opnd1 + opnd2;
@@ -181,7 +181,7 @@ void Executor::exec_ADDI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLTI(Instruction instr) {
+void Executor::exec_SLTI(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 =
         util::Signify(util::SignExtend<RV64UDWord, 12>(instr.immidiate));
@@ -192,7 +192,7 @@ void Executor::exec_SLTI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLTIU(Instruction instr) {
+void Executor::exec_SLTIU(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord res = opnd1 < opnd2 ? 1 : 0;
@@ -202,7 +202,7 @@ void Executor::exec_SLTIU(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_ORI(Instruction instr) {
+void Executor::exec_ORI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord res = opnd1 | opnd2;
@@ -212,7 +212,7 @@ void Executor::exec_ORI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_ANDI(Instruction instr) {
+void Executor::exec_ANDI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord res = opnd1 & opnd2;
@@ -222,7 +222,7 @@ void Executor::exec_ANDI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_XORI(Instruction instr) {
+void Executor::exec_XORI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord res = opnd1 ^ opnd2;
@@ -232,7 +232,7 @@ void Executor::exec_XORI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLLI(Instruction instr) {
+void Executor::exec_SLLI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
     RV64UDWord res = opnd1 << opnd2;
@@ -242,7 +242,7 @@ void Executor::exec_SLLI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRLI(Instruction instr) {
+void Executor::exec_SRLI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
     RV64UDWord res = opnd1 >> opnd2;
@@ -252,7 +252,7 @@ void Executor::exec_SRLI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRAI(Instruction instr) {
+void Executor::exec_SRAI(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
     RV64DWord res = opnd1 >> opnd2;
@@ -262,7 +262,7 @@ void Executor::exec_SRAI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_LUI(Instruction instr) {
+void Executor::exec_LUI(Instruction const instr) {
     RV64UDWord opnd1 = util::ExtractBits<RV64UDWord, 20>(instr.immidiate);
 
     gprf_.write(instr.rd, opnd1 << 12);
@@ -270,7 +270,7 @@ void Executor::exec_LUI(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_AUIPC(Instruction instr) {
+void Executor::exec_AUIPC(Instruction const instr) {
     RV64UDWord offset = util::ExtractBits<RV64UDWord, 20>(instr.immidiate);
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord res = pc + (offset << 12);
@@ -280,7 +280,7 @@ void Executor::exec_AUIPC(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_ADD(Instruction instr) {
+void Executor::exec_ADD(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 + opnd2;
@@ -290,7 +290,7 @@ void Executor::exec_ADD(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLT(Instruction instr) {
+void Executor::exec_SLT(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
     RV64UDWord res = opnd1 < opnd2 ? 1 : 0;
@@ -300,7 +300,7 @@ void Executor::exec_SLT(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLTU(Instruction instr) {
+void Executor::exec_SLTU(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 < opnd2 ? 1 : 0;
@@ -310,7 +310,7 @@ void Executor::exec_SLTU(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_AND(Instruction instr) {
+void Executor::exec_AND(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 & opnd2;
@@ -320,7 +320,7 @@ void Executor::exec_AND(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_OR(Instruction instr) {
+void Executor::exec_OR(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 | opnd2;
@@ -330,7 +330,7 @@ void Executor::exec_OR(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_XOR(Instruction instr) {
+void Executor::exec_XOR(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 ^ opnd2;
@@ -340,7 +340,7 @@ void Executor::exec_XOR(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLL(Instruction instr) {
+void Executor::exec_SLL(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 << opnd2;
@@ -350,7 +350,7 @@ void Executor::exec_SLL(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRL(Instruction instr) {
+void Executor::exec_SRL(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 >> opnd2;
@@ -360,7 +360,7 @@ void Executor::exec_SRL(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SUB(Instruction instr) {
+void Executor::exec_SUB(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = opnd1 - opnd2;
@@ -370,7 +370,7 @@ void Executor::exec_SUB(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRA(Instruction instr) {
+void Executor::exec_SRA(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = util::Unsignify(opnd1 >> opnd2);
@@ -380,7 +380,7 @@ void Executor::exec_SRA(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_JAL(Instruction instr) {
+void Executor::exec_JAL(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(instr.immidiate) << 1;
 
@@ -391,7 +391,7 @@ void Executor::exec_JAL(Instruction instr) {
     gprf_.write(reg::GPRF::PC, target);
 }
 
-void Executor::exec_JALR(Instruction instr) {
+void Executor::exec_JALR(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord base = gprf_.read(instr.rs1);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
@@ -403,7 +403,7 @@ void Executor::exec_JALR(Instruction instr) {
     gprf_.write(reg::GPRF::PC, target);
 }
 
-void Executor::exec_BEQ(Instruction instr) {
+void Executor::exec_BEQ(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
@@ -417,7 +417,7 @@ void Executor::exec_BEQ(Instruction instr) {
     }
 }
 
-void Executor::exec_BNE(Instruction instr) {
+void Executor::exec_BNE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
@@ -431,7 +431,7 @@ void Executor::exec_BNE(Instruction instr) {
     }
 }
 
-void Executor::exec_BLT(Instruction instr) {
+void Executor::exec_BLT(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
@@ -445,7 +445,7 @@ void Executor::exec_BLT(Instruction instr) {
     }
 }
 
-void Executor::exec_BLTU(Instruction instr) {
+void Executor::exec_BLTU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
@@ -459,7 +459,7 @@ void Executor::exec_BLTU(Instruction instr) {
     }
 }
 
-void Executor::exec_BGE(Instruction instr) {
+void Executor::exec_BGE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
@@ -473,7 +473,7 @@ void Executor::exec_BGE(Instruction instr) {
     }
 }
 
-void Executor::exec_BGEU(Instruction instr) {
+void Executor::exec_BGEU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(reg::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
@@ -487,7 +487,7 @@ void Executor::exec_BGEU(Instruction instr) {
     }
 }
 
-void Executor::exec_ADDIW(Instruction instr) {
+void Executor::exec_ADDIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 + opnd2);
@@ -497,7 +497,7 @@ void Executor::exec_ADDIW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLLIW(Instruction instr) {
+void Executor::exec_SLLIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 << opnd2);
@@ -507,7 +507,7 @@ void Executor::exec_SLLIW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRLIW(Instruction instr) {
+void Executor::exec_SRLIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2);
@@ -517,17 +517,17 @@ void Executor::exec_SRLIW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRAIW(Instruction instr) {
+void Executor::exec_SRAIW(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
-    RV64UDWord res = util::Unsignify(util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2));
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2);
 
     gprf_.write(instr.rd, res);
 
     this->nextPC();
 }
 
-void Executor::exec_ADDW(Instruction instr) {
+void Executor::exec_ADDW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 + opnd2);
@@ -537,7 +537,7 @@ void Executor::exec_ADDW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SUBW(Instruction instr) {
+void Executor::exec_SUBW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 - opnd2);
@@ -547,7 +547,7 @@ void Executor::exec_SUBW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SLLW(Instruction instr) {
+void Executor::exec_SLLW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 << opnd2);
@@ -557,7 +557,7 @@ void Executor::exec_SLLW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRLW(Instruction instr) {
+void Executor::exec_SRLW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
     RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2);
@@ -567,10 +567,11 @@ void Executor::exec_SRLW(Instruction instr) {
     this->nextPC();
 }
 
-void Executor::exec_SRAW(Instruction instr) {
-    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+void Executor::exec_SRAW(Instruction const instr) {
+    RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
-    RV64UDWord res = util::Unsignify(util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2));
+    RV64UDWord res =
+        util::ExtractBits<RV64UDWord, 32>(util::Unsignify(opnd1 >> opnd2));
 
     gprf_.write(instr.rd, res);
 

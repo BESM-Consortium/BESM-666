@@ -10,71 +10,71 @@ class Executor {
 public:
     Executor() = default;
 
-    void exec(Instruction instr);
+    void exec(Instruction const instr);
 
     inline reg::GPRF const &getState() const { return gprf_; }
 
 private:
-    void exec_ADDI(Instruction instr);
-    void exec_SLTI(Instruction instr);
-    void exec_SLTIU(Instruction instr);
-    void exec_ANDI(Instruction instr);
-    void exec_ORI(Instruction instr);
-    void exec_XORI(Instruction instr);
-    void exec_SLLI(Instruction instr);
-    void exec_SRLI(Instruction instr);
-    void exec_SRAI(Instruction instr);
-    void exec_LUI(Instruction instr);
-    void exec_AUIPC(Instruction instr);
-    void exec_ADD(Instruction instr);
-    void exec_SLT(Instruction instr);
-    void exec_SLTU(Instruction instr);
-    void exec_AND(Instruction instr);
-    void exec_OR(Instruction instr);
-    void exec_XOR(Instruction instr);
-    void exec_SLL(Instruction instr);
-    void exec_SRL(Instruction instr);
-    void exec_SUB(Instruction instr);
-    void exec_SRA(Instruction instr);
-    void exec_JAL(Instruction instr);
-    void exec_JALR(Instruction instr);
-    void exec_BEQ(Instruction instr);
-    void exec_BNE(Instruction instr);
-    void exec_BLT(Instruction instr);
-    void exec_BLTU(Instruction instr);
-    void exec_BGE(Instruction instr);
-    void exec_BGEU(Instruction instr);
+    void exec_ADDI(Instruction const instr);
+    void exec_SLTI(Instruction const instr);
+    void exec_SLTIU(Instruction const instr);
+    void exec_ANDI(Instruction const instr);
+    void exec_ORI(Instruction const instr);
+    void exec_XORI(Instruction const instr);
+    void exec_SLLI(Instruction const instr);
+    void exec_SRLI(Instruction const instr);
+    void exec_SRAI(Instruction const instr);
+    void exec_LUI(Instruction const instr);
+    void exec_AUIPC(Instruction const instr);
+    void exec_ADD(Instruction const instr);
+    void exec_SLT(Instruction const instr);
+    void exec_SLTU(Instruction const instr);
+    void exec_AND(Instruction const instr);
+    void exec_OR(Instruction const instr);
+    void exec_XOR(Instruction const instr);
+    void exec_SLL(Instruction const instr);
+    void exec_SRL(Instruction const instr);
+    void exec_SUB(Instruction const instr);
+    void exec_SRA(Instruction const instr);
+    void exec_JAL(Instruction const instr);
+    void exec_JALR(Instruction const instr);
+    void exec_BEQ(Instruction const instr);
+    void exec_BNE(Instruction const instr);
+    void exec_BLT(Instruction const instr);
+    void exec_BLTU(Instruction const instr);
+    void exec_BGE(Instruction const instr);
+    void exec_BGEU(Instruction const instr);
 
     // Will be implemented after memory system release
-    void exec_LB(Instruction instr) {}
-    void exec_LH(Instruction instr) {}
-    void exec_LW(Instruction instr) {}
-    void exec_LD(Instruction instr) {}
-    void exec_LBU(Instruction instr) {}
-    void exec_LHU(Instruction instr) {}
-    void exec_LWU(Instruction instr) {}
-    void exec_SB(Instruction instr) {}
-    void exec_SH(Instruction instr) {}
-    void exec_SW(Instruction instr) {}
-    void exec_SD(Instruction instr) {}
+    void exec_LB(Instruction const instr) {}
+    void exec_LH(Instruction const instr) {}
+    void exec_LW(Instruction const instr) {}
+    void exec_LD(Instruction const instr) {}
+    void exec_LBU(Instruction const instr) {}
+    void exec_LHU(Instruction const instr) {}
+    void exec_LWU(Instruction const instr) {}
+    void exec_SB(Instruction const instr) {}
+    void exec_SH(Instruction const instr) {}
+    void exec_SW(Instruction const instr) {}
+    void exec_SD(Instruction const instr) {}
 
     // Does nothing in in-order implementation
-    void exec_FENCE(Instruction instr) { this->nextPC(); }
-    void exec_FENCE_TSO(Instruction instr) { this->nextPC(); }
+    void exec_FENCE(Instruction const instr) { this->nextPC(); }
+    void exec_FENCE_TSO(Instruction const instr) { this->nextPC(); }
 
     // Will be implemented after CSR system release
-    void exec_ECALL(Instruction instr) { this->nextPC(); }
-    void exec_EBREAK(Instruction instr) { this->nextPC(); }
+    void exec_ECALL(Instruction const instr) { this->nextPC(); }
+    void exec_EBREAK(Instruction const instr) { this->nextPC(); }
 
-    void exec_ADDIW(Instruction instr);
-    void exec_SLLIW(Instruction instr);
-    void exec_SRLIW(Instruction instr);
-    void exec_SRAIW(Instruction instr);
-    void exec_ADDW(Instruction instr);
-    void exec_SUBW(Instruction instr);
-    void exec_SLLW(Instruction instr);
-    void exec_SRLW(Instruction instr);
-    void exec_SRAW(Instruction instr);
+    void exec_ADDIW(Instruction const instr);
+    void exec_SLLIW(Instruction const instr);
+    void exec_SRLIW(Instruction const instr);
+    void exec_SRAIW(Instruction const instr);
+    void exec_ADDW(Instruction const instr);
+    void exec_SUBW(Instruction const instr);
+    void exec_SLLW(Instruction const instr);
+    void exec_SRLW(Instruction const instr);
+    void exec_SRAW(Instruction const instr);
 
     void nextPC();
 
