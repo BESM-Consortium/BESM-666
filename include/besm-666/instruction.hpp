@@ -15,6 +15,8 @@ struct Instruction {
     Register rs2;
     RV64UDWord immidiate;
     InstructionOp operation;
+
+    static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
 };
 
 } // namespace besm

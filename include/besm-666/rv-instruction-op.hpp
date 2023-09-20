@@ -3,6 +3,7 @@
 namespace besm {
 
 enum InstructionOp {
+    NON_OP,
     // RV32I:
     LUI,
     AUIPC,
