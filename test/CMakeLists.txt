@@ -1,6 +1,6 @@
 
 add_library(besm666_testif INTERFACE)
-target_link_libraries(besm666_testif INTERFACE besm666_shared gmock_main gmock gtest)
+target_link_libraries(besm666_testif INTERFACE besm666_shared besm666_decoder gmock_main gmock gtest)
 
 function(besm666_test SOURCE_NAME)
     get_filename_component(TARGET_NAME ${SOURCE_NAME} NAME_WE)
