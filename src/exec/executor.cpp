@@ -103,6 +103,9 @@ void Executor::exec(Instruction instr) {
     case LW:
         exec_LW(instr);
         break;
+    case LD:
+        exec_LD(instr);
+        break;
     case LBU:
         exec_LBU(instr);
         break;
@@ -121,6 +124,9 @@ void Executor::exec(Instruction instr) {
     case SW:
         exec_SW(instr);
         break;
+    case SD:
+        exec_SW(instr);
+        break;
     case FENCE:
         exec_FENCE(instr);
         break;
@@ -132,6 +138,36 @@ void Executor::exec(Instruction instr) {
         break;
     case EBREAK:
         exec_EBREAK(instr);
+        break;
+    case ADDIW:
+        exec_ADDIW(instr);
+        break;
+    case SLLIW:
+        exec_SLLIW(instr);
+        break;
+    case SRLIW:
+        exec_SRLIW(instr);
+        break;
+    case SRAIW:
+        exec_SRAIW(instr);
+        break;
+    case ADDW:
+        exec_ADDW(instr);
+        break;
+    case SUBW:
+        exec_SUBW(instr);
+        break;
+    case SLLW:
+        exec_SLLW(instr);
+        break;
+    case SRLW:
+        exec_SRLW(instr);
+        break;
+    case SRAW:
+        exec_SRAW(instr);
+        break;
+    case PAUSE:
+        // can't find this instruction in docs
         break;
     }
 }
@@ -449,6 +485,96 @@ void Executor::exec_BGEU(Instruction instr) {
     } else {
         this->nextPC();
     }
+}
+
+void Executor::exec_ADDIW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 + opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SLLIW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 << opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SRLIW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SRAIW(Instruction instr) {
+    RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
+    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord res = util::Unsignify(util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2));
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_ADDW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = gprf_.read(instr.rs2);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 + opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SUBW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = gprf_.read(instr.rs2);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 - opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SLLW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = gprf_.read(instr.rs2);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 << opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SRLW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = gprf_.read(instr.rs2);
+    RV64UDWord res = util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2);
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
+}
+
+void Executor::exec_SRAW(Instruction instr) {
+    RV64UDWord opnd1 = gprf_.read(instr.rs1);
+    RV64UDWord opnd2 = gprf_.read(instr.rs2);
+    RV64UDWord res = util::Unsignify(util::ExtractBits<RV64UDWord, 32>(opnd1 >> opnd2));
+
+    gprf_.write(instr.rd, res);
+
+    this->nextPC();
 }
 
 void Executor::nextPC() {

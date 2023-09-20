@@ -49,12 +49,14 @@ private:
     void exec_LB(Instruction instr) {}
     void exec_LH(Instruction instr) {}
     void exec_LW(Instruction instr) {}
+    void exec_LD(Instruction instr) {}
     void exec_LBU(Instruction instr) {}
     void exec_LHU(Instruction instr) {}
     void exec_LWU(Instruction instr) {}
     void exec_SB(Instruction instr) {}
     void exec_SH(Instruction instr) {}
     void exec_SW(Instruction instr) {}
+    void exec_SD(Instruction instr) {}
 
     // Does nothing in in-order implementation
     void exec_FENCE(Instruction instr) { this->nextPC(); }
@@ -63,6 +65,16 @@ private:
     // Will be implemented after CSR system release
     void exec_ECALL(Instruction instr) { this->nextPC(); }
     void exec_EBREAK(Instruction instr) { this->nextPC(); }
+
+    void exec_ADDIW(Instruction instr);
+    void exec_SLLIW(Instruction instr);
+    void exec_SRLIW(Instruction instr);
+    void exec_SRAIW(Instruction instr);
+    void exec_ADDW(Instruction instr);
+    void exec_SUBW(Instruction instr);
+    void exec_SLLW(Instruction instr);
+    void exec_SRLW(Instruction instr);
+    void exec_SRAW(Instruction instr);
 
     void nextPC();
 
