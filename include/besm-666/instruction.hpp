@@ -16,11 +16,6 @@ struct Instruction {
     const Immidiate immidiate;
     const InstructionOp operation;
 
-    bool operator==(Instruction rhs) const {
-        return rd == rhs.rd && rs1 == rhs.rs1 && rs2 == rhs.rs2 &&
-               immidiate == rhs.immidiate && operation == rhs.operation;
-    }
-    bool operator!=(Instruction rhs) const { return !(*this == rhs); }
     static constexpr Immidiate IMMIDIATE_POISON = UINT32_MAX;
 };
 
