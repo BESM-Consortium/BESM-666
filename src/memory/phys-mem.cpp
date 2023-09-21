@@ -71,6 +71,8 @@ bool operator<(PhysMemPagemap::PageId lhs, PhysMemPagemap::Page rhs) {
     return lhs < rhs.id;
 }
 
+PhysMem::PhysMem(PhysMem &&other) : pagemap_(std::move(other.pagemap_)) {}
+
 PhysMem::PhysMem(PhysMemPagemap &&pagemap) : pagemap_(std::move(pagemap)) {}
 
 PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)

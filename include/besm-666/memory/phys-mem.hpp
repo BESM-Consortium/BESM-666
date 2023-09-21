@@ -44,6 +44,8 @@ class PhysMem : public INonCopyable {
 public:
     ~PhysMem() = default;
 
+    PhysMem(PhysMem &&other);
+
     template <typename RV64Type> void store(RV64Ptr address, RV64Type value);
     template <typename RV64Type> RV64Type load(RV64Ptr address) const;
 
