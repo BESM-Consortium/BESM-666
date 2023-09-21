@@ -36,6 +36,13 @@ TEST(SignExtend, NegativeValue) {
 
     EXPECT_EQ(r, std::numeric_limits<unsigned int>::max());
 }
+TEST(SignExtend, VeryLongNegativeValue) {
+    unsigned int v = 15; // 1111 (-1)
+
+    unsigned int r = besm::util::SignExtend<unsigned int, 3>(v);
+
+    EXPECT_EQ(r, std::numeric_limits<unsigned int>::max());
+}
 
 TEST(Signify, PositiveValue) {
     unsigned int v = 3;
