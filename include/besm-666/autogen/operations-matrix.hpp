@@ -248,14 +248,14 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {ILLEGAL, NON_OP},
     }, // opcode: 0b10110
     {
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
+        {U, AUIPC},
     }, // opcode: 0b10111
     {
         {ILLEGAL, NON_OP},
@@ -568,14 +568,14 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {ILLEGAL, NON_OP},
     }, // opcode: 0b110110
     {
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
-        {U, NON_OP},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
+        {U, LUI},
     }, // opcode: 0b110111
     {
         {ILLEGAL, NON_OP},
@@ -1298,4 +1298,5 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {ILLEGAL, NON_OP},
     }, // opcode: 0b1111111
 };
+
 } // namespace besm::dec

@@ -22,159 +22,47 @@ private:
 
 public:
     /**
-     * Give the {@link Instruction} by the word.
-     * @param word word.
+     * Give the {@link Instruction} by the bytecode word.
+     * @param bytecode word.
      * @return {@link Instruction} struct.
      */
-    besm::Instruction parse(const RV64UWord bytecode) const {
-        const Opcode opcode = bytecode & OPCODE_MASK;
-        const uint8_t func3 = (bytecode & FUNC3_MASK) >> FUNC3_shift;
-        assert(opcode < 128);
-        assert(func3 < 8);
-        const Cell *cell = &(INSTR_WHO[opcode][func3]);
-        const Format format = cell->format;
-        const InstructionOp operation = cell->operation;
-        switch (format) {
-        case R:
-            return parse_R(bytecode, opcode, func3);
-            break;
-        case I:
-            return parse_I(bytecode, operation, opcode);
-            break;
-        case S:
-            return parse_S(bytecode, operation);
-            break;
-        case B:
-            return parse_B(bytecode, operation);
-            break;
-        case U:
-            return parse_U(bytecode, operation);
-            break;
-        case J:
-            return parse_J(bytecode, operation);
-            break;
-        }
-        return Instruction{.operation = NON_OP};
-    }
+    [[nodiscard]] besm::Instruction parse(RV64UWord bytecode) const;
 
 private:
-    static inline Instruction parse_R(const RV64UWord bytecode,
-                                      const Opcode opcode,
-                                      const uint8_t func3) {
-        constexpr int FUNC7_SHIFT = 25;
-        constexpr RV64UWord FUNC7_MASK = 0b1111111 << FUNC7_SHIFT;
-        const uint16_t func7 = (bytecode & FUNC7_MASK) >> (FUNC7_SHIFT - 3);
-        const uint16_t func10 = func7 | func3;
-        assert(func10 < 0b10000000000);
-        InstructionOp operation = NON_OP;
-        switch (opcode) {
-        case 0b0110011:
-            switch (func10) {
-            case 0b0000000000:
-                operation = ADD;
-                break;
-            case 0b0100000000:
-                operation = SUB;
-                break;
-            case 0b0000000001:
-                operation = SLL;
-                break;
-            case 0b0000000010:
-                operation = SLT;
-                break;
-            case 0b0000000011:
-                operation = SLTU;
-                break;
-            case 0b0000000100:
-                operation = XOR;
-                break;
-            case 0b0000000101:
-                operation = SRL;
-                break;
-            case 0b0100000101:
-                operation = SRA;
-                break;
-            case 0b0000000110:
-                operation = OR;
-                break;
-            case 0b0000000111:
-                operation = AND;
-            }
-            break;
-        case 0b0111011:
-            switch (func10) {
-            case 0b0000000000:
-                operation = ADDW;
-                break;
-            case 0b0100000000:
-                operation = SUBW;
-                break;
-            case 0b0000000001:
-                operation = SLLW;
-                break;
-            case 0b0000000101:
-                operation = SRLW;
-                break;
-            case 0b0100000101:
-                operation = SRAW;
-                break;
-            }
-            break;
-        }
-        return Instruction{
-            .rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT),
-            .rs1 = static_cast<Register>((bytecode & RS1_MASK) >> RS1_SHIFT),
-            .rs2 = static_cast<Register>((bytecode & RS2_MASK) >> RS2_SHIFT),
-            .immidiate = Instruction::IMMIDIATE_POISON,
-            .operation = operation};
-    }
+    static inline Instruction parse_R(RV64UWord bytecode, Opcode opcode,
+                                      uint8_t func3);
 
     /*
      * @todo #1ILLEGAL:90m Implement the functions of I format. Now it is
      * just a stub. We need to implement every of them and test.
      * ALARM: pay attention to 0b1110011 opcode.
      */
-    static inline Instruction parse_I(const RV64UWord word,
-                                      const InstructionOp operation,
-                                      const Opcode opcode) {
-        return Instruction{};
-    }
+    static inline Instruction parse_I(RV64UWord bytecode,
+                                      InstructionOp operation, Opcode opcode);
 
     /*
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of S format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_S(const RV64UWord word,
-                                      const InstructionOp operation) {
-        return Instruction{};
-    }
+    static inline Instruction parse_S(RV64UWord bytecode,
+                                      InstructionOp operation);
 
     /*
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of B format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_B(const RV64UWord word,
-                                      const InstructionOp operation) {
-        return Instruction{};
-    }
+    static inline Instruction parse_B(RV64UWord bytecode,
+                                      InstructionOp operation);
 
-    /*
-     * @todo #1ILLEGAL:9ILLEGALm Implement the functions of U format. Now it is
-     * just a stub. We need to implement every of them and test.
-     */
-    static inline Instruction parse_U(const RV64UWord word,
-                                      const InstructionOp operation) {
-        return Instruction{};
-    }
+    static inline Instruction parse_U(RV64UWord bytecode,
+                                      InstructionOp operation);
 
     /*
      * @todo #1ILLEGAL:9ILLEGALm Implement the functions of J format. Now it is
      * just a stub. We need to implement every of them and test.
      */
-    static inline Instruction parse_J(const RV64UWord word,
-                                      const InstructionOp operation) {
-        return Instruction{};
-    }
+    static inline Instruction parse_J(RV64UWord bytecode,
+                                      InstructionOp operation);
 };
 
 } // namespace besm::dec

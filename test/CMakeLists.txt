@@ -4,6 +4,7 @@ target_link_libraries(besm666_testif INTERFACE
     besm666_include
     besm666_exec 
     besm666_memory 
+    besm666_decoder
     gmock_main 
     gmock 
     gtest
