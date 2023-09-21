@@ -11,8 +11,15 @@
 
 namespace besm::util {
 
+/**
+ * \brief checks that ELF suites all simulator requirements and  retrieves all
+ * LOAD segments
+ */
 class ElfParser final : INonCopyable {
 public:
+    /**
+     * \brief stores all required data about segment to load
+     */
     struct LoadableSegment : INonCopyable {
         RV64Ptr address;
         const void *data;
@@ -23,20 +30,31 @@ public:
         LoadableSegment &operator=(LoadableSegment &&other);
     };
 
+    /**
+     * \throws InvalidELFFormat if ELF format is invalid
+     */
     ElfParser(const std::filesystem::path &elfPath);
 
+    /**
+     * \brief stores all information about LOAD segments in vector and returns
+     * a reference to it
+     */
     const std::vector<LoadableSegment> &getLoadableSegments() &;
 
 private:
+    /**
+     * \brief stores ELF requirements for simulator
+     */
     enum Requirements {
-        /// 64bit
-        FileClass = ELFIO::ELFCLASS64,
-        /// little-endian
-        Encoding = ELFIO::ELFDATA2LSB,
-        /// RISC-V
-        Arch = ELFIO::EM_RISCV
+        FileClass = ELFIO::ELFCLASS64, ///< ELF file class (64bit)
+        Encoding = ELFIO::ELFDATA2LSB, ///< little-endian
+        Arch = ELFIO::EM_RISCV ///< architecture (RISC-V)
     };
 
+    /**
+     * \brief checks that ELF suites all requirements
+     * \throws UnavailableELFRequirements if ELF doesn't suite requirements
+     */
     void checkRequirements() const;
 
     ELFIO::elfio reader_{};
