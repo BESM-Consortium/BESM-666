@@ -30,7 +30,6 @@ add_custom_target(besm666_riscv_isa DEPENDS
 add_library(besm666_include INTERFACE)
 target_include_directories(besm666_include INTERFACE
     ./include
-    # @todo #24:15m/DEV to add elfio as to target_link_libraries
     ./third_party/ELFIO
 )
 add_dependencies(besm666_include besm666_riscv_isa)
@@ -45,7 +44,6 @@ target_link_libraries(besm666_shared
 PUBLIC
     besm666_include
 PRIVATE
-    elfio::elfio
     besm666_memory
     besm666_util
 )

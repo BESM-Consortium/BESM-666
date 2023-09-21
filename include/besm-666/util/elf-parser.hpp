@@ -11,17 +11,8 @@
 
 namespace besm::util {
 
-class ElfParser final {
+class ElfParser final : INonCopyable {
 public:
-    enum Requirements {
-        /// 64bit
-        FileClass = ELFIO::ELFCLASS64,
-        /// little-endian
-        Encoding = ELFIO::ELFDATA2LSB,
-        /// RISC-V
-        Arch = ELFIO::EM_RISCV
-    };
-
     struct LoadableSegment : INonCopyable {
         RV64Ptr address;
         const void *data;
@@ -37,15 +28,32 @@ public:
     const std::vector<LoadableSegment> &getLoadableSegments() &;
 
 private:
+    enum Requirements {
+        /// 64bit
+        FileClass = ELFIO::ELFCLASS64,
+        /// little-endian
+        Encoding = ELFIO::ELFDATA2LSB,
+        /// RISC-V
+        Arch = ELFIO::EM_RISCV
+    };
+
     void checkRequirements() const;
 
     ELFIO::elfio reader_{};
     std::vector<LoadableSegment> loadableSegments_;
 };
 
-class BadElf : public std::runtime_error {
+class InvalidELFFormat : public std::runtime_error {
 public:
-    BadElf(const std::string &msg);
+    InvalidELFFormat(char const *msg);
+    InvalidELFFormat(const std::string &msg);
+    const char *what() const noexcept override;
+};
+
+class UnavailableELFRequirements : public std::runtime_error {
+public:
+    UnavailableELFRequirements(char const *msg);
+    UnavailableELFRequirements(const std::string &msg);
     const char *what() const noexcept override;
 };
 

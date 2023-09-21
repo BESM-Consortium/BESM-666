@@ -22,7 +22,8 @@ TEST_F(ElfParserTest, requirements_false) {
 
     gen::generateUnsuitableElf(elfPath, ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB,
                                ELFIO::EM_386);
-    EXPECT_THROW(ElfParser unsuitableParser(elfPath), BadElf);
+    EXPECT_THROW(ElfParser unsuitableParser(elfPath),
+                 UnavailableELFRequirements);
 }
 
 TEST_F(ElfParserTest, get_loadable_segments) {

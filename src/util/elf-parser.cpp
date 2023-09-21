@@ -4,19 +4,19 @@ namespace besm::util {
 
 ElfParser::ElfParser(const std::filesystem::path &elfPath) {
     if (!reader_.load(elfPath)) {
-        throw BadElf("Invalid ELF file: " + elfPath.string());
+        throw InvalidELFFormat("Invalid ELF file: " + elfPath.string());
     }
     checkRequirements();
 }
 void ElfParser::checkRequirements() const {
     if (reader_.get_class() != Requirements::FileClass) {
-        throw BadElf("Wrong ELF file class.");
+        throw UnavailableELFRequirements("Wrong ELF file class.");
     }
     if (reader_.get_encoding() != Requirements::Encoding) {
-        throw BadElf("Wrong ELF encoding.");
+        throw UnavailableELFRequirements("Wrong ELF encoding.");
     }
     if (reader_.get_machine() != Requirements::Arch) {
-        throw BadElf("Wrong ELF target architecture.");
+        throw UnavailableELFRequirements("Wrong ELF target architecture.");
     }
 }
 /**
@@ -58,7 +58,18 @@ ElfParser::LoadableSegment::operator=(ElfParser::LoadableSegment &&other) {
     return *this;
 }
 
-BadElf::BadElf(const std::string &msg) : runtime_error(msg) {}
-const char *BadElf::what() const noexcept { return runtime_error::what(); }
+InvalidELFFormat::InvalidELFFormat(const char *msg) : runtime_error(msg) {}
+InvalidELFFormat::InvalidELFFormat(const std::string &msg)
+    : runtime_error(msg) {}
+const char *InvalidELFFormat::what() const noexcept {
+    return runtime_error::what();
+}
 
+UnavailableELFRequirements::UnavailableELFRequirements(const char *msg)
+    : runtime_error(msg) {}
+UnavailableELFRequirements::UnavailableELFRequirements(const std::string &msg)
+    : runtime_error(msg) {}
+const char *UnavailableELFRequirements::what() const noexcept {
+    return runtime_error::what();
+}
 } // namespace besm::util
