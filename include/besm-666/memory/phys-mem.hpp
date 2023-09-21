@@ -33,7 +33,7 @@ private:
 
     size_t const pageSize_;
     PageAllocator allocator_;
-    mutable Pagemap pagemap_;
+    Pagemap pagemap_;
 };
 
 bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::Page rhs);
