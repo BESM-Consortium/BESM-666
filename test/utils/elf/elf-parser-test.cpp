@@ -20,8 +20,8 @@ TEST_F(ElfParserTest, requirements_true) {
 TEST_F(ElfParserTest, requirements_false) {
     using namespace besm::utl;
 
-    gen::generateUnsuitableElf(elfPath, ELFIO::ELFCLASS32,
-                               ELFIO::ELFDATA2LSB, ELFIO::EM_386);
+    gen::generateUnsuitableElf(elfPath, ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB,
+                               ELFIO::EM_386);
     EXPECT_THROW(ElfParser unsuitableParser(elfPath), BadElf);
 }
 

@@ -39,15 +39,15 @@ ElfParser::getLoadableSegments() & {
 ElfParser::LoadableSegment::LoadableSegment(RV64Ptr address, const void *data,
                                             RV64Size size)
     : address(address), data(data), size(size) {}
-ElfParser::LoadableSegment::LoadableSegment(
-    ElfParser::LoadableSegment &&other) : address(other.address), data(other.data), size(other.size) {
+ElfParser::LoadableSegment::LoadableSegment(ElfParser::LoadableSegment &&other)
+    : address(other.address), data(other.data), size(other.size) {
     std::swap(other.address, address);
     std::swap(other.data, data);
     std::swap(other.size, size);
 }
 ElfParser::LoadableSegment &
 ElfParser::LoadableSegment::operator=(ElfParser::LoadableSegment &&other) {
-    if (this != &other){
+    if (this != &other) {
         address = 0;
         data = nullptr;
         size = 0;

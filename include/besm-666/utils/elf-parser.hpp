@@ -22,7 +22,7 @@ public:
         Arch = ELFIO::EM_RISCV
     };
 
-    struct LoadableSegment: INonCopyable {
+    struct LoadableSegment : INonCopyable {
         RV64Ptr address;
         const void *data;
         RV64Size size;
@@ -49,4 +49,4 @@ public:
     const char *what() const noexcept override;
 };
 
-} // namespace besm::elf
+} // namespace besm::utl
