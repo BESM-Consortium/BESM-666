@@ -11,12 +11,13 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         ctect_option:
           - "-DBESM666_ENABLE_VALGRIND=1"
           - "-DBESM666_ENABLE_VALGRIND=0"
+        os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v3
       with:
