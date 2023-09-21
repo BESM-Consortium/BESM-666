@@ -6,9 +6,8 @@
 namespace besm::gen {
 using elf_t = unsigned char;
 
-constexpr char defaultData[] =
-    { '\xDE', '\xAD', '\xBA', '\xBE'};
-constexpr RV64Ptr defaultPtr = 0x08048000;
+constexpr char defaultData[] = {'\x62', '\x6F', '\x6F', '\x62', '\x73', '\x00'};
+constexpr RV64Ptr defaultPtr = 0xDEADEBABE;
 
 void generateElf(const std::filesystem::path &path,
                  elf_t fileClass, elf_t encoding, elf_t arch,
@@ -23,7 +22,6 @@ void generateElf(const std::filesystem::path &path,
     ELFIO::section* text_sec = writer.sections.add(".text");
     text_sec->set_type(ELFIO::SHT_PROGBITS);
     text_sec->set_flags(ELFIO::SHF_ALLOC | ELFIO::SHF_EXECINSTR);
-    text_sec->set_addr_align(0x10);
 
     text_sec->set_data(loadData, loadSize);
 
@@ -32,7 +30,6 @@ void generateElf(const std::filesystem::path &path,
     text_seg->set_virtual_address(loadPtr);
     text_seg->set_physical_address(loadPtr);
     text_seg->set_flags(ELFIO::PF_X | ELFIO::PF_R);
-    text_seg->set_align(0x1000);
 
     text_seg->add_section_index(text_sec->get_index(),
                                 text_sec->get_addr_align());

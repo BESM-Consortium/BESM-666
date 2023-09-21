@@ -24,7 +24,7 @@ public:
 
     struct LoadableSegment: INonCopyable {
         RV64Ptr address;
-        void const *data;
+        const void *data;
         RV64Size size;
 
         LoadableSegment(RV64Ptr address, void const *data, RV64Size size);
@@ -34,7 +34,7 @@ public:
 
     ElfParser(const std::filesystem::path &elfPath);
 
-    const std::vector<LoadableSegment> &getLoadableSegments();
+    const std::vector<LoadableSegment> &getLoadableSegments() &;
 
 private:
     void checkRequirements();

@@ -23,12 +23,14 @@ void ElfParser::checkRequirements() {
  * @todo #9:15m/DEV to check that elf does not require dynamic linking
  */
 const std::vector<ElfParser::LoadableSegment> &
-ElfParser::getLoadableSegments() {
-    for (const auto &seg : reader_.segments) {
-        if (seg->get_type() == ELFIO::PT_LOAD) {
-            loadableSegments_.push_back(
-                LoadableSegment{seg->get_virtual_address(), seg->get_data(),
-                                static_cast<RV64Size>(seg->get_memory_size())});
+ElfParser::getLoadableSegments() & {
+    if (loadableSegments_.empty()) {
+        for (const auto &seg : reader_.segments) {
+            if (seg->get_type() == ELFIO::PT_LOAD) {
+                loadableSegments_.emplace_back(
+                    seg->get_virtual_address(), seg->get_data(),
+                    static_cast<RV64Size>(seg->get_memory_size()));
+            }
         }
     }
     return loadableSegments_;
@@ -38,7 +40,7 @@ ElfParser::LoadableSegment::LoadableSegment(RV64Ptr address, const void *data,
                                             RV64Size size)
     : address(address), data(data), size(size) {}
 ElfParser::LoadableSegment::LoadableSegment(
-    ElfParser::LoadableSegment &&other) : address(0), data(nullptr), size(0) {
+    ElfParser::LoadableSegment &&other) : address(other.address), data(other.data), size(other.size) {
     std::swap(other.address, address);
     std::swap(other.data, data);
     std::swap(other.size, size);
