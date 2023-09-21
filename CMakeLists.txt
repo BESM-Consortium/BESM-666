@@ -8,7 +8,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(besm666_include INTERFACE)
 target_include_directories(besm666_include INTERFACE
     ./include
-    ./third_party/ELFIO #TODO: to add elfio as to target_link_libraries
+    # @todo #24:15m/DEV to add elfio as to target_link_libraries
+    ./third_party/ELFIO
 )
 
 add_library(besm666_shared SHARED)
