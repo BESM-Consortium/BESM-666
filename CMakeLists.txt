@@ -42,8 +42,9 @@ target_sources(besm666_shared PRIVATE
 target_link_libraries(besm666_shared 
 PUBLIC 
     besm666_include
-PRIVATE besm666_memory
-PRIVATE besm666_decoder
+PRIVATE
+    besm666_memory
+    besm666_decoder
 )
 
 add_executable(besm666)
