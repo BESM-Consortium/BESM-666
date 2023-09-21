@@ -20,16 +20,16 @@ protected:
         instr.operation = op;
         instr.rd = rd;
         instr.rs1 = rs1;
-        instr.immidiate = imm;
+        instr.immidiate = util::ExtractBits<RV64UDWord, 12>(imm);
     }
-    void SetupInstrIS(InstructionOp op, Register rd, Register rs1,
-                      RV64DWord imm) {
+    void SetupInstrISigned(InstructionOp op, Register rd, Register rs1,
+                           RV64DWord imm) {
         SetupInstrI(op, rd, rs1, util::Unsignify(imm));
     }
     void SetupInstrU(InstructionOp op, Register rd, RV64UDWord imm) {
         instr.operation = op;
         instr.rd = rd;
-        instr.immidiate = imm;
+        instr.immidiate = util::ExtractBits<RV64UDWord, 20>(imm);
     }
     void SetupInstrB(InstructionOp op, Register rs1, Register rs2,
                      RV64UDWord imm) {
@@ -40,7 +40,7 @@ protected:
     }
 
     void LoadImm12(Register rd, RV64DWord val) {
-        SetupInstrIS(InstructionOp::ADDI, rd, reg::GPRF::X0, val);
+        SetupInstrISigned(InstructionOp::ADDI, rd, reg::GPRF::X0, val);
         Exec();
     }
 
@@ -68,7 +68,7 @@ TEST_F(RV64IExecutorTest, MOVI) {
 
 TEST_F(RV64IExecutorTest, ADDI) {
     LoadImm12(reg::GPRF::X1, -3);
-    SetupInstrIS(InstructionOp::ADDI, reg::GPRF::X2, reg::GPRF::X1, -5);
+    SetupInstrISigned(InstructionOp::ADDI, reg::GPRF::X2, reg::GPRF::X1, -5);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -79,7 +79,7 @@ TEST_F(RV64IExecutorTest, ADDI) {
 
 TEST_F(RV64IExecutorTest, SLTI_True) {
     LoadImm12(reg::GPRF::X1, -3);
-    SetupInstrIS(InstructionOp::SLTI, reg::GPRF::X2, reg::GPRF::X1, -2);
+    SetupInstrISigned(InstructionOp::SLTI, reg::GPRF::X2, reg::GPRF::X1, -2);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -89,7 +89,7 @@ TEST_F(RV64IExecutorTest, SLTI_True) {
 }
 TEST_F(RV64IExecutorTest, SLTI_False) {
     LoadImm12(reg::GPRF::X1, -2);
-    SetupInstrIS(InstructionOp::SLTI, reg::GPRF::X2, reg::GPRF::X1, -3);
+    SetupInstrISigned(InstructionOp::SLTI, reg::GPRF::X2, reg::GPRF::X1, -3);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -100,7 +100,7 @@ TEST_F(RV64IExecutorTest, SLTI_False) {
 
 TEST_F(RV64IExecutorTest, SLTIU_True) {
     LoadImm12(reg::GPRF::X1, 2);
-    SetupInstrIS(InstructionOp::SLTIU, reg::GPRF::X2, reg::GPRF::X1, 3);
+    SetupInstrISigned(InstructionOp::SLTIU, reg::GPRF::X2, reg::GPRF::X1, 3);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -110,7 +110,7 @@ TEST_F(RV64IExecutorTest, SLTIU_True) {
 }
 TEST_F(RV64IExecutorTest, SLTIU_False) {
     LoadImm12(reg::GPRF::X1, 3);
-    SetupInstrIS(InstructionOp::SLTIU, reg::GPRF::X2, reg::GPRF::X1, 2);
+    SetupInstrISigned(InstructionOp::SLTIU, reg::GPRF::X2, reg::GPRF::X1, 2);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -121,7 +121,7 @@ TEST_F(RV64IExecutorTest, SLTIU_False) {
 
 TEST_F(RV64IExecutorTest, ANDI) {
     LoadImm12(reg::GPRF::X1, -1);
-    SetupInstrIS(InstructionOp::ANDI, reg::GPRF::X2, reg::GPRF::X1, 1);
+    SetupInstrISigned(InstructionOp::ANDI, reg::GPRF::X2, reg::GPRF::X1, 1);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -132,7 +132,7 @@ TEST_F(RV64IExecutorTest, ANDI) {
 
 TEST_F(RV64IExecutorTest, ORI) {
     LoadImm12(reg::GPRF::X1, -2);
-    SetupInstrIS(InstructionOp::ORI, reg::GPRF::X2, reg::GPRF::X1, 1);
+    SetupInstrISigned(InstructionOp::ORI, reg::GPRF::X2, reg::GPRF::X1, 1);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
@@ -143,7 +143,7 @@ TEST_F(RV64IExecutorTest, ORI) {
 
 TEST_F(RV64IExecutorTest, XORI) {
     LoadImm12(reg::GPRF::X1, -1);
-    SetupInstrIS(InstructionOp::XORI, reg::GPRF::X2, reg::GPRF::X1, 2);
+    SetupInstrISigned(InstructionOp::XORI, reg::GPRF::X2, reg::GPRF::X1, 2);
     RV64UDWord prevPC = ReadReg(reg::GPRF::PC);
 
     Exec();
