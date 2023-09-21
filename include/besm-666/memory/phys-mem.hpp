@@ -23,17 +23,17 @@ public:
     ~PhysMemPagemap() = default;
 
     void storeByte(RV64Ptr address, RV64UChar value);
-    RV64UChar loadByte(RV64Ptr address);
+    RV64UChar loadByte(RV64Ptr address) const;
 
 private:
     RV64Size addr2PageId(RV64Ptr address) const;
     RV64Size addr2PageOffset(RV64Ptr address) const;
-    Pagemap::iterator touchAddress(RV64Ptr address);
-    void *translate(RV64Ptr address);
+    void *touchAddress(RV64Ptr address);
+    void const *translate(RV64Ptr address) const;
 
     size_t const pageSize_;
     PageAllocator allocator_;
-    Pagemap pagemap_;
+    mutable Pagemap pagemap_;
 };
 
 bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::Page rhs);
@@ -45,7 +45,7 @@ public:
     ~PhysMem() = default;
 
     template <typename RV64Type> void store(RV64Ptr address, RV64Type value);
-    template <typename RV64Type> RV64Type load(RV64Ptr address);
+    template <typename RV64Type> RV64Type load(RV64Ptr address) const;
 
 private:
     friend class PhysMemBuilder;
@@ -60,7 +60,7 @@ void PhysMem::store(RV64Ptr address, RV64Type value) {
         pagemap_.storeByte(address + i, *((RV64UChar *)&value + i));
     }
 }
-template <typename RV64Type> RV64Type PhysMem::load(RV64Ptr address) {
+template <typename RV64Type> RV64Type PhysMem::load(RV64Ptr address) const {
     RV64Type result;
     for (RV64Ptr i = 0; i < sizeof(RV64Type); ++i) {
         *((RV64UChar *)&result + i) = pagemap_.loadByte(address + i);

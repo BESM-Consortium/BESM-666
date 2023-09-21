@@ -22,12 +22,13 @@ PhysMemPagemap::PhysMemPagemap(PhysMemPagemap &&other)
       pagemap_(std::move(other.pagemap_)) {}
 
 void PhysMemPagemap::storeByte(RV64Ptr address, RV64UChar value) {
-    RV64UChar *pos = reinterpret_cast<RV64UChar *>(this->translate(address));
+    RV64UChar *pos = reinterpret_cast<RV64UChar *>(this->touchAddress(address));
     *pos = value;
 }
-RV64UChar PhysMemPagemap::loadByte(RV64Ptr address) {
-    RV64UChar *pos = reinterpret_cast<RV64UChar *>(this->translate(address));
-    return *pos;
+RV64UChar PhysMemPagemap::loadByte(RV64Ptr address) const {
+    RV64UChar const *pos =
+        reinterpret_cast<RV64UChar const *>(this->translate(address));
+    return pos == nullptr ? 0 : *pos;
 }
 
 RV64Size PhysMemPagemap::addr2PageId(RV64Ptr address) const {
@@ -37,8 +38,7 @@ RV64Size PhysMemPagemap::addr2PageOffset(RV64Ptr address) const {
     return address & (pageSize_ - 1);
 }
 
-PhysMemPagemap::Pagemap::iterator
-PhysMemPagemap::touchAddress(RV64Ptr address) {
+void *PhysMemPagemap::touchAddress(RV64Ptr address) {
     RV64Size pageId = this->addr2PageId(address);
     auto pageItr = pagemap_.find(pageId);
     if (pageItr == pagemap_.end()) {
@@ -46,16 +46,19 @@ PhysMemPagemap::touchAddress(RV64Ptr address) {
                      .mem = reinterpret_cast<char *>(allocator_.allocPage())};
         auto [itr, success] = pagemap_.insert(page);
         assert(success);
-        return itr;
-    } else {
-        return pageItr;
+        pageItr = itr;
     }
+
+    return pageItr->mem + this->addr2PageOffset(address);
 }
 
-void *PhysMemPagemap::translate(RV64Ptr address) {
-    auto pageItr = this->touchAddress(address);
-    RV64Size offset = this->addr2PageOffset(address);
-    return pageItr->mem + static_cast<size_t>(offset);
+void const *PhysMemPagemap::translate(RV64Ptr address) const {
+    auto pageItr = pagemap_.find(this->addr2PageId(address));
+    if (pageItr == pagemap_.end()) {
+        return nullptr;
+    } else {
+        return pageItr->mem + this->addr2PageOffset(address);
+    }
 }
 
 bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::Page rhs) {
