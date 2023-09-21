@@ -5,8 +5,8 @@
 
 #include "besm-666/memory/page-allocator.hpp"
 #include "besm-666/riscv-types.hpp"
-#include "besm-666/utils/elf-parser.hpp"
-#include "besm-666/utils/non-copyable.hpp"
+#include "besm-666/util/elf-parser.hpp"
+#include "besm-666/util/non-copyable.hpp"
 
 namespace besm::mem {
 

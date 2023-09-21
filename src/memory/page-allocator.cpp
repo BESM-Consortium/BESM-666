@@ -7,7 +7,7 @@
 
 #include "besm-666/memory/mmap-wrapper.hpp"
 #include "besm-666/memory/page-allocator.hpp"
-#include "besm-666/utils/math.hpp"
+#include "besm-666/util/math.hpp"
 
 namespace besm::mem {
 

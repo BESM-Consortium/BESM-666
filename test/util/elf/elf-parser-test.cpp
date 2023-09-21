@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "besm-666/utils/elf-parser.hpp"
+#include "besm-666/util/elf-parser.hpp"
 #include "elf-gen.hpp"
 
 using namespace besm;
@@ -11,14 +11,14 @@ protected:
 };
 
 TEST_F(ElfParserTest, requirements_true) {
-    using namespace besm::utl;
+    using namespace besm::util;
 
     gen::generateSuitableElf(elfPath);
     EXPECT_NO_THROW(ElfParser suitableParser(elfPath););
 }
 
 TEST_F(ElfParserTest, requirements_false) {
-    using namespace besm::utl;
+    using namespace besm::util;
 
     gen::generateUnsuitableElf(elfPath, ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB,
                                ELFIO::EM_386);
@@ -26,7 +26,7 @@ TEST_F(ElfParserTest, requirements_false) {
 }
 
 TEST_F(ElfParserTest, get_loadable_segments) {
-    using namespace besm::utl;
+    using namespace besm::util;
 
     gen::generateSuitableElf(elfPath);
 

@@ -6,10 +6,10 @@
 
 #include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/riscv-types.hpp"
-#include "besm-666/utils/non-copyable.hpp"
+#include "besm-666/util/non-copyable.hpp"
 #include "elfio/elfio.hpp"
 
-namespace besm::utl {
+namespace besm::util {
 
 class ElfParser final {
 public:
@@ -37,7 +37,7 @@ public:
     const std::vector<LoadableSegment> &getLoadableSegments() &;
 
 private:
-    void checkRequirements();
+    void checkRequirements() const;
 
     ELFIO::elfio reader_{};
     std::vector<LoadableSegment> loadableSegments_;
@@ -49,4 +49,4 @@ public:
     const char *what() const noexcept override;
 };
 
-} // namespace besm::utl
+} // namespace besm::util

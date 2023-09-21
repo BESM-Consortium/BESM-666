@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #include "besm-666/memory/phys-mem.hpp"
-#include "besm-666/utils/math.hpp"
+#include "besm-666/util/math.hpp"
 
 namespace besm::mem {
 
@@ -80,7 +80,7 @@ PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
 }
 
 PhysMemBuilder &PhysMemBuilder::loadElf(const std::filesystem::path &elfPath) {
-    besm::utl::ElfParser parser(elfPath);
+    besm::util::ElfParser parser(elfPath);
     for (const auto &seg : parser.getLoadableSegments()) {
         this->loadContArea(seg.address, seg.data, seg.size);
     }

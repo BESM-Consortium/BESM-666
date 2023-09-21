@@ -1,6 +1,6 @@
-#include "besm-666/utils/elf-parser.hpp"
+#include "besm-666/util/elf-parser.hpp"
 
-namespace besm::utl {
+namespace besm::util {
 
 ElfParser::ElfParser(const std::filesystem::path &elfPath) {
     if (!reader_.load(elfPath)) {
@@ -8,7 +8,7 @@ ElfParser::ElfParser(const std::filesystem::path &elfPath) {
     }
     checkRequirements();
 }
-void ElfParser::checkRequirements() {
+void ElfParser::checkRequirements() const {
     if (reader_.get_class() != Requirements::FileClass) {
         throw BadElf("Wrong ELF file class.");
     }
@@ -61,4 +61,4 @@ ElfParser::LoadableSegment::operator=(ElfParser::LoadableSegment &&other) {
 BadElf::BadElf(const std::string &msg) : runtime_error(msg) {}
 const char *BadElf::what() const noexcept { return runtime_error::what(); }
 
-} // namespace besm::utl
+} // namespace besm::util

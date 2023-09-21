@@ -1,6 +1,6 @@
 #pragma once
 
-#include "besm-666/utils/elf-parser.hpp"
+#include "besm-666/util/elf-parser.hpp"
 
 namespace besm::gen {
 using elf_t = unsigned char;
@@ -41,7 +41,7 @@ void generateSuitableElf(const std::filesystem::path &path,
                          const char *loadData = defaultData,
                          size_t loadSize = sizeof(defaultData),
                          RV64Ptr loadPtr = defaultPtr) {
-    using namespace besm::utl;
+    using namespace besm::util;
     generateElf(path, ElfParser::Requirements::FileClass,
                 ElfParser::Requirements::Encoding,
                 ElfParser::Requirements::Arch, loadData, loadSize, loadPtr);
@@ -52,7 +52,7 @@ void generateUnsuitableElf(const std::filesystem::path &path, elf_t fileClass,
                            const char *loadData = defaultData,
                            size_t loadSize = sizeof(defaultData),
                            RV64Ptr loadPtr = defaultPtr) {
-    using namespace besm::utl;
+    using namespace besm::util;
     generateElf(path, fileClass, encoding, arch, loadData, loadSize, loadPtr);
 }
 }; // namespace besm::gen

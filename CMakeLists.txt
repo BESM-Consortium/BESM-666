@@ -47,7 +47,7 @@ PUBLIC
 PRIVATE
     elfio::elfio
     besm666_memory
-    besm666_utl
+    besm666_util
 )
 
 
@@ -58,7 +58,7 @@ target_sources(besm666 PRIVATE
 target_link_libraries(besm666 PRIVATE besm666::besm666_shared)
 
 add_subdirectory(./src/memory)
-add_subdirectory(./src/utils)
+add_subdirectory(src/util)
 add_subdirectory(third_party)
 
 enable_testing()
