@@ -4,3 +4,6 @@
 [submodule "third_party/ELFIO"]
 	path = third_party/ELFIO
 	url = https://github.com/serge1/ELFIO.git
+[submodule "third_party/riscv-opcodes"]
+	path = third_party/riscv-opcodes
+	url = https://github.com/riscv/riscv-opcodes

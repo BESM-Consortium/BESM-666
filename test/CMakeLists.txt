@@ -11,8 +11,8 @@ function(besm666_test SOURCE_NAME)
 endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
-
-set(DIRS memory utils elfgen)
+besm666_test(./reg/gprf-tests.cpp)
+set(DIRS memory decoder utils elfgen)
 foreach(DIR ${DIRS})
     add_subdirectory(${DIR})
 endforeach()

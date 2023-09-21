@@ -8,3 +8,8 @@ build/
 # ide stuff
 .idea
 cmake-build-debug
+
+# autogen files
+include/besm-666/autogen/*
+!include/besm-666/autogen/opcodes-to-format.hpp
+!include/besm-666/autogen/operations-matrix.hpp

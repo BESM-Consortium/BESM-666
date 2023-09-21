@@ -40,3 +40,4 @@ test_val: init
 .SILENT: clean
 clean:
 	rm -rf $(PWD)/$(BUILD_DIR)
+	rm -rf $(PWD)/include/autogen
