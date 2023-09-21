@@ -48,7 +48,7 @@ private:
     enum Requirements {
         FileClass = ELFIO::ELFCLASS64, ///< ELF file class (64bit)
         Encoding = ELFIO::ELFDATA2LSB, ///< little-endian
-        Arch = ELFIO::EM_RISCV ///< architecture (RISC-V)
+        Arch = ELFIO::EM_RISCV         ///< architecture (RISC-V)
     };
 
     /**
