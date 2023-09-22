@@ -5,18 +5,18 @@
 
 namespace besm {
 
-using Register = uint8_t;
 using Opcode = uint8_t;
-using Immidiate = uint32_t;
+using Register = uint8_t;
+using Immidiate = RV64UDWord;
 
 struct Instruction {
-    const Register rd;
-    const Register rs1;
-    const Register rs2;
-    const Immidiate immidiate;
-    const InstructionOp operation;
+    Register rd;
+    Register rs1;
+    Register rs2;
+    RV64UDWord immidiate;
+    InstructionOp operation;
 
-    static constexpr Immidiate IMMIDIATE_POISON = UINT32_MAX;
+    static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
 };
 
 } // namespace besm
