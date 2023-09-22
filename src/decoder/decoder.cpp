@@ -1,4 +1,5 @@
 #include "besm-666/decoder/decoder.hpp"
+#include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
 
@@ -10,6 +11,7 @@ Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
     const Cell *cell = &(INSTR_WHO[opcode][func3]);
     const Format format = cell->format;
     const InstructionOp operation = cell->operation;
+    printf("opcode = %i, operation = %i\n", opcode, operation);
     switch (format) {
     case R:
         return parse_R(bytecode, opcode, func3);
@@ -126,5 +128,16 @@ Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
 }
 Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                                   const InstructionOp operation) {
-    return Instruction{};
+    // format J: imm[20, 10:11, 11, 19:12] [rd(5 bits)] [opcode(7 bits)]
+    const auto bit20 = util::ExtractBits<RV64UWord, 1, 12 + 19>(bytecode) << 19;
+    const auto bit1_10 = util::ExtractBits<RV64UWord, 10, 12 + 9>(bytecode) << 0;
+    const auto bit11 = util::ExtractBits<RV64UWord, 1, 12 + 8>(bytecode) << 10;
+    const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode) << 11;
+    printf("%u, %u, %u, %u\n", bit20, bit1_10, bit11, bit12_19);
+    printf("unite = %i\n", bit20 & bit1_10 & bit11 & bit12_19 );
+    //assert(bit20 & bit1_10 & bit11 & bit12_19 == (RV64UWord)0b0);
+    return Instruction{
+        .rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT),
+        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
+        .operation = operation};
 }

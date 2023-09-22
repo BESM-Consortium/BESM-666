@@ -1128,14 +1128,14 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {ILLEGAL, NON_OP},
     }, // opcode: 0b1101110
     {
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
-        {J, NON_OP},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
+        {J, JAL},
     }, // opcode: 0b1101111
     {
         {ILLEGAL, NON_OP},
