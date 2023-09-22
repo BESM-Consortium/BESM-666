@@ -1,4 +1,3 @@
-set(DIRS elf)
-foreach(DIR ${DIRS})
-    add_subdirectory(${DIR})
-endforeach()
+add_subdirectory(elf)
+
+besm666_test(./bit-magic-tests.cpp)
