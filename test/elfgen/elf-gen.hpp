@@ -1,6 +1,6 @@
 #pragma once
 
-#include "besm-666/util/elf-parser.hpp"
+#include "elfio/elfio.hpp"
 
 namespace besm::gen {
 using elf_t = unsigned char;

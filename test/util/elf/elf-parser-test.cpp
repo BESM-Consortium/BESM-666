@@ -14,7 +14,7 @@ TEST_F(ElfParserTest, requirements_true) {
     using namespace besm::util;
 
     gen::generateSuitableElf(elfPath);
-    EXPECT_NO_THROW(ElfParser suitableParser(elfPath););
+    EXPECT_NO_THROW(IElfParser::createParser(elfPath));
 }
 
 TEST_F(ElfParserTest, requirements_false) {
@@ -22,8 +22,7 @@ TEST_F(ElfParserTest, requirements_false) {
 
     gen::generateUnsuitableElf(elfPath, ELFIO::ELFCLASS32, ELFIO::ELFDATA2LSB,
                                ELFIO::EM_386);
-    EXPECT_THROW(ElfParser unsuitableParser(elfPath),
-                 UnavailableELFRequirements);
+    EXPECT_THROW(IElfParser::createParser(elfPath), UnavailableELFRequirements);
 }
 
 TEST_F(ElfParserTest, get_loadable_segments) {
@@ -31,8 +30,8 @@ TEST_F(ElfParserTest, get_loadable_segments) {
 
     gen::generateSuitableElf(elfPath);
 
-    ElfParser parser = ElfParser(elfPath);
-    for (const auto &seg : parser.getLoadableSegments()) {
+    auto parser = IElfParser::createParser(elfPath);
+    for (const auto &seg : parser->getLoadableSegments()) {
         EXPECT_EQ(seg.size, sizeof(gen::defaultData));
         EXPECT_EQ(seg.address, gen::defaultPtr);
         for (int i = 0; i < seg.size; i++) {

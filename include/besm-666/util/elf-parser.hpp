@@ -4,18 +4,15 @@
 #include <fstream>
 #include <iostream>
 
-#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/non-copyable.hpp"
-#include "elfio/elfio.hpp"
 
 namespace besm::util {
 
 /**
- * \brief checks that ELF suites all simulator requirements and  retrieves all
- * LOAD segments
+ * \brief interface for elf parser, that can retrieve all LOAD segments
  */
-class ElfParser final : INonCopyable {
+class IElfParser : INonCopyable {
 public:
     /**
      * \brief stores all required data about segment to load
@@ -31,34 +28,19 @@ public:
     };
 
     /**
-     * \throws InvalidELFFormat if ELF format is invalid
-     */
-    ElfParser(const std::filesystem::path &elfPath);
-
-    /**
      * \brief stores all information about LOAD segments in vector and returns
      * a reference to it
      */
-    const std::vector<LoadableSegment> &getLoadableSegments() &;
-
-private:
-    /**
-     * \brief stores ELF requirements for simulator
-     */
-    enum Requirements {
-        FileClass = ELFIO::ELFCLASS64, ///< ELF file class (64bit)
-        Encoding = ELFIO::ELFDATA2LSB, ///< little-endian
-        Arch = ELFIO::EM_RISCV         ///< architecture (RISC-V)
-    };
+    virtual const std::vector<LoadableSegment> &getLoadableSegments() & = 0;
 
     /**
-     * \brief checks that ELF suites all requirements
-     * \throws UnavailableELFRequirements if ELF doesn't suite requirements
+     * \brief creates instance of specific ElfParser that is inheritor of
+     * IElfParser
      */
-    void checkRequirements() const;
+    static std::unique_ptr<IElfParser>
+    createParser(const std::filesystem::path &elfPath);
 
-    ELFIO::elfio reader_{};
-    std::vector<LoadableSegment> loadableSegments_;
+    virtual ~IElfParser() = default;
 };
 
 class InvalidELFFormat : public std::runtime_error {

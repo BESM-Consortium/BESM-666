@@ -30,7 +30,6 @@ add_custom_target(besm666_riscv_isa DEPENDS
 add_library(besm666_include INTERFACE)
 target_include_directories(besm666_include INTERFACE
     ./include
-    ./third_party/ELFIO
 )
 add_dependencies(besm666_include besm666_riscv_isa)
 
@@ -45,9 +44,7 @@ PUBLIC
     besm666_include
 PRIVATE
     besm666_memory
-    besm666_util
 )
-
 
 add_executable(besm666)
 target_sources(besm666 PRIVATE

@@ -1,6 +1,50 @@
 #include "besm-666/util/elf-parser.hpp"
+#include "elfio/elfio.hpp"
 
 namespace besm::util {
+
+/**
+ * \brief checks that ELF suites all simulator requirements and retrieves all
+ * LOAD segments
+ */
+class ElfParser final : public IElfParser {
+public:
+    /**
+     * \throws InvalidELFFormat if ELF format is invalid
+     */
+    ElfParser(const std::filesystem::path &elfPath);
+
+    /**
+     * \brief stores all information about LOAD segments in vector and returns
+     * a reference to it
+     */
+    const std::vector<LoadableSegment> &getLoadableSegments() & override;
+
+private:
+    /**
+     * \brief stores ELF requirements for simulator
+     */
+    enum Requirements {
+        FileClass = ELFIO::ELFCLASS64, ///< ELF file class (64bit)
+        Encoding = ELFIO::ELFDATA2LSB, ///< little-endian
+        Arch = ELFIO::EM_RISCV         ///< architecture (RISC-V)
+    };
+
+    /**
+     * \brief checks that ELF suites all requirements
+     * \throws UnavailableELFRequirements if ELF doesn't suite requirements
+     */
+    void checkRequirements() const;
+
+    ELFIO::elfio reader_{};
+    std::vector<LoadableSegment> loadableSegments_;
+};
+
+std::unique_ptr<IElfParser>
+IElfParser::createParser(const std::filesystem::path &elfPath) {
+    return std::unique_ptr<besm::util::IElfParser>(
+        new besm::util::ElfParser(elfPath));
+}
 
 ElfParser::ElfParser(const std::filesystem::path &elfPath) {
     if (!reader_.load(elfPath)) {
@@ -36,17 +80,18 @@ ElfParser::getLoadableSegments() & {
     return loadableSegments_;
 }
 
-ElfParser::LoadableSegment::LoadableSegment(RV64Ptr address, const void *data,
-                                            RV64Size size)
+IElfParser::LoadableSegment::LoadableSegment(RV64Ptr address, const void *data,
+                                             RV64Size size)
     : address(address), data(data), size(size) {}
-ElfParser::LoadableSegment::LoadableSegment(ElfParser::LoadableSegment &&other)
+IElfParser::LoadableSegment::LoadableSegment(
+    IElfParser::LoadableSegment &&other)
     : address(other.address), data(other.data), size(other.size) {
     std::swap(other.address, address);
     std::swap(other.data, data);
     std::swap(other.size, size);
 }
-ElfParser::LoadableSegment &
-ElfParser::LoadableSegment::operator=(ElfParser::LoadableSegment &&other) {
+IElfParser::LoadableSegment &
+IElfParser::LoadableSegment::operator=(IElfParser::LoadableSegment &&other) {
     if (this != &other) {
         address = 0;
         data = nullptr;
@@ -72,4 +117,5 @@ UnavailableELFRequirements::UnavailableELFRequirements(const std::string &msg)
 const char *UnavailableELFRequirements::what() const noexcept {
     return runtime_error::what();
 }
+
 } // namespace besm::util
