@@ -32,11 +32,6 @@ private:
     static inline Instruction parse_R(RV64UWord bytecode, Opcode opcode,
                                       uint8_t func3);
 
-    /*
-     * @todo #1ILLEGAL:90m Implement the functions of I format. Now it is
-     * just a stub. We need to implement every of them and test.
-     * ALARM: pay attention to 0b1110011 opcode.
-     */
     static inline Instruction parse_I(RV64UWord bytecode,
                                       InstructionOp operation, Opcode opcode);
 
@@ -57,10 +52,6 @@ private:
     static inline Instruction parse_U(RV64UWord bytecode,
                                       InstructionOp operation);
 
-    /*
-     * @todo #1ILLEGAL:9ILLEGALm Implement the functions of J format. Now it is
-     * just a stub. We need to implement every of them and test.
-     */
     static inline Instruction parse_J(RV64UWord bytecode,
                                       InstructionOp operation);
 };
