@@ -22,6 +22,23 @@ protected:
     }
 };
 
+class Decoder_I : public DecoderCommon {
+protected:
+    bool equal(const Instruction lhs, const Instruction rhs) override {
+        return lhs.operation == rhs.operation &&
+               lhs.immidiate == rhs.immidiate && lhs.rs1 == rhs.rs1;
+    }
+
+    static Instruction buildInstr(Register rd, Register rs1, Immidiate imm,
+                                  InstructionOp operation) {
+        return {.rd = rd,
+                .rs1 = rs1,
+                .rs2 = 0b0,
+                .immidiate = imm,
+                .operation = operation};
+    }
+};
+
 class Decoder_U : public DecoderCommon {
 protected:
     bool equal(const Instruction lhs, const Instruction rhs) override {
@@ -404,4 +421,164 @@ TEST_F(Decoder_J, JAL8) {
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
     EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, JALR1) {
+    const auto instance = buildInstr(0b01011, 0b11101, 0b000111000000, JALR);
+    Instruction parsed = decoder.parse(0b00011100000011101000010111100111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, JALR2) {
+    const auto instance = buildInstr(0b10010, 0b01101, 0b101011001010, JALR);
+    Instruction parsed = decoder.parse(0b10101100101001101000100101100111);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LB) {
+    const auto instance = buildInstr(0b10001, 0b11011, 0b111111100010, LB);
+    Instruction parsed = decoder.parse(0b11111110001011011000100010000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LH) {
+    const auto instance = buildInstr(0b10011, 0b11001, 0b011000101011, LH);
+    Instruction parsed = decoder.parse(0b01100010101111001001100110000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LW) {
+    const auto instance = buildInstr(0b01111, 0b01010, 0b100110101101, LW);
+    Instruction parsed = decoder.parse(0b10011010110101010010011110000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LBU) {
+    const auto instance = buildInstr(0b01000, 0b11111, 0b111110000001, LBU);
+    Instruction parsed = decoder.parse(0b11111000000111111100010000000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LHU) {
+    const auto instance = buildInstr(0b01111, 0b01100, 0b101000000111, LHU);
+    Instruction parsed = decoder.parse(0b10100000011101100101011110000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, ADDI) {
+    const auto instance = buildInstr(0b10111, 0b01000, 0b100011100101, ADDI);
+    Instruction parsed = decoder.parse(0b10001110010101000000101110010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, SLTI) {
+    const auto instance = buildInstr(0b00111, 0b00001, 0b010101010111, SLTI);
+    Instruction parsed = decoder.parse(0b01010101011100001010001110010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, SLTIU) {
+    const auto instance = buildInstr(0b11100, 0b00101, 0b000010100011, SLTIU);
+    Instruction parsed = decoder.parse(0b00001010001100101011111000010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, XORI) {
+    const auto instance = buildInstr(0b00101, 0b00011, 0b001011100000, XORI);
+    Instruction parsed = decoder.parse(0b00101110000000011100001010010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, ORI) {
+    const auto instance = buildInstr(0b10001, 0b01111, 0b100110101111, ORI);
+    Instruction parsed = decoder.parse(0b10011010111101111110100010010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, ANDI) {
+    const auto instance = buildInstr(0b01011, 0b01101, 0b100001010111, ANDI);
+    Instruction parsed = decoder.parse(0b10000101011101101111010110010011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, ECALL) {
+    const auto instance = buildInstr(0b0, 0b0, 0b0, ECALL);
+    Instruction parsed = decoder.parse(0b1110011);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, EBREAK) {
+    const auto instance = buildInstr(0b0, 0b0, 0b1, EBREAK);
+    Instruction parsed = decoder.parse(0b100000000000001110011);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, NOT_EACALL_AND_EBREAK) {
+    const auto instance = buildInstr(0b0, 0b0, 0b1, EBREAK);
+    Instruction parsed = decoder.parse(0b100001000000001110011);
+    EXPECT_FALSE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LWU1) {
+    const auto instance = buildInstr(0b00001, 0b10111, 0b010110110110, LWU);
+    Instruction parsed = decoder.parse(0b01011011011010111110000010000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LWU2) {
+    const auto instance = buildInstr(0b11011, 0b01001, 0b000010001111, LWU);
+    Instruction parsed = decoder.parse(0b00001000111101001110110110000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LD1) {
+    const auto instance = buildInstr(0b00011, 0b10100, 0b100110101011, LD);
+    Instruction parsed = decoder.parse(0b10011010101110100011000110000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, LD2) {
+    const auto instance = buildInstr(0b10101, 0b10110, 0b000010010111, LD);
+    Instruction parsed = decoder.parse(0b00001001011110110011101010000011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, NOT_LD) {
+    const auto instance = buildInstr(0b11011, 0b10010, 0b100110010001, LD);
+    Instruction parsed = decoder.parse(0b10011001000110010001110110000011);
+    EXPECT_FALSE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, ADDIW) {
+    const auto instance = buildInstr(0b10110, 0b00101, 0b101101000001, ADDIW);
+    Instruction parsed = decoder.parse(0b10110100000100101000101100011011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, SLLIW) {
+    const auto instance = buildInstr(0b11110, 0b01010, 0b000000010010, SLLIW);
+    Instruction parsed = decoder.parse(0b00000001001001010001111100011011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, SRLIW) {
+    const auto instance = buildInstr(0b10110, 0b11010, 0b000000001001, SRLIW);
+    Instruction parsed = decoder.parse(0b00000000100111010101101100011011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, SRAIW) {
+    const auto instance = buildInstr(0b11001, 0b00100, 0b010000001000, SRAIW);
+    Instruction parsed = decoder.parse(0b01000000100000100101110010011011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, NOT_SRLIW_OR_SRAIW) {
+    const auto instance = buildInstr(0b11001, 0b00100, 0b010000001000, SRAIW);
+    Instruction parsed = decoder.parse(0b01100000100000100101110010011011);
+    ASSERT_EQ(parsed.operation, NON_OP);
 }

@@ -115,9 +115,54 @@ inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
         .operation = operation};
 }
 Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
-                                  const InstructionOp operation,
+                                  InstructionOp operation,
                                   const Opcode opcode) {
-    return Instruction{};
+    const auto imm = util::ExtractBits<Immidiate, 12, 20>(bytecode);
+    const auto rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT);
+    const auto rs1 = static_cast<Register>((bytecode & RS1_MASK) >> RS1_SHIFT);
+    if (operation != NON_OP) {
+        return Instruction{
+            .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
+    }
+    const uint8_t func3 = (bytecode & FUNC3_MASK) >> FUNC3_shift;
+    switch (opcode) {
+    case 0b0001111:
+        /*
+         * @todo #39:90min Implement processing of 0b0001111 opcode.
+         *  According to the new specification
+         *  https://raw.githubusercontent.com/riscv/riscv-isa-manual/8176af1a46bfe2e15f8cdb170d74e52e1ba6efa2/src/rv-32-64g.adoc
+         *  there are not FENCE only but also FENCE.TSO and PAUSE with
+         * non-trivial decoding. Nor it just returns FENCE operation.
+         */
+        return Instruction{
+            .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = FENCE};
+        break;
+    case 0b1110011:
+        printf("imm = %lu, rs1 = %u\n", imm, rs1);
+        if (rd == 0b0 && rs1 == 0b0 && func3 == 0b0) {
+            switch (imm) {
+            case 0b0:
+                operation = ECALL;
+                break;
+            case 0b1:
+                operation = EBREAK;
+                break;
+            }
+        }
+        break;
+    case 0b011011:
+        switch (bytecode >> 25) {
+        case 0b0:
+            operation = SRLIW;
+            break;
+        case 0b0100000:
+            operation = SRAIW;
+            break;
+        }
+        break;
+    }
+    return Instruction{
+        .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
 }
 Instruction dec::Decoder::parse_S(RV64UWord bytecode, InstructionOp operation) {
     return Instruction{};
@@ -130,12 +175,12 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                                   const InstructionOp operation) {
     // format J: imm[20, 10:11, 11, 19:12] [rd(5 bits)] [opcode(7 bits)]
     const auto bit20 = util::ExtractBits<RV64UWord, 1, 12 + 19>(bytecode) << 19;
-    const auto bit1_10 = util::ExtractBits<RV64UWord, 10, 12 + 9>(bytecode) << 0;
+    const auto bit1_10 = util::ExtractBits<RV64UWord, 10, 12 + 9>(bytecode)
+                         << 0;
     const auto bit11 = util::ExtractBits<RV64UWord, 1, 12 + 8>(bytecode) << 10;
-    const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode) << 11;
-    printf("%u, %u, %u, %u\n", bit20, bit1_10, bit11, bit12_19);
-    printf("unite = %i\n", bit20 & bit1_10 & bit11 & bit12_19 );
-    //assert(bit20 & bit1_10 & bit11 & bit12_19 == (RV64UWord)0b0);
+    const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode)
+                          << 11;
+    assert(bit20 & bit1_10 & bit11 & bit12_19 == (RV64UWord)0b0);
     return Instruction{
         .rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT),
         .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
