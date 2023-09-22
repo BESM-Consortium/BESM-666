@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/non-copyable.hpp"
