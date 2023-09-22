@@ -272,7 +272,7 @@ void Executor::exec_LUI(Instruction const instr) {
 
 void Executor::exec_AUIPC(Instruction const instr) {
     RV64UDWord offset = util::ExtractBits<RV64UDWord, 20>(instr.immidiate);
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord res = pc + (offset << 12);
 
     gprf_.write(instr.rd, res);
@@ -381,18 +381,18 @@ void Executor::exec_SRA(Instruction const instr) {
 }
 
 void Executor::exec_JAL(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(instr.immidiate) << 1;
 
     RV64UDWord target = pc + offset;
     RV64UDWord ret = pc + 4;
 
     gprf_.write(instr.rd, ret);
-    gprf_.write(reg::GPRF::PC, target);
+    gprf_.write(GPRF::PC, target);
 }
 
 void Executor::exec_JALR(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord base = gprf_.read(instr.rs1);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
 
@@ -400,88 +400,88 @@ void Executor::exec_JALR(Instruction const instr) {
     RV64UDWord ret = pc + 4;
 
     gprf_.write(instr.rd, ret);
-    gprf_.write(reg::GPRF::PC, target);
+    gprf_.write(GPRF::PC, target);
 }
 
 void Executor::exec_BEQ(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
     if (opnd1 == opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
 }
 
 void Executor::exec_BNE(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
     if (opnd1 != opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
 }
 
 void Executor::exec_BLT(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
 
     if (opnd1 < opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
 }
 
 void Executor::exec_BLTU(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
     if (opnd1 < opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
 }
 
 void Executor::exec_BGE(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
 
     if (opnd1 >= opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
 }
 
 void Executor::exec_BGEU(Instruction const instr) {
-    RV64UDWord pc = gprf_.read(reg::GPRF::PC);
+    RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
     if (opnd1 >= opnd2) {
         RV64UDWord target = pc + offset;
-        gprf_.write(reg::GPRF::PC, target);
+        gprf_.write(GPRF::PC, target);
     } else {
         this->nextPC();
     }
@@ -578,8 +578,6 @@ void Executor::exec_SRAW(Instruction const instr) {
     this->nextPC();
 }
 
-void Executor::nextPC() {
-    gprf_.write(reg::GPRF::PC, gprf_.read(reg::GPRF::PC) + 4);
-}
+void Executor::nextPC() { gprf_.write(GPRF::PC, gprf_.read(GPRF::PC) + 4); }
 
 } // namespace besm::exec
