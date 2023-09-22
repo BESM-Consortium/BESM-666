@@ -34,15 +34,14 @@ public:
      */
     virtual const std::vector<LoadableSegment> &getLoadableSegments() & = 0;
 
-    /**
-     * \brief creates instance of specific ElfParser that is inheritor of
-     * IElfParser
-     */
-    static std::unique_ptr<IElfParser>
-    createParser(const std::filesystem::path &elfPath);
-
     virtual ~IElfParser() = default;
 };
+
+/**
+ * \brief creates instance of specific ElfParser that is inheritor of
+ * IElfParser
+ */
+std::unique_ptr<IElfParser> createParser(const std::filesystem::path &elfPath);
 
 class InvalidELFFormat : public std::runtime_error {
 public:

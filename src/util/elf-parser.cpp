@@ -40,8 +40,7 @@ private:
     std::vector<LoadableSegment> loadableSegments_;
 };
 
-std::unique_ptr<IElfParser>
-IElfParser::createParser(const std::filesystem::path &elfPath) {
+std::unique_ptr<IElfParser> createParser(const std::filesystem::path &elfPath) {
     return std::unique_ptr<besm::util::IElfParser>(
         new besm::util::ElfParser(elfPath));
 }
