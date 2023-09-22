@@ -1,8 +1,8 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "besm-666/math.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/util/math.hpp"
 
 namespace besm::mem {
 
@@ -77,6 +77,14 @@ PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
       wasAlreadyBuilt_(false)
 #endif
 {
+}
+
+PhysMemBuilder &PhysMemBuilder::loadElf(const std::filesystem::path &elfPath) {
+    auto parserPtr = besm::util::createParser(elfPath);
+    for (const auto &seg : parserPtr->getLoadableSegments()) {
+        this->loadContArea(seg.address, seg.data, seg.size);
+    }
+    return *this;
 }
 
 PhysMemBuilder &PhysMemBuilder::loadContArea(RV64Ptr address, void const *data,

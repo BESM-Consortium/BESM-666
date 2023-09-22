@@ -5,9 +5,9 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "besm-666/math.hpp"
 #include "besm-666/memory/mmap-wrapper.hpp"
 #include "besm-666/memory/page-allocator.hpp"
+#include "besm-666/util/math.hpp"
 
 namespace besm::mem {
 

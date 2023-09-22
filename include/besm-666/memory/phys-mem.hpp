@@ -4,8 +4,9 @@
 #include <set>
 
 #include "besm-666/memory/page-allocator.hpp"
-#include "besm-666/non-copyable.hpp"
 #include "besm-666/riscv-types.hpp"
+#include "besm-666/util/elf-parser.hpp"
+#include "besm-666/util/non-copyable.hpp"
 
 namespace besm::mem {
 
@@ -74,7 +75,7 @@ public:
                    size_t allocatorChunkSize = PageAllocator::DefaultChunkSize);
     ~PhysMemBuilder() = default;
 
-    PhysMemBuilder &loadElf(std::filesystem::path elfPath);
+    PhysMemBuilder &loadElf(const std::filesystem::path &elfPath);
     PhysMemBuilder &loadContArea(RV64Ptr address, void const *data,
                                  RV64Size size);
 

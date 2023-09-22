@@ -19,7 +19,8 @@ function(besm666_test SOURCE_NAME)
 endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
-add_subdirectory(./memory)
-add_subdirectory(./exec)
-add_subdirectory(./util)
-add_subdirectory(./decoder)
+
+set(DIRS memory decoder exec util elfgen)
+foreach(DIR ${DIRS})
+    add_subdirectory(${DIR})
+endforeach()
