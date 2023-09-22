@@ -1,7 +1,7 @@
 #pragma once
 
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
-#include "besm-666/reg/rf.hpp"
 #include "besm-666/rv-instruction-op.hpp"
 
 namespace besm::exec {
@@ -12,7 +12,7 @@ public:
 
     void exec(Instruction const instr);
 
-    inline reg::GPRF const &getState() const { return gprf_; }
+    inline GPRF const &getState() const { return gprf_; }
 
 private:
     void exec_ADDI(Instruction const instr);
@@ -78,7 +78,7 @@ private:
 
     void nextPC();
 
-    reg::GPRF gprf_;
+    GPRF gprf_;
 };
 
 } // namespace besm::exec
