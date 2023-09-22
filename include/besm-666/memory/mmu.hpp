@@ -8,8 +8,10 @@
 
 namespace besm::mem {
 
-class Memory : public INonCopyable {
+class MMU : public INonCopyable {
 public:
+    MMU(PhysMem &pMem) : pMem_(pMem) {}
+
     RV64UChar loadByte(RV64Ptr address) const;
     RV64UHWord loadHWord(RV64Ptr address) const;
     RV64UWord loadWord(RV64Ptr address) const;
@@ -24,21 +26,7 @@ private:
     RV64Ptr translate(RV64Ptr address) const;
 
     friend class MemoryBuilder;
-    Memory(PhysMem &&pMem);
-    PhysMem pMem_;
-};
-
-class MemoryBuilder {
-public:
-    MemoryBuilder(size_t pageSize, size_t allocatorChunkSize)
-        : pMemBuilder_(pageSize, allocatorChunkSize) {}
-
-    PhysMemBuilder &physMem() { return pMemBuilder_; }
-
-    Memory build() { return Memory(pMemBuilder_.build()); }
-
-private:
-    PhysMemBuilder pMemBuilder_;
+    PhysMem &pMem_;
 };
 
 } // namespace besm::mem

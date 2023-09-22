@@ -25,7 +25,7 @@ add_test(NAME besm666_phys_mem COMMAND besm666_phys_mem_tests)
 
 add_executable(besm666_memory_tests)
 target_sources(besm666_memory_tests PRIVATE
-    ./memory-tests.cpp
+    ./mmu-tests.cpp
 )
 target_link_libraries(besm666_memory_tests PRIVATE
     besm666_testif
