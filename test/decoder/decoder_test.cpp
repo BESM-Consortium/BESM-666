@@ -38,6 +38,23 @@ protected:
     }
 };
 
+class Decoder_J : public DecoderCommon {
+protected:
+    bool equal(const Instruction lhs, const Instruction rhs) override {
+        return lhs.operation == rhs.operation && lhs.immidiate == rhs.immidiate;
+    }
+
+    static Instruction buildInstr(Register rd, Immidiate imm,
+                                  InstructionOp operation) {
+        printf("imm = %lu\n", imm);
+        return {.rd = rd,
+                .rs1 = 0b0,
+                .rs2 = 0b0,
+                .immidiate = imm,
+                .operation = operation};
+    }
+};
+
 TEST_F(Decoder_R, decodes_ADD) {
     auto instance =
         besm::Instruction{.rd = 0b11111,
@@ -323,4 +340,68 @@ TEST_F(Decoder_U, NOT_AUIPC) {
     // should  be 0b10100100011000111010, not 0b00100100011000111010
     Instruction parsed = decoder.parse(0b10100100011000111010000010010111);
     EXPECT_FALSE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL1) {
+    const auto instance = buildInstr(0b00000, 0b11111111111111111111, JAL);
+    Instruction parsed = decoder.parse(0b11111111111111111111000001101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL2) {
+    const auto instance = buildInstr(0b11011, 0b00000000000000000001, JAL);
+    Instruction parsed = decoder.parse(0b00000000001000000000110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL3) {
+    const auto instance = buildInstr(0b11011, 0b01100111100001011111, JAL);
+    Instruction parsed = decoder.parse(0b00001011111011001111110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL4) {
+    const auto instance = buildInstr(0b01110, 0b11011101000100001011, JAL);
+    Instruction parsed = decoder.parse(0b10100001011010111010011101101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL5) {
+    const auto instance = buildInstr(0b11011, 0b00000000010000000000, JAL);
+    Instruction parsed = decoder.parse(0b00000000000100000000110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL6) {
+    const auto instance = buildInstr(0b11011, 0b00000001000000000000, JAL);
+    Instruction parsed = decoder.parse(0b00000000000000000010110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL7) {
+    const auto instance = buildInstr(0b11011, 0b10000000000000000000, JAL);
+    Instruction parsed = decoder.parse(0b10000000000000000000110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_J, JAL8) {
+    const auto instance = buildInstr(0b11011, 0b01000000000000000000, JAL);
+    Instruction parsed = decoder.parse(0b00000000000010000000110111101111);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
 }
