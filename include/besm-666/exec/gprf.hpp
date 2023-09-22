@@ -8,7 +8,7 @@
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
-namespace besm::reg {
+namespace besm::exec {
 
 /// General purpose register file
 class GPRF {
@@ -68,4 +68,4 @@ inline RV64UDWord GPRF::read(Register regId) const {
     return regId == X0 ? 0 : registers_[regId];
 }
 
-} // namespace besm::reg
+} // namespace besm::exec
