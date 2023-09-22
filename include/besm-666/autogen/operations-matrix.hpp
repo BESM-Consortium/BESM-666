@@ -293,7 +293,7 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {I, NON_OP},
         {I, NON_OP},
         {I, NON_OP},
-        {I, SRAIW},
+        {I, NON_OP},
         {I, NON_OP},
         {I, NON_OP},
     }, // opcode: 0b11011
@@ -1168,7 +1168,7 @@ constexpr static Cell INSTR_WHO[128][8] = {
         {ILLEGAL, NON_OP},
     }, // opcode: 0b1110010
     {
-        {I, EBREAK},
+        {I, NON_OP},
         {I, NON_OP},
         {I, NON_OP},
         {I, NON_OP},
