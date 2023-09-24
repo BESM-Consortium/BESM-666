@@ -377,7 +377,7 @@ TEST_F(Decoder_U, NOT_AUIPC) {
 }
 
 TEST_F(Decoder_J, JAL1) {
-    const auto instance = buildInstr(0b00000, 0b11111111111111111111, JAL);
+    const auto instance = buildInstr(0b00000, 0b111111111111111111110, JAL);
     Instruction parsed = decoder.parse(0b11111111111111111111000001101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -385,7 +385,7 @@ TEST_F(Decoder_J, JAL1) {
 }
 
 TEST_F(Decoder_J, JAL2) {
-    const auto instance = buildInstr(0b11011, 0b00000000000000000001, JAL);
+    const auto instance = buildInstr(0b11011, 0b000000000000000000010, JAL);
     Instruction parsed = decoder.parse(0b00000000001000000000110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -393,7 +393,7 @@ TEST_F(Decoder_J, JAL2) {
 }
 
 TEST_F(Decoder_J, JAL3) {
-    const auto instance = buildInstr(0b11011, 0b01100111100001011111, JAL);
+    const auto instance = buildInstr(0b11011, 0b011001111000010111110, JAL);
     Instruction parsed = decoder.parse(0b00001011111011001111110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -401,7 +401,7 @@ TEST_F(Decoder_J, JAL3) {
 }
 
 TEST_F(Decoder_J, JAL4) {
-    const auto instance = buildInstr(0b01110, 0b11011101000100001011, JAL);
+    const auto instance = buildInstr(0b01110, 0b110111010001000010110, JAL);
     Instruction parsed = decoder.parse(0b10100001011010111010011101101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -409,7 +409,7 @@ TEST_F(Decoder_J, JAL4) {
 }
 
 TEST_F(Decoder_J, JAL5) {
-    const auto instance = buildInstr(0b11011, 0b00000000010000000000, JAL);
+    const auto instance = buildInstr(0b11011, 0b000000000100000000000, JAL);
     Instruction parsed = decoder.parse(0b00000000000100000000110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -417,7 +417,7 @@ TEST_F(Decoder_J, JAL5) {
 }
 
 TEST_F(Decoder_J, JAL6) {
-    const auto instance = buildInstr(0b11011, 0b00000001000000000000, JAL);
+    const auto instance = buildInstr(0b11011, 0b000000010000000000000, JAL);
     Instruction parsed = decoder.parse(0b00000000000000000010110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -425,7 +425,7 @@ TEST_F(Decoder_J, JAL6) {
 }
 
 TEST_F(Decoder_J, JAL7) {
-    const auto instance = buildInstr(0b11011, 0b10000000000000000000, JAL);
+    const auto instance = buildInstr(0b11011, 0b100000000000000000000, JAL);
     Instruction parsed = decoder.parse(0b10000000000000000000110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
@@ -433,7 +433,7 @@ TEST_F(Decoder_J, JAL7) {
 }
 
 TEST_F(Decoder_J, JAL8) {
-    const auto instance = buildInstr(0b11011, 0b01000000000000000000, JAL);
+    const auto instance = buildInstr(0b11011, 0b010000000000000000000, JAL);
     Instruction parsed = decoder.parse(0b00000000000010000000110111101111);
     EXPECT_EQ(parsed.operation, instance.operation);
     EXPECT_EQ(parsed.immidiate, instance.immidiate);
