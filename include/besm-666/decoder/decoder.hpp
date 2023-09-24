@@ -35,17 +35,9 @@ private:
     static inline Instruction parse_I(RV64UWord bytecode,
                                       InstructionOp operation, Opcode opcode);
 
-    /*
-     * @todo #1ILLEGAL:9ILLEGALm Implement the functions of S format. Now it is
-     * just a stub. We need to implement every of them and test.
-     */
     static inline Instruction parse_S(RV64UWord bytecode,
                                       InstructionOp operation);
 
-    /*
-     * @todo #1ILLEGAL:9ILLEGALm Implement the functions of B format. Now it is
-     * just a stub. We need to implement every of them and test.
-     */
     static inline Instruction parse_B(RV64UWord bytecode,
                                       InstructionOp operation);
 

@@ -54,6 +54,8 @@ protected:
     }
 };
 
+class Decoder_B : public Decoder_S {};
+
 class Decoder_U : public DecoderCommon {
 protected:
     bool equal(const Instruction lhs, const Instruction rhs) override {
@@ -648,4 +650,60 @@ TEST_F(Decoder_S, SW) {
     const auto instance = buildInstr(0b11010, 0b10100, 0b110101111010, SW);
     Instruction parsed = decoder.parse(0b11010111010011010010110100100011);
     EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BEQ1) {
+    const auto instance = buildInstr(0b11011, 0b11011, 0b1111111111110, BEQ);
+    Instruction parsed = decoder.parse(0b11111111101111011000111111100011);
+    ASSERT_EQ(parsed.operation, BEQ);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BEQ2) {
+    const auto instance = buildInstr(0b11011, 0b11011, 0b0000000000000, BEQ);
+    Instruction parsed = decoder.parse(0b00000001101111011000000001100011);
+    ASSERT_EQ(parsed.operation, BEQ);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BEQ3) {
+    const auto instance = buildInstr(0b01001, 0b11101, 0b0111001110010, BEQ);
+    Instruction parsed = decoder.parse(0b01100111110101001000100111100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BNE) {
+    const auto instance = buildInstr(0b01001, 0b11101, 0b0111001110010, BNE);
+    Instruction parsed = decoder.parse(0b01100111110101001001100111100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BLT) {
+    const auto instance = buildInstr(0b00101, 0b11011, 0b1101010011100, BLT);
+    Instruction parsed = decoder.parse(0b10101001101100101100111011100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BGE) {
+    const auto instance = buildInstr(0b00110, 0b00000, 0b0100000001110, BGE);
+    Instruction parsed = decoder.parse(0b00000000000000110101011111100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BLTU) {
+    const auto instance = buildInstr(0b00101, 0b10110, 0b0111100101010, BLTU);
+    Instruction parsed = decoder.parse(0b01110011011000101110010111100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, BGEU) {
+    const auto instance = buildInstr(0b01100, 0b00000, 0b0111101001110, BGEU);
+    Instruction parsed = decoder.parse(0b01110100000001100111011111100011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_B, NOT_BEQ) {
+    // this is the test with opcode 0b1100011 but non-existent func3 = 0b010
+    Instruction parsed = decoder.parse(0b01110100000001100010011111100011);
+    EXPECT_EQ(parsed.operation, NON_OP);
 }
