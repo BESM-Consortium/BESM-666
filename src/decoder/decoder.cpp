@@ -178,8 +178,19 @@ Instruction dec::Decoder::parse_S(RV64UWord bytecode, InstructionOp operation) {
 }
 Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
                                   const InstructionOp operation) {
-    return Instruction{};
+    const auto imm12 = util::ExtractBits<Immidiate, 1, 31>(bytecode) << 12;
+    const auto imm5_10 = util::ExtractBits<Immidiate, 6, 25>(bytecode) << 5;
+    const auto imm1_4 = util::ExtractBits<Immidiate, 4, 8>(bytecode) << 1;
+    const auto imm11 = util::ExtractBits<Immidiate, 1, 7>(bytecode) << 11;
+    assert((imm1_4 & imm5_10 & imm11 & imm12) == (RV64UWord)0);
+    return Instruction{
+        .rs1 = static_cast<Register>((bytecode & RS1_MASK) >> RS1_SHIFT),
+        .rs2 = static_cast<Register>((bytecode & RS2_MASK) >> RS2_SHIFT),
+        .immidiate = imm1_4 | imm5_10 | imm11 | imm12,
+        .operation = operation
+    };
 }
+
 Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                                   const InstructionOp operation) {
     // format J: imm[20, 10:11, 11, 19:12] [rd(5 bits)] [opcode(7 bits)]
