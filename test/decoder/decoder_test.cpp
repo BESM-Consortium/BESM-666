@@ -62,12 +62,21 @@ protected:
         return lhs.operation == rhs.operation && lhs.immidiate == rhs.immidiate;
     }
 
-    static Instruction buildInstr(Register rd, Immidiate imm,
+    /**
+     * Make U format instr.
+     * @param rd Register.
+     * @param shifted_imm Immediate, shifted to the left to avert 12 following
+     *  zeros.
+     * @param operation Instruction operation.
+     * @return Instruction.
+     */
+    static Instruction buildInstr(Register rd, Immidiate shifted_imm,
                                   InstructionOp operation) {
+        constexpr int IMM_SHIFT = 12;
         return {.rd = rd,
                 .rs1 = 0b0,
                 .rs2 = 0b0,
-                .immidiate = imm,
+                .immidiate = shifted_imm << IMM_SHIFT,
                 .operation = operation};
     }
 };
@@ -80,7 +89,6 @@ protected:
 
     static Instruction buildInstr(Register rd, Immidiate imm,
                                   InstructionOp operation) {
-        printf("imm = %lu\n", imm);
         return {.rd = rd,
                 .rs1 = 0b0,
                 .rs2 = 0b0,

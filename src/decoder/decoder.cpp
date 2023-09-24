@@ -110,7 +110,7 @@ inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
     constexpr RV64UWord IMM_MASK = 0b11111111111111111111 << IMM_SHIFT;
     return Instruction{
         .rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT),
-        .immidiate = ((bytecode & IMM_MASK) >> IMM_SHIFT),
+        .immidiate = (bytecode & IMM_MASK),
         .operation = operation};
 }
 Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
@@ -137,7 +137,6 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
             .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = FENCE};
         break;
     case 0b1110011:
-        printf("imm = %lu, rs1 = %u\n", imm, rs1);
         if (rd == 0b0 && rs1 == 0b0 && func3 == 0b0) {
             switch (imm) {
             case 0b0:
