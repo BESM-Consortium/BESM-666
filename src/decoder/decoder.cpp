@@ -11,7 +11,6 @@ Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
     const Cell *cell = &(INSTR_WHO[opcode][func3]);
     const Format format = cell->format;
     const InstructionOp operation = cell->operation;
-    printf("opcode = %i, operation = %i\n", opcode, operation);
     switch (format) {
     case R:
         return parse_R(bytecode, opcode, func3);
@@ -165,7 +164,17 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
         .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
 }
 Instruction dec::Decoder::parse_S(RV64UWord bytecode, InstructionOp operation) {
-    return Instruction{};
+    // [imm 11:0][rs1][func3][rd][opcode]
+    const auto imm11_5 = util::ExtractBits<Immidiate, 7, 25>(bytecode) << 5;
+    const auto imm4_0 = util::ExtractBits<Immidiate, 5, 7>(bytecode) << 0;
+
+    assert((imm4_0 & imm11_5) == (RV64UWord)0);
+    return Instruction{
+        .rs1 = static_cast<Register>((bytecode & RS1_MASK) >> RS1_SHIFT),
+        .rs2 = static_cast<Register>((bytecode & RS2_MASK) >> RS2_SHIFT),
+        .immidiate = imm4_0 | imm11_5,
+        .operation = operation,
+    };
 }
 Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
                                   const InstructionOp operation) {
