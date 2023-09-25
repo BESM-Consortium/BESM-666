@@ -93,12 +93,12 @@ PhysMemBuilder &PhysMemBuilder::loadContArea(RV64Ptr address, void const *data,
     return *this;
 }
 
-PhysMem PhysMemBuilder::build() {
+PhysMem::SPtr PhysMemBuilder::build() {
 #ifndef NDEBUG
     assert(!wasAlreadyBuilt_);
     wasAlreadyBuilt_ = true;
 #endif
-    return PhysMem(std::move(pagemap_));
+    return PhysMem::SPtr(new PhysMem(std::move(pagemap_)));
 }
 
 } // namespace besm::mem

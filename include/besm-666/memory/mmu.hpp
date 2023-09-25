@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 
 #include "besm-666/memory/phys-mem.hpp"
@@ -9,7 +10,7 @@ namespace besm::mem {
 
 class MMU : public INonCopyable {
 public:
-    MMU(PhysMem &pMem) : pMem_(pMem) {}
+    MMU(PhysMem::SPtr pMem) : pMem_(pMem) {}
 
     RV64UChar loadByte(RV64Ptr address) const;
     RV64UHWord loadHWord(RV64Ptr address) const;
@@ -24,7 +25,7 @@ public:
 private:
     RV64Ptr translate(RV64Ptr address) const;
 
-    PhysMem &pMem_;
+    PhysMem::SPtr pMem_;
 };
 
 } // namespace besm::mem

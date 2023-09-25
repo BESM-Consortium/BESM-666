@@ -6,7 +6,7 @@
 using namespace besm;
 
 TEST(mmu_tests, storeByte) {
-    mem::PhysMem pMem = mem::PhysMemBuilder(4096).build();
+    mem::PhysMem::SPtr pMem = mem::PhysMemBuilder(4096).build();
     mem::MMU mmu(pMem);
 
     constexpr RV64Ptr const ADDR = 1000;

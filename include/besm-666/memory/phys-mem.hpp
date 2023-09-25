@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
 #include <set>
 
 #include "besm-666/memory/page-allocator.hpp"
@@ -42,8 +43,9 @@ bool operator<(PhysMemPagemap::PageId lhs, PhysMemPagemap::Page rhs);
 
 class PhysMem : public INonCopyable {
 public:
-    ~PhysMem() = default;
+    using SPtr = std::shared_ptr<PhysMem>;
 
+    ~PhysMem() = default;
     PhysMem(PhysMem &&other);
 
     template <typename RV64Type> void store(RV64Ptr address, RV64Type value);
@@ -80,7 +82,7 @@ public:
     PhysMemBuilder &loadContArea(RV64Ptr address, void const *data,
                                  RV64Size size);
 
-    PhysMem build();
+    PhysMem::SPtr build();
 
 private:
     PhysMemPagemap pagemap_;
