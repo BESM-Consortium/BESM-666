@@ -10,7 +10,7 @@ namespace besm::mem {
 
 class MMU : public INonCopyable {
 public:
-    MMU(PhysMem::SPtr pMem) : pMem_(pMem) {}
+    explicit MMU(PhysMem::SPtr pMem) : pMem_(pMem) {}
 
     RV64UChar loadByte(RV64Ptr address) const;
     RV64UHWord loadHWord(RV64Ptr address) const;
