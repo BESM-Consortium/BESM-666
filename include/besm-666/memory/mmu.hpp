@@ -24,7 +24,6 @@ public:
 private:
     RV64Ptr translate(RV64Ptr address) const;
 
-    friend class MemoryBuilder;
     PhysMem &pMem_;
 };
 
