@@ -23,7 +23,7 @@ public:
     void storeDWord(RV64Ptr address, RV64DWord value);
 
 private:
-    RV64Ptr translate(RV64Ptr address) const;
+    RV64Ptr translateAddress(RV64Ptr address) const;
 
     PhysMem::SPtr pMem_;
 };
