@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include "besm-666/memory/phys-mem.hpp"
-#include "besm-666/non-copyable.hpp"
 #include "besm-666/riscv-types.hpp"
 
 namespace besm::mem {
