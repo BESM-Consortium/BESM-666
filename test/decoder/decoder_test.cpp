@@ -604,7 +604,7 @@ TEST_F(Decoder_I, SRAIW) {
 
 TEST_F(Decoder_I, NOT_SRLIW_OR_SRAIW) {
     Instruction parsed = decoder.parse(0b01100000100000100101110010011011);
-    ASSERT_EQ(parsed.operation, NON_OP);
+    ASSERT_EQ(parsed.operation, INV_OP);
 }
 
 TEST_F(Decoder_S, SD1) {
@@ -713,5 +713,5 @@ TEST_F(Decoder_B, BGEU) {
 TEST_F(Decoder_B, NOT_BEQ) {
     // this is the test with opcode 0b1100011 but non-existent func3 = 0b010
     Instruction parsed = decoder.parse(0b01110100000001100010011111100011);
-    EXPECT_EQ(parsed.operation, NON_OP);
+    EXPECT_EQ(parsed.operation, INV_OP);
 }
