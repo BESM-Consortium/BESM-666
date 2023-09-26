@@ -31,7 +31,7 @@ Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
         return parse_J(bytecode, operation);
         break;
     }
-    return Instruction{.operation = NON_OP};
+    return Instruction{.operation = INV_OP};
 }
 
 Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
@@ -41,7 +41,7 @@ Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
     const uint16_t func7 = (bytecode & FUNC7_MASK) >> (FUNC7_SHIFT - 3);
     const uint16_t func10 = func7 | func3;
     assert(func10 < 0b10000000000);
-    InstructionOp operation = NON_OP;
+    InstructionOp operation = INV_OP;
     switch (opcode) {
     case 0b0110011:
         switch (func10) {
@@ -119,7 +119,7 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
     const auto imm = util::ExtractBits<Immidiate, 12, 20>(bytecode);
     const auto rd = static_cast<Register>((bytecode & RD_MASK) >> RD_SHIFT);
     const auto rs1 = static_cast<Register>((bytecode & RS1_MASK) >> RS1_SHIFT);
-    if (operation != NON_OP) {
+    if (operation != INV_OP) {
         return Instruction{
             .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
     }
