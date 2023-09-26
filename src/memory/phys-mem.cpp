@@ -27,7 +27,7 @@ void PhysMemPagemap::storeByte(RV64Ptr address, RV64UChar value) {
 }
 RV64UChar PhysMemPagemap::loadByte(RV64Ptr address) const {
     RV64UChar const *pos =
-        reinterpret_cast<RV64UChar const *>(this->translate(address));
+        reinterpret_cast<RV64UChar const *>(this->translateAddress(address));
     return pos == nullptr ? 0 : *pos;
 }
 
@@ -52,7 +52,7 @@ void *PhysMemPagemap::touchAddress(RV64Ptr address) {
     return pageItr->mem + this->addr2PageOffset(address);
 }
 
-void const *PhysMemPagemap::translate(RV64Ptr address) const {
+void const *PhysMemPagemap::translateAddress(RV64Ptr address) const {
     auto pageItr = pagemap_.find(this->addr2PageId(address));
     if (pageItr == pagemap_.end()) {
         return nullptr;

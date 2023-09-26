@@ -31,7 +31,7 @@ private:
     RV64Size addr2PageId(RV64Ptr address) const;
     RV64Size addr2PageOffset(RV64Ptr address) const;
     void *touchAddress(RV64Ptr address);
-    void const *translate(RV64Ptr address) const;
+    void const *translateAddress(RV64Ptr address) const;
 
     size_t const pageSize_;
     PageAllocator allocator_;
