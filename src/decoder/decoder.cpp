@@ -8,14 +8,14 @@ static constexpr int OPCODE_WIDTH = 7;
 static constexpr int FUNC3_WIDTH = 3;
 using util::ExtractBits;
 
-template<size_t From>
-static Register ExtractRegister(RV64UWord bytecode) {
+template <size_t From> static Register ExtractRegister(RV64UWord bytecode) {
     return ExtractBits<RV64UWord, Register, REG_WIDTH, From>(bytecode);
 }
 
 Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
     const Opcode opcode = ExtractBits<RV64UWord, OPCODE_WIDTH>(bytecode);
-    const uint8_t func3 = ExtractBits<RV64UWord, FUNC3_WIDTH, FUNC3_SHIFT>(bytecode);
+    const uint8_t func3 =
+        ExtractBits<RV64UWord, FUNC3_WIDTH, FUNC3_SHIFT>(bytecode);
     assert(opcode < 128);
     assert(func3 < 8);
     const Cell *cell = &(INSTR_WHO[opcode][func3]);
@@ -48,12 +48,14 @@ Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
                                   const uint8_t func3) {
     constexpr int FUNC7_SHIFT = 25;
     constexpr RV64UWord FUNC7_MASK = 0b1111111 << FUNC7_SHIFT;
+    constexpr Opcode OP = 0b0110011;
+    constexpr Opcode OP32 = 0b0111011;
     const uint16_t func7 = (bytecode & FUNC7_MASK) >> (FUNC7_SHIFT - 3);
     const uint16_t func10 = func7 | func3;
     assert(func10 < 0b10000000000);
     InstructionOp operation = INV_OP;
     switch (opcode) {
-    case 0b0110011:
+    case OP:
         switch (func10) {
         case 0b0000000000:
             operation = ADD;
@@ -86,7 +88,7 @@ Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
             operation = AND;
         }
         break;
-    case 0b0111011:
+    case OP32:
         switch (func10) {
         case 0b0000000000:
             operation = ADDW;
@@ -106,22 +108,20 @@ Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
         }
         break;
     }
-    return Instruction{
-        .rd = ExtractRegister<RD_SHIFT>(bytecode),
-        .rs1 = ExtractRegister<RS1_SHIFT>(bytecode),
-        .rs2 = ExtractRegister<RS2_SHIFT>(bytecode),
-        .immidiate = Instruction::IMMIDIATE_POISON,
-        .operation = operation};
+    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+                       .rs1 = ExtractRegister<RS1_SHIFT>(bytecode),
+                       .rs2 = ExtractRegister<RS2_SHIFT>(bytecode),
+                       .immidiate = Instruction::IMMIDIATE_POISON,
+                       .operation = operation};
 }
 
 inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
                                          const InstructionOp operation) {
     constexpr int IMM_SHIFT = 12;
     constexpr RV64UWord IMM_MASK = 0b11111111111111111111 << IMM_SHIFT;
-    return Instruction{
-        .rd = ExtractRegister<RD_SHIFT>(bytecode),
-        .immidiate = (bytecode & IMM_MASK),
-        .operation = operation};
+    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+                       .immidiate = (bytecode & IMM_MASK),
+                       .operation = operation};
 }
 Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
                                   InstructionOp operation,
@@ -133,9 +133,13 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
         return Instruction{
             .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
     }
-    const uint8_t func3 = util::ExtractBits<RV64UWord, 3, FUNC3_SHIFT>(bytecode);
+    const uint8_t func3 =
+        util::ExtractBits<RV64UWord, 3, FUNC3_SHIFT>(bytecode);
+    constexpr Opcode MISC_MEM = 0b0001111;
+    constexpr Opcode SYSTEM = 0b1110011;
+    constexpr Opcode OPP_IMM32 = 0b0011011;
     switch (opcode) {
-    case 0b0001111:
+    case MISC_MEM:
         /*
          * @todo #39:90min Implement processing of 0b0001111 opcode.
          *  According to the new specification
@@ -146,7 +150,7 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
         return Instruction{
             .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = FENCE};
         break;
-    case 0b1110011:
+    case SYSTEM:
         if (rd == 0b0 && rs1 == 0b0 && func3 == 0b0) {
             switch (imm) {
             case 0b0:
@@ -158,7 +162,7 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
             }
         }
         break;
-    case 0b011011:
+    case OPP_IMM32:
         switch (bytecode >> 25) {
         case 0b0:
             operation = SRLIW;
@@ -192,12 +196,10 @@ Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
     const auto imm1_4 = util::ExtractBits<Immidiate, 4, 8>(bytecode) << 1;
     const auto imm11 = util::ExtractBits<Immidiate, 1, 7>(bytecode) << 11;
     assert((imm1_4 & imm5_10 & imm11 & imm12) == (RV64UWord)0);
-    return Instruction {
-        .rs1 = ExtractRegister<RS1_SHIFT>(bytecode),
-        .rs2 = ExtractRegister<RS2_SHIFT>(bytecode),
-        .immidiate = imm1_4 | imm5_10 | imm11 | imm12,
-        .operation = operation
-    };
+    return Instruction{.rs1 = ExtractRegister<RS1_SHIFT>(bytecode),
+                       .rs2 = ExtractRegister<RS2_SHIFT>(bytecode),
+                       .immidiate = imm1_4 | imm5_10 | imm11 | imm12,
+                       .operation = operation};
 }
 
 Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
@@ -210,9 +212,7 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
     const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode)
                           << 12;
     assert(bit20 & bit1_10 & bit11 & bit12_19 == (RV64UWord)0b0);
-    return Instruction {
-        .rd = ExtractRegister<RD_SHIFT>(bytecode),
-        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
-        .operation = operation
-    };
+    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+                       .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
+                       .operation = operation};
 }
