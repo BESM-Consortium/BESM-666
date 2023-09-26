@@ -20,6 +20,7 @@ target_sources(besm666_phys_mem_tests PRIVATE
 target_link_libraries(besm666_phys_mem_tests PRIVATE
     besm666_testif
     besm666_memory
+    besm666_elfgen
 )
 add_test(NAME besm666_phys_mem COMMAND besm666_phys_mem_tests)
 

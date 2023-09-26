@@ -1,6 +1,14 @@
 
 add_library(besm666_testif INTERFACE)
-target_link_libraries(besm666_testif INTERFACE besm666_shared gmock_main gmock gtest)
+target_link_libraries(besm666_testif INTERFACE 
+    besm666_include
+    besm666_exec 
+    besm666_memory 
+    besm666_decoder
+    gmock_main 
+    gmock 
+    gtest
+)
 
 function(besm666_test SOURCE_NAME)
     get_filename_component(TARGET_NAME ${SOURCE_NAME} NAME_WE)
@@ -11,6 +19,8 @@ function(besm666_test SOURCE_NAME)
 endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
-besm666_test(./reg/gprf-tests.cpp)
 
-add_subdirectory(./memory)
+set(DIRS memory decoder exec util elfgen)
+foreach(DIR ${DIRS})
+    add_subdirectory(${DIR})
+endforeach()
