@@ -3,6 +3,7 @@ BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := include
 TEST_DIR := test
+STANDALONE_DIR := standalone
 
 JOBS ?= 4
 
@@ -20,6 +21,7 @@ format:
 	./tools/clang-format.sh $(PWD)/$(SRC_DIR)
 	./tools/clang-format.sh $(PWD)/$(INC_DIR)
 	./tools/clang-format.sh $(PWD)/$(TEST_DIR)
+	./tools/clang-format.sh $(PWD)/$(STANDALONE_DIR)
 
 .PHONY: build
 build: init
