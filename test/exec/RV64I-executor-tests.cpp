@@ -2,11 +2,17 @@
 
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/exec/gprf.hpp"
+#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
 
 class RV64IExecutorTest : public testing::Test {
+public:
+    RV64IExecutorTest()
+        : pMem(mem::PhysMemBuilder(4096, 2 * 1024 * 1024).build()),
+          mmu(mem::MMU::Create(pMem)), exec(mmu) {}
+
 protected:
     void SetupInstrR(InstructionOp op, Register rd, Register rs1,
                      Register rs2) {
@@ -52,6 +58,8 @@ protected:
     void Exec() { exec.exec(instr); }
 
     Instruction instr;
+    mem::PhysMem::SPtr pMem;
+    mem::MMU::SPtr mmu;
     exec::Executor exec;
 };
 

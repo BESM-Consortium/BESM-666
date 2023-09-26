@@ -2,13 +2,14 @@
 
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
+#include "besm-666/memory/mmu.hpp"
 #include "besm-666/rv-instruction-op.hpp"
 
 namespace besm::exec {
 
 class Executor {
 public:
-    Executor() = default;
+    Executor(mem::MMU::SPtr mmu) : mmu_(mmu) {}
 
     void exec(Instruction const instr);
 
@@ -46,17 +47,17 @@ private:
     void exec_BGEU(Instruction const instr);
 
     // Will be implemented after memory system release
-    void exec_LB(Instruction const instr) {}
-    void exec_LH(Instruction const instr) {}
-    void exec_LW(Instruction const instr) {}
-    void exec_LD(Instruction const instr) {}
-    void exec_LBU(Instruction const instr) {}
-    void exec_LHU(Instruction const instr) {}
-    void exec_LWU(Instruction const instr) {}
-    void exec_SB(Instruction const instr) {}
-    void exec_SH(Instruction const instr) {}
-    void exec_SW(Instruction const instr) {}
-    void exec_SD(Instruction const instr) {}
+    void exec_LB(Instruction const instr);
+    void exec_LH(Instruction const instr);
+    void exec_LW(Instruction const instr);
+    void exec_LD(Instruction const instr);
+    void exec_LBU(Instruction const instr);
+    void exec_LHU(Instruction const instr);
+    void exec_LWU(Instruction const instr);
+    void exec_SB(Instruction const instr);
+    void exec_SH(Instruction const instr);
+    void exec_SW(Instruction const instr);
+    void exec_SD(Instruction const instr);
 
     // Does nothing in in-order implementation
     void exec_FENCE(Instruction const instr) { this->nextPC(); }
@@ -79,6 +80,7 @@ private:
     void nextPC();
 
     GPRF gprf_;
+    mem::MMU::SPtr mmu_;
 };
 
 } // namespace besm::exec

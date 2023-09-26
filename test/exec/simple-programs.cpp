@@ -3,6 +3,7 @@
 
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/instruction.hpp"
+#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
@@ -39,7 +40,10 @@ TEST(Executor, Sum) {
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
          InstructionOp::ADD}};
 
-    exec::Executor exec;
+    mem::PhysMem::SPtr pMem =
+        mem::PhysMemBuilder(4096, 1024 * 1024 * 2).build();
+    mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
+    exec::Executor exec(mmu);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
 
     while (pc <= 20) {
@@ -93,7 +97,10 @@ TEST(Executor, Mul) {
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
          InstructionOp::ADD}};
 
-    exec::Executor exec;
+    mem::PhysMem::SPtr pMem =
+        mem::PhysMemBuilder(4096, 1024 * 1024 * 2).build();
+    mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
+    exec::Executor exec(mmu);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
 
     while (pc <= 40) {
