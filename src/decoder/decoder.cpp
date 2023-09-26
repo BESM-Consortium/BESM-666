@@ -8,7 +8,8 @@ static constexpr int OPCODE_WIDTH = 7;
 static constexpr int FUNC3_WIDTH = 3;
 using util::ExtractBits;
 
-template <size_t From> static Register ExtractRegister(RV64UWord bytecode) {
+template <size_t From>
+static inline Register ExtractRegister(RV64UWord bytecode) {
     return ExtractBits<RV64UWord, Register, REG_WIDTH, From>(bytecode);
 }
 
