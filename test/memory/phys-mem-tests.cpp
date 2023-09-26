@@ -36,9 +36,9 @@ TEST(phys_mem_tests, load_elf) {
     std::filesystem::path elfPath = "./generated_elf";
     gen::generateSuitableElf(elfPath);
 
-    mem::PhysMem memory =
+    mem::PhysMem::SPtr memory =
         mem::PhysMemBuilder(PageSize, ChunkSize).loadElf(elfPath).build();
     for (int i = 0; i < sizeof(gen::defaultData); i++) {
-        EXPECT_EQ(memory.load<char>(gen::defaultPtr + i), gen::defaultData[i]);
+        EXPECT_EQ(memory->load<char>(gen::defaultPtr + i), gen::defaultData[i]);
     }
 }
