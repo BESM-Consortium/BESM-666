@@ -27,6 +27,11 @@ Type ExtractBits(Type value) {
     return (value & Mask) >> From;
 }
 
+template <typename PassT, typename RetT, size_t Bits, size_t From = 0>
+RetT ExtractBits(PassT value) {
+    return static_cast<RetT>(ExtractBits<PassT, Bits, From>(value));
+}
+
 template <typename Type> union SUConverter {
     static_assert(std::is_integral_v<Type>);
 

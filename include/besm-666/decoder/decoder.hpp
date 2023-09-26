@@ -11,8 +11,8 @@ class Decoder {
 
 private:
     static constexpr RV64UWord OPCODE_MASK = 0b01111111;
-    static constexpr int FUNC3_shift = 12;
-    static constexpr RV64UWord FUNC3_MASK = 0b111 << FUNC3_shift;
+    static constexpr int FUNC3_SHIFT = 12;
+    static constexpr RV64UWord FUNC3_MASK = 0b111 << FUNC3_SHIFT;
     static constexpr int RD_SHIFT = 7;
     static constexpr RV64UWord RD_MASK = 0b11111 << RD_SHIFT;
     static constexpr int RS1_SHIFT = 15;
