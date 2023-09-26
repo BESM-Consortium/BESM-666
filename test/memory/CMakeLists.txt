@@ -23,3 +23,13 @@ target_link_libraries(besm666_phys_mem_tests PRIVATE
     besm666_elfgen
 )
 add_test(NAME besm666_phys_mem COMMAND besm666_phys_mem_tests)
+
+add_executable(besm666_memory_tests)
+target_sources(besm666_memory_tests PRIVATE
+    ./mmu-tests.cpp
+)
+target_link_libraries(besm666_memory_tests PRIVATE
+    besm666_testif
+    besm666_memory
+)
+add_test(NAME besm666_memory_tests COMMAND besm666_memory_tests)
