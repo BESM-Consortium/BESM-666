@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
         ->required()
         ->check(CLI::ExistingFile);
 
+    CLI11_PARSE(app, argc, argv);
+
     besm::sim::Config config = configBuilder.build();
 
     return 0;
