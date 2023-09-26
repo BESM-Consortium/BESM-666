@@ -58,6 +58,7 @@ add_subdirectory(./src/memory)
 add_subdirectory(./src/util)
 add_subdirectory(./src/exec)
 add_subdirectory(./src/decoder)
+add_subdirectory(./src/sim)
 add_subdirectory(third_party)
 
 enable_testing()
