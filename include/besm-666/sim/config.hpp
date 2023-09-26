@@ -5,7 +5,7 @@
 #include <functional>
 #include <stdexcept>
 
-namespace besm {
+namespace besm::sim {
 
 struct ConfigData {
     // Input files
@@ -14,8 +14,9 @@ struct ConfigData {
 
 class InvalidConfiguration : public std::runtime_error {
 public:
-    InvalidConfiguration(std::string const& string) : std::runtime_error(string) {}
-    InvalidConfiguration(char const* cstring) : std::runtime_error(cstring) {}
+    InvalidConfiguration(std::string const &string)
+        : std::runtime_error(string) {}
+    InvalidConfiguration(char const *cstring) : std::runtime_error(cstring) {}
 };
 
 class Config {
@@ -43,4 +44,4 @@ private:
     ConfigData data_;
 };
 
-} // namespace besm
+} // namespace besm::sim

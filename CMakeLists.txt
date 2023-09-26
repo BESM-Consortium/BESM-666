@@ -42,23 +42,18 @@ target_sources(besm666_shared PRIVATE
 target_link_libraries(besm666_shared
 PUBLIC
     besm666_include
-PRIVATE
     besm666_memory
     besm666_exec
     besm666_decoder
+    besm666_sim
 )
-
-add_executable(besm666)
-target_sources(besm666 PRIVATE
-    ./standalone/main.cpp
-)
-target_link_libraries(besm666 PRIVATE besm666::besm666_shared)
 
 add_subdirectory(./src/memory)
 add_subdirectory(./src/util)
 add_subdirectory(./src/exec)
 add_subdirectory(./src/decoder)
 add_subdirectory(./src/sim)
+add_subdirectory(./standalone)
 add_subdirectory(third_party)
 
 enable_testing()
