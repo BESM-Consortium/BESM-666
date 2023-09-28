@@ -46,7 +46,6 @@ private:
     void exec_BGE(Instruction const instr);
     void exec_BGEU(Instruction const instr);
 
-    // Will be implemented after memory system release
     void exec_LB(Instruction const instr);
     void exec_LH(Instruction const instr);
     void exec_LW(Instruction const instr);
