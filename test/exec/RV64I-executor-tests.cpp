@@ -44,6 +44,10 @@ protected:
         instr.rs2 = rs2;
         instr.immidiate = imm;
     }
+    void SetupInstrS(InstructionOp op, Register rs1, Register rs2,
+                     RV64UDWord imm) {
+        SetupInstrB(op, rs1, rs2, imm);
+    }
 
     void LoadImm12(Register rd, RV64DWord val) {
         SetupInstrISigned(InstructionOp::ADDI, rd, exec::GPRF::X0, val);
@@ -587,4 +591,33 @@ TEST_F(RV64IExecutorTest, LOAD_Negative) {
     EXPECT_EQ(ReadReg(exec::GPRF::X7), std::numeric_limits<RV64UChar>::max());
     EXPECT_EQ(ReadReg(exec::GPRF::X8), std::numeric_limits<RV64UHWord>::max());
     EXPECT_EQ(ReadReg(exec::GPRF::X9), std::numeric_limits<RV64UWord>::max());
+}
+
+TEST_F(RV64IExecutorTest, STORE) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    LoadImm12(exec::GPRF::X3, 100);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrS(InstructionOp::SB, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadByte(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SH, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadHWord(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SW, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadWord(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SD, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadDWord(ADDRESS), 100);
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 4);
 }

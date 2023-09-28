@@ -559,6 +559,8 @@ void Executor::exec_SB(Instruction const instr) {
     RV64UChar value = static_cast<RV64UChar>(gprf_.read(instr.rs2));
 
     mmu_->storeByte(address, value);
+
+    this->nextPC();
 }
 void Executor::exec_SH(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
@@ -566,6 +568,8 @@ void Executor::exec_SH(Instruction const instr) {
     RV64UHWord value = static_cast<RV64UHWord>(gprf_.read(instr.rs2));
 
     mmu_->storeHWord(address, value);
+
+    this->nextPC();
 }
 void Executor::exec_SW(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
@@ -573,6 +577,8 @@ void Executor::exec_SW(Instruction const instr) {
     RV64UWord value = static_cast<RV64UWord>(gprf_.read(instr.rs2));
 
     mmu_->storeWord(address, value);
+
+    this->nextPC();
 }
 void Executor::exec_SD(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
@@ -580,6 +586,8 @@ void Executor::exec_SD(Instruction const instr) {
     RV64UDWord value = static_cast<RV64UDWord>(gprf_.read(instr.rs2));
 
     mmu_->storeDWord(address, value);
+
+    this->nextPC();
 }
 
 void Executor::exec_ADDIW(Instruction const instr) {
