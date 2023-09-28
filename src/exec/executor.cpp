@@ -490,8 +490,8 @@ void Executor::exec_BGEU(Instruction const instr) {
 void Executor::exec_LB(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
                          util::SignExtend<RV64UDWord, 12>(instr.immidiate);
-    RV64UChar value = mmu_->loadByte(address);
-    RV64UDWord extendedValue = util::SignExtend<RV64UDWord, 8>(value);
+    RV64Char value = util::Signify(mmu_->loadByte(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
 
     gprf_.write(instr.rd, extendedValue);
 
@@ -500,8 +500,8 @@ void Executor::exec_LB(Instruction const instr) {
 void Executor::exec_LH(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
                          util::SignExtend<RV64UDWord, 12>(instr.immidiate);
-    RV64UHWord value = mmu_->loadHWord(address);
-    RV64UDWord extendedValue = util::SignExtend<RV64UDWord, 16>(value);
+    RV64HWord value = util::Signify(mmu_->loadHWord(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
 
     gprf_.write(instr.rd, extendedValue);
 
@@ -510,8 +510,8 @@ void Executor::exec_LH(Instruction const instr) {
 void Executor::exec_LW(Instruction const instr) {
     RV64UDWord address = gprf_.read(instr.rs1) +
                          util::SignExtend<RV64UDWord, 12>(instr.immidiate);
-    RV64UWord value = mmu_->loadWord(address);
-    RV64UDWord extendedValue = util::SignExtend<RV64UDWord, 32>(value);
+    RV64Word value = util::Signify(mmu_->loadWord(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
 
     gprf_.write(instr.rd, extendedValue);
 
