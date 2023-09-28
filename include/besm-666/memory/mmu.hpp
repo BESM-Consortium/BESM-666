@@ -25,7 +25,7 @@ public:
     void storeDWord(RV64Ptr address, RV64DWord value);
 
 private:
-    explicit MMU(PhysMem::SPtr pMem) : pMem_(pMem) {}
+    explicit MMU(PhysMem::SPtr pMem) : pMem_(std::move(pMem)) {}
 
     RV64Ptr translateAddress(RV64Ptr address) const;
 

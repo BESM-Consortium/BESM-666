@@ -9,7 +9,7 @@ namespace besm::exec {
 
 class Executor {
 public:
-    Executor(mem::MMU::SPtr mmu) : mmu_(mmu) {}
+    explicit Executor(mem::MMU::SPtr mmu) : mmu_(std::move(mmu)) {}
 
     void exec(Instruction const instr);
 
