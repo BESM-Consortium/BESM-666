@@ -518,3 +518,73 @@ TEST_F(RV64IExecutorTest, BGEU_Equal_False) {
 
     EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4);
 }
+
+TEST_F(RV64IExecutorTest, LOAD_Positive) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    mmu->storeDWord(ADDRESS, 100);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrI(InstructionOp::LB, exec::GPRF::X3, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LH, exec::GPRF::X4, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LW, exec::GPRF::X5, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LD, exec::GPRF::X6, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LBU, exec::GPRF::X7, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LHU, exec::GPRF::X8, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LWU, exec::GPRF::X9, exec::GPRF::X2, OFFSET);
+    Exec();
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 7);
+    EXPECT_EQ(ReadReg(exec::GPRF::X3), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X4), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X5), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X6), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X7), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X8), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X9), 100);
+}
+
+TEST_F(RV64IExecutorTest, LOAD_Negative) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    mmu->storeDWord(ADDRESS, -1);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrI(InstructionOp::LB, exec::GPRF::X3, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LH, exec::GPRF::X4, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LW, exec::GPRF::X5, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LD, exec::GPRF::X6, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LBU, exec::GPRF::X7, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LHU, exec::GPRF::X8, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LWU, exec::GPRF::X9, exec::GPRF::X2, OFFSET);
+    Exec();
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 7);
+    EXPECT_EQ(ReadReg(exec::GPRF::X3), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X4), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X5), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X6), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X7), std::numeric_limits<RV64UChar>::max());
+    EXPECT_EQ(ReadReg(exec::GPRF::X8), std::numeric_limits<RV64UHWord>::max());
+    EXPECT_EQ(ReadReg(exec::GPRF::X9), std::numeric_limits<RV64UWord>::max());
+}
