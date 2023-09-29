@@ -1,5 +1,6 @@
 #include "besm-666/decoder/decoder.hpp"
 #include "besm-666/util/bit-magic.hpp"
+#include <iostream>
 
 using namespace besm;
 
@@ -212,7 +213,7 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
     const auto bit11 = util::ExtractBits<RV64UWord, 1, 12 + 8>(bytecode) << 11;
     const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode)
                           << 12;
-    assert(bit20 & bit1_10 & bit11 & bit12_19 == (RV64UWord)0b0);
+    assert((bit20 & bit1_10 & bit11 & bit12_19) == 0b0);
     return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
                        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
                        .operation = operation};
