@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "besm-666/decoder/decoder.hpp"
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/memory/mmu.hpp"
@@ -9,7 +11,8 @@ namespace besm::sim {
 
 class Hart {
 public:
-    explicit Hart(mem::PhysMem::SPtr pMem);
+    using SPtr = std::shared_ptr<Hart>;
+    static SPtr Create(mem::PhysMem::SPtr pMem);
 
     exec::GPRF const &getState() const { return exec_.getState(); }
 
@@ -19,6 +22,8 @@ public:
     void run();
 
 private:
+    explicit Hart(mem::PhysMem::SPtr pMem);
+
     dec::Decoder dec_;
     mem::MMU::SPtr mmu_;
     exec::Executor exec_;

@@ -1,8 +1,13 @@
 #include <cassert>
 
+#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/sim/hart.hpp"
 
 namespace besm::sim {
+
+Hart::SPtr Hart::Create(mem::PhysMem::SPtr pMem) {
+    return std::shared_ptr<Hart>(new Hart(pMem));
+}
 
 Hart::Hart(mem::PhysMem::SPtr pMem)
     : mmu_(mem::MMU::Create(pMem)), exec_(mmu_),
