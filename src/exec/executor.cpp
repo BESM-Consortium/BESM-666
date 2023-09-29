@@ -487,6 +487,109 @@ void Executor::exec_BGEU(Instruction const instr) {
     }
 }
 
+void Executor::exec_LB(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64Char value = util::Signify(mmu_->loadByte(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
+
+    gprf_.write(instr.rd, extendedValue);
+
+    this->nextPC();
+}
+void Executor::exec_LH(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64HWord value = util::Signify(mmu_->loadHWord(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
+
+    gprf_.write(instr.rd, extendedValue);
+
+    this->nextPC();
+}
+void Executor::exec_LW(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64Word value = util::Signify(mmu_->loadWord(address));
+    RV64UDWord extendedValue = util::Unsignify(static_cast<RV64DWord>(value));
+
+    gprf_.write(instr.rd, extendedValue);
+
+    this->nextPC();
+}
+void Executor::exec_LD(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord value = mmu_->loadDWord(address);
+
+    gprf_.write(instr.rd, value);
+
+    this->nextPC();
+}
+void Executor::exec_LBU(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord value = mmu_->loadByte(address);
+
+    gprf_.write(instr.rd, value);
+
+    this->nextPC();
+}
+void Executor::exec_LHU(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord value = mmu_->loadHWord(address);
+
+    gprf_.write(instr.rd, value);
+
+    this->nextPC();
+}
+void Executor::exec_LWU(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord value = mmu_->loadWord(address);
+
+    gprf_.write(instr.rd, value);
+
+    this->nextPC();
+}
+void Executor::exec_SB(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UChar value = static_cast<RV64UChar>(gprf_.read(instr.rs2));
+
+    mmu_->storeByte(address, value);
+
+    this->nextPC();
+}
+void Executor::exec_SH(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UHWord value = static_cast<RV64UHWord>(gprf_.read(instr.rs2));
+
+    mmu_->storeHWord(address, value);
+
+    this->nextPC();
+}
+void Executor::exec_SW(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UWord value = static_cast<RV64UWord>(gprf_.read(instr.rs2));
+
+    mmu_->storeWord(address, value);
+
+    this->nextPC();
+}
+void Executor::exec_SD(Instruction const instr) {
+    RV64UDWord address = gprf_.read(instr.rs1) +
+                         util::SignExtend<RV64UDWord, 12>(instr.immidiate);
+    RV64UDWord value = static_cast<RV64UDWord>(gprf_.read(instr.rs2));
+
+    mmu_->storeDWord(address, value);
+
+    this->nextPC();
+}
+
 void Executor::exec_ADDIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);

@@ -2,11 +2,17 @@
 
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/exec/gprf.hpp"
+#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
 
 class RV64IExecutorTest : public testing::Test {
+public:
+    RV64IExecutorTest()
+        : pMem(mem::PhysMemBuilder(4096, 2 * 1024 * 1024).build()),
+          mmu(mem::MMU::Create(pMem)), exec(mmu) {}
+
 protected:
     void SetupInstrR(InstructionOp op, Register rd, Register rs1,
                      Register rs2) {
@@ -38,6 +44,10 @@ protected:
         instr.rs2 = rs2;
         instr.immidiate = imm;
     }
+    void SetupInstrS(InstructionOp op, Register rs1, Register rs2,
+                     RV64UDWord imm) {
+        SetupInstrB(op, rs1, rs2, imm);
+    }
 
     void LoadImm12(Register rd, RV64DWord val) {
         SetupInstrISigned(InstructionOp::ADDI, rd, exec::GPRF::X0, val);
@@ -52,6 +62,8 @@ protected:
     void Exec() { exec.exec(instr); }
 
     Instruction instr;
+    mem::PhysMem::SPtr pMem;
+    mem::MMU::SPtr mmu;
     exec::Executor exec;
 };
 
@@ -509,4 +521,103 @@ TEST_F(RV64IExecutorTest, BGEU_Equal_False) {
     Exec();
 
     EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4);
+}
+
+TEST_F(RV64IExecutorTest, LOAD_Positive) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    mmu->storeDWord(ADDRESS, 100);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrI(InstructionOp::LB, exec::GPRF::X3, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LH, exec::GPRF::X4, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LW, exec::GPRF::X5, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LD, exec::GPRF::X6, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LBU, exec::GPRF::X7, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LHU, exec::GPRF::X8, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LWU, exec::GPRF::X9, exec::GPRF::X2, OFFSET);
+    Exec();
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 7);
+    EXPECT_EQ(ReadReg(exec::GPRF::X3), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X4), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X5), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X6), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X7), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X8), 100);
+    EXPECT_EQ(ReadReg(exec::GPRF::X9), 100);
+}
+
+TEST_F(RV64IExecutorTest, LOAD_Negative) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    mmu->storeDWord(ADDRESS, -1);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrI(InstructionOp::LB, exec::GPRF::X3, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LH, exec::GPRF::X4, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LW, exec::GPRF::X5, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LD, exec::GPRF::X6, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LBU, exec::GPRF::X7, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LHU, exec::GPRF::X8, exec::GPRF::X2, OFFSET);
+    Exec();
+    SetupInstrI(InstructionOp::LWU, exec::GPRF::X9, exec::GPRF::X2, OFFSET);
+    Exec();
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 7);
+    EXPECT_EQ(ReadReg(exec::GPRF::X3), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X4), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X5), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X6), util::Unsignify<RV64DWord>(-1));
+    EXPECT_EQ(ReadReg(exec::GPRF::X7), std::numeric_limits<RV64UChar>::max());
+    EXPECT_EQ(ReadReg(exec::GPRF::X8), std::numeric_limits<RV64UHWord>::max());
+    EXPECT_EQ(ReadReg(exec::GPRF::X9), std::numeric_limits<RV64UWord>::max());
+}
+
+TEST_F(RV64IExecutorTest, STORE) {
+    constexpr const RV64UDWord BASE = 42;
+    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
+
+    LoadImm12(exec::GPRF::X2, BASE);
+    LoadImm12(exec::GPRF::X3, 100);
+
+    RV64UDWord prevPC = ReadReg(exec::GPRF::PC);
+
+    SetupInstrS(InstructionOp::SB, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadByte(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SH, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadHWord(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SW, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadWord(ADDRESS), 100);
+
+    SetupInstrS(InstructionOp::SD, exec::GPRF::X2, exec::GPRF::X3, OFFSET);
+    Exec();
+    EXPECT_EQ(mmu->loadDWord(ADDRESS), 100);
+
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 4 * 4);
 }

@@ -10,7 +10,9 @@ namespace besm::mem {
 
 class MMU : public INonCopyable {
 public:
-    explicit MMU(PhysMem::SPtr pMem) : pMem_(pMem) {}
+    using SPtr = std::shared_ptr<MMU>;
+
+    static MMU::SPtr Create(PhysMem::SPtr pMem);
 
     RV64UChar loadByte(RV64Ptr address) const;
     RV64UHWord loadHWord(RV64Ptr address) const;
@@ -23,6 +25,8 @@ public:
     void storeDWord(RV64Ptr address, RV64DWord value);
 
 private:
+    explicit MMU(PhysMem::SPtr pMem) : pMem_(std::move(pMem)) {}
+
     RV64Ptr translateAddress(RV64Ptr address) const;
 
     PhysMem::SPtr pMem_;

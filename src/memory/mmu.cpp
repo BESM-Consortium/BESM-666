@@ -2,6 +2,8 @@
 
 namespace besm::mem {
 
+MMU::SPtr MMU::Create(PhysMem::SPtr pMem) { return SPtr(new MMU(pMem)); }
+
 RV64UChar MMU::loadByte(RV64Ptr address) const {
     RV64Ptr paddr = this->translateAddress(address);
     return pMem_->load<RV64UChar>(paddr);
