@@ -85,7 +85,8 @@ PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
 }
 
 PhysMemBuilder &PhysMemBuilder::loadElf(const std::filesystem::path &elfPath) {
-    std::clog << "[PhysMem] Loading ELF file \'" << elfPath << "\'" << std::endl;
+    std::clog << "[PhysMem] Loading ELF file \'" << elfPath << "\'"
+              << std::endl;
 
     auto parserPtr = besm::util::createParser(elfPath);
     for (const auto &seg : parserPtr->getLoadableSegments()) {

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "CLI/CLI.hpp"
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/machine.hpp"
 
@@ -31,11 +32,7 @@ int main(int argc, char *argv[]) {
     std::clog << "[BESM-666] Simulation finished. Machine state is"
               << std::endl;
 
-    besm::exec::GPRF const &gprfState = machine.getState();
-    std::clog << "\tPC = " << gprfState.read(besm::exec::GPRF::PC) << std::endl;
-    for (besm::Register i = 0; i < 32; ++i) {
-        std::clog << "\tX" << (int)i << " = " << gprfState.read(i) << std::endl;
-    }
+    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     return 0;
 }

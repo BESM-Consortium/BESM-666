@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <iostream>
 
 #include "besm-666/instruction.hpp"
 #include "besm-666/riscv-types.hpp"
@@ -67,5 +68,21 @@ inline RV64UDWord GPRF::read(Register regId) const {
     assert(regId < Size);
     return regId == X0 ? 0 : registers_[regId];
 }
+
+class GPRFStateDumper {
+public:
+    GPRFStateDumper(std::ostream &stream) : stream_(stream) {}
+
+    void dump(GPRF const &gprf);
+
+private:
+    constexpr static char const *REG_ALIAS[] = {
+        "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0/fp",
+        "s1",   "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
+        "s2",   "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10",
+        "s11",  "t3", "t4", "t5", "t6", "pc"};
+
+    std::ostream &stream_;
+};
 
 } // namespace besm::exec

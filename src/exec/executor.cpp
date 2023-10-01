@@ -169,6 +169,9 @@ void Executor::exec(Instruction const instr) {
     case PAUSE:
         // can't find this instruction in docs
         break;
+    default:
+        std::terminate();
+        break;
     }
 }
 
@@ -382,7 +385,7 @@ void Executor::exec_SRA(Instruction const instr) {
 
 void Executor::exec_JAL(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(instr.immidiate);
 
     RV64UDWord target = pc + offset;
     RV64UDWord ret = pc + 4;
@@ -394,7 +397,7 @@ void Executor::exec_JAL(Instruction const instr) {
 void Executor::exec_JALR(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
     RV64UDWord base = gprf_.read(instr.rs1);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
 
     RV64UDWord target = (base + offset) & ~(static_cast<RV64UDWord>(1));
     RV64UDWord ret = pc + 4;
