@@ -5,15 +5,13 @@ INC_DIR := include
 TEST_DIR := test
 STANDALONE_DIR := standalone
 
+RISCV_SYSROOT := $(PWD)/../sysroot
+
 JOBS ?= 4
 
 .PHONY: all
-all: init format build test
+all: format build test
 
-.PHONY: init
-init:
-	git submodule init
-	git submodule update
 
 .PHONY: format
 .SILENT: format
@@ -24,19 +22,33 @@ format:
 	./tools/clang-format.sh $(PWD)/$(STANDALONE_DIR)
 
 .PHONY: build
-build: init
-	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_ENABLE_VALGRIND=0
+build:
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR)
+	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
+
+.PHONY: build-val
+build-val:
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_TEST_WITH_VALGRIND=ON
+	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
+
+.PHONY: build-e2e
+build-e2e:
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_WITH_E2E_TESTS=ON \
+		-DBESM666_RISCV_SYSROOT=$(RISCV_SYSROOT)
 	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
 
 .PHONY: test
 test: build
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+	make -C $(PWD)/$(BUILD_DIR)/besm-666 -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
 
-.PHONY: test_val
-test_val: init
-	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_ENABLE_VALGRIND=1
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+.PHONY: test-val
+test-val: build-val
+	make -C $(PWD)/$(BUILD_DIR)/besm-666 -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+
+.PHONY: test-e2e
+test_e2e: build-e2e
+
+
 
 .PHONY: clean
 .SILENT: clean

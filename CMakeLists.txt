@@ -1,64 +1,96 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project(BESM-666 LANGUAGES CXX)
+project(BESM-666 
+    LANGUAGES ASM CXX
+    VERSION 1.0.0
+    DESCRIPTION "Pet RISCV Simulator"
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Python3 REQUIRED)
 
-file(GLOB BESM666_RISCV_ISA_FILES 
-    ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/rv64_*)
-add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
-    COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
-    COMMENT "Creating include/besm-666/autogen directory"
-)
-add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h
-    COMMAND python3 ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py -c 
-        ${BESM666_RISCV_ISA_FILES}
-    DEPENDS ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
-    DEPENDS ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py 
-    DEPENDS ${BESM666_RISCV_ISA_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
-    COMMENT "Generating RICSV instruction encoding info."
-)
-add_custom_target(besm666_riscv_isa DEPENDS 
-    ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h)
+if(DEFINED BESM666_WITH_E2E_TESTS AND NOT DEFINED BESM666_RISCV_SYSROOT)
+    message(FATAL_ERROR "BESM666_RISCV_SYSROOT should be defined")
+endif()
 
-add_library(besm666_include INTERFACE)
-target_include_directories(besm666_include INTERFACE
-    ./include
-)
-add_dependencies(besm666_include besm666_riscv_isa)
+if(NOT DEFINED BESM666__PARENT_BUILD)
+    include(ExternalProject)
 
-add_library(besm666_shared SHARED)
-add_library(besm666::besm666_shared ALIAS besm666_shared)
-target_sources(besm666_shared PRIVATE
-    ./src/stub.cpp
-)
+    ExternalProject_Add(besm666_simulator
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}
+        BINARY_DIR ${CMAKE_BINARY_DIR}/besm-666
+        CMAKE_CACHE_ARGS
+            -DBESM666__SIMULATOR_BUILD:BOOL=ON
+            -DBESM666__PARENT_BUILD:BOOL=ON
+        INSTALL_COMMAND ""
+    )
 
-target_link_libraries(besm666_shared
-PUBLIC
-    besm666_include
-    besm666_memory
-    besm666_exec
-    besm666_decoder
-    besm666_sim
-)
+    if(DEFINED BESM666_WITH_E2E_TESTS)
+        ExternalProject_Add(besm666_e2e
+            SOURCE_DIR ${CMAKE_SOURCE_DIR}
+            BINARY_DIR ${CMAKE_BINARY_DIR}/e2e
+            CMAKE_CACHE_ARGS
+                -DBESM666__PARENT_BUILD:BOOL=ON
+                -DBESM666__E2E_TESTS_BUILD:BOOL=ON
+                -DBESM666_RISCV_SYSROOT:FILEPATH=${BESM666_RISCV_SYSROOT}
+                -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_SOURCE_DIR}/tools/riscv64-toolchain.make
+            INSTALL_COMMAND ""
+        )
+    endif()
 
-add_subdirectory(./src/memory)
-add_subdirectory(./src/util)
-add_subdirectory(./src/exec)
-add_subdirectory(./src/decoder)
-add_subdirectory(./src/sim)
-add_subdirectory(./standalone)
-add_subdirectory(third_party)
+    return()
+endif()
 
-enable_testing()
-include (CTest)
-if (BESM666_ENABLE_VALGRIND)
-    set(CMAKE_CTEST_ARGUMENTS --test-action memcheck)
-endif ()
-add_subdirectory(unit_test)
+if(DEFINED BESM666__SIMULATOR_BUILD)
+    include(GNUInstallDirs)
+    include(CMakePackageConfigHelpers)
+
+    find_package(Python3 REQUIRED)
+    find_package(Git REQUIRED)
+
+    message(STATUS "Fetching submodules")
+    #execute_process(
+    #COMMAND ${Git_EXECUTABLE} submodule update --init --recursive
+    #WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    #RESULT_VARIABLE GIT_SUBMODULE_UPDATE_RESULT
+    #)
+    #if(NOT GIT_SUBMODULE_UPDATE_RESULT EQUAL "0")
+    #message(FATAL_ERROR "Failed to fetch submodules")
+    #endif()
+
+    file(GLOB BESM666_RISCV_ISA_FILES 
+        ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/rv64_*)
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+        COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+        COMMENT "Creating include/besm-666/autogen directory"
+    )
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h
+        COMMAND ${Python3_EXECUTABLE} 
+            ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py -c 
+            ${BESM666_RISCV_ISA_FILES}
+        DEPENDS ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+        DEPENDS ${CMAKE_SOURCE_DIR}/third_party/riscv-opcodes/parse.py 
+        DEPENDS ${BESM666_RISCV_ISA_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/include/besm-666/autogen
+        COMMENT "Generating RICSV instruction encoding info."
+    )
+    add_custom_target(besm666_riscv_isa DEPENDS 
+        ${CMAKE_SOURCE_DIR}/include/besm-666/autogen/encoding.out.h)
+
+    add_subdirectory(src)
+    add_subdirectory(standalone)
+    add_subdirectory(third_party)
+
+    enable_testing()
+    if (DEFINED BESM666_TEST_WITH_VALGRIND)
+        include (CTest)
+        set(CMAKE_CTEST_ARGUMENTS --test-action memcheck)
+    endif()
+
+    add_subdirectory(unit_test)
+endif()
+
+add_subdirectory(e2e_test)
