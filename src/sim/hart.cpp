@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/sim/hart.hpp"
@@ -17,6 +18,9 @@ void Hart::runCycle() {
     RV64UDWord pc = exec_.getState().read(exec::GPRF::PC);
     assert(pc % 4 == 0);
 
+    // out-of-program control
+    prevPC_ = pc;
+
     // fetch
     RV64UWord instrBytecode = mmu_->loadWord(pc);
 
@@ -25,9 +29,6 @@ void Hart::runCycle() {
 
     // execute
     exec_.exec(instr);
-
-    // out-of-program control
-    prevPC_ = pc;
 }
 
 bool Hart::finished() const {
