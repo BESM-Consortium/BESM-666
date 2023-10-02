@@ -11,7 +11,7 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
     target_link_options(besm666-e2eif PUBLIC
         "-T" "${CMAKE_CURRENT_SOURCE_DIR}/e2e-linker.ld"
         "-mcmodel=medany" "-fvisibility=hidden" "-nostdlib"
-        "-nostartfiles"
+        "-nostartfiles" "-march=rv64id"
     )
 
     function(besm666_e2etest_asm SOURCE_NAME)
