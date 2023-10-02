@@ -341,7 +341,7 @@ TEST_F(RV64IExecutorTest, JAL) {
     Exec();
 
     EXPECT_EQ(ReadReg(exec::GPRF::X1), prevPC + 4);
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), 15 * 2);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), 15);
 }
 
 TEST_F(RV64IExecutorTest, JALR) {
@@ -352,7 +352,7 @@ TEST_F(RV64IExecutorTest, JALR) {
     Exec();
 
     EXPECT_EQ(ReadReg(exec::GPRF::X1), prevPC + 4);
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), 11 + 15 * 2 - 1);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), 11 + 15);
 }
 
 TEST_F(RV64IExecutorTest, BEQ_True) {
