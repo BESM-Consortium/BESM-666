@@ -2,7 +2,7 @@
 BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := include
-TEST_DIR := test
+TEST_DIR := unit_test
 STANDALONE_DIR := standalone
 
 RISCV_SYSROOT ?= $(PWD)/../sysroot
@@ -39,11 +39,11 @@ build-e2e:
 
 .PHONY: test
 test: build
-	ctest $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
+	ctest --test-dir $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
 
 .PHONY: test-val
 test-val: build-val
-	ctest $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
+	ctest --test-dir $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
 
 .PHONY: test-e2e
 test-e2e: build-e2e
