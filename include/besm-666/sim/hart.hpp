@@ -9,7 +9,7 @@
 
 namespace besm::sim {
 
-class Hart {
+class Hart : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<Hart>;
     static SPtr Create(mem::PhysMem::SPtr pMem);
