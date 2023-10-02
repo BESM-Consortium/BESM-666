@@ -11,12 +11,13 @@ env:
 
 jobs:
   build:
+    name: Running unit tests with ${{matrix.ctest_option}} option
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ctect_option:
-          - "-DBESM666_ENABLE_VALGRIND=1"
-          - "-DBESM666_ENABLE_VALGRIND=0"
+          - "-DBESM666_TEST_WITH_VALGRIND=OFF"
+          - "-DBESM666_TEST_WITH_VALGRIND=ON"
     steps:
     - uses: actions/checkout@v3
       with:
@@ -33,4 +34,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: make test
+      run: ctest --test-dir ${{github.workspace}}/build/besm-666
