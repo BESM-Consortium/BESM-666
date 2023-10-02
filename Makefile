@@ -10,7 +10,7 @@ RISCV_SYSROOT := $(PWD)/../sysroot
 JOBS ?= 4
 
 .PHONY: all
-all: format build test
+all: test test-e2e
 
 
 .PHONY: format
@@ -24,31 +24,30 @@ format:
 .PHONY: build
 build:
 	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR)
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
+	cmake --build $(PWD)/$(BUILD_DIR) --parallel $(JOBS)
 
 .PHONY: build-val
 build-val:
 	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_TEST_WITH_VALGRIND=ON
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
+	cmake --build $(PWD)/$(BUILD_DIR) --parallel $(JOBS)
 
 .PHONY: build-e2e
 build-e2e:
 	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DBESM666_WITH_E2E_TESTS=ON \
 		-DBESM666_RISCV_SYSROOT=$(RISCV_SYSROOT)
-	make -C $(PWD)/$(BUILD_DIR) -j $(JOBS)
+	cmake --build $(PWD)/$(BUILD_DIR) --parallel $(JOBS)
 
 .PHONY: test
 test: build
-	make -C $(PWD)/$(BUILD_DIR)/besm-666 -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+	ctest $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
 
 .PHONY: test-val
 test-val: build-val
-	make -C $(PWD)/$(BUILD_DIR)/besm-666 -j $(JOBS) test CTEST_OUTPUT_ON_FAILURE=1
+	ctest $(PWD)/$(BUILD_DIR)/besm-666 --parallel $(JOBS) --output-on-failure
 
 .PHONY: test-e2e
-test_e2e: build-e2e
-
-
+test-e2e: build-e2e
+	ctest --test-dir $(PWD)/$(BUILD_DIR)/e2e --output-on-failure
 
 .PHONY: clean
 .SILENT: clean

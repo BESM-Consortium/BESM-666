@@ -93,4 +93,7 @@ if(DEFINED BESM666__SIMULATOR_BUILD)
     add_subdirectory(unit_test)
 endif()
 
+if (DEFINED BESM666__E2E_TESTS_BUILD)
+    enable_testing()
+endif()
 add_subdirectory(e2e_test)

@@ -21,10 +21,10 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
             target_link_libraries(${TARGET_NAME} PRIVATE besm666-e2eif)
             set_property(SOURCE ${SOURCE_NAME} APPEND PROPERTY COMPILE_OPTIONS
                 "-x" "assembler-with-cpp")
-            add_test(NAME ${TARGET_NAME} COMMAND besm666-a0-validator ${TARGET_NAME})
+            add_test(NAME ${TARGET_NAME} 
+                COMMAND ${CMAKE_BINARY_DIR}/../besm-666/e2e_test/besm666-a0-validator ${TARGET_NAME})
     endfunction(besm666_e2etest_asm)
 
-    enable_testing()
     besm666_e2etest_asm(./dummy-test.s)
 endif()
 
