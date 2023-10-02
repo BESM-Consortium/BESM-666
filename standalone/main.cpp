@@ -4,6 +4,7 @@
 
 #include "CLI/CLI.hpp"
 #include "besm-666/sim/config.hpp"
+#include "besm-666/sim/machine.hpp"
 
 int main(int argc, char *argv[]) {
     besm::sim::ConfigBuilder configBuilder;
@@ -23,6 +24,10 @@ int main(int argc, char *argv[]) {
     CLI11_PARSE(app, argc, argv);
 
     besm::sim::Config config = configBuilder.build();
+
+    besm::sim::Machine machine(config);
+
+    machine.run();
 
     return 0;
 }
