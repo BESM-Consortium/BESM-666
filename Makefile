@@ -5,9 +5,9 @@ INC_DIR := include
 TEST_DIR := test
 STANDALONE_DIR := standalone
 
-RISCV_SYSROOT := $(PWD)/../sysroot
+RISCV_SYSROOT ?= $(PWD)/../sysroot
 
-JOBS ?= 4
+JOBS ?= 8
 
 .PHONY: all
 all: test test-e2e
