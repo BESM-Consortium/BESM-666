@@ -4,15 +4,18 @@
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/sim/hart.hpp"
+#include "besm-666/sim/hooks.hpp"
 
 namespace besm::sim {
 
-Hart::SPtr Hart::Create(mem::PhysMem::SPtr pMem) {
-    return std::shared_ptr<Hart>(new Hart(pMem));
+Hart::SPtr Hart::Create(mem::PhysMem::SPtr pMem,
+                        std::shared_ptr<HookManager> const &hookManager) {
+    return std::shared_ptr<Hart>(new Hart(pMem, hookManager));
 }
 
-Hart::Hart(mem::PhysMem::SPtr pMem)
-    : mmu_(mem::MMU::Create(pMem)), exec_(mmu_),
+Hart::Hart(mem::PhysMem::SPtr pMem,
+           std::shared_ptr<HookManager> const &hookManager)
+    : mmu_(mem::MMU::Create(pMem)), exec_(mmu_), hookManager_(hookManager),
       prevPC_(std::numeric_limits<RV64UDWord>::max()) {}
 
 void Hart::runCycle() {
@@ -24,15 +27,17 @@ void Hart::runCycle() {
 
     // fetch
     RV64UWord instrBytecode = mmu_->loadWord(pc);
+    hookManager_->triggerHooks(HookManager::INSTRUCTION_FETCH, *this,
+                               &instrBytecode);
 
     // decode
     Instruction instr = dec_.parse(instrBytecode);
-    std::clog << "[HART] Fetched instruction " << instr.operation << std::endl;
+    hookManager_->triggerHooks(HookManager::INSTRUCTION_DECODE, *this, &instr);
 
     // execute
     exec_.exec(instr);
-
-    exec::GPRFStateDumper(std::clog).dump(exec_.getState());
+    hookManager_->triggerHooks(HookManager::INSTRUCTION_EXECUTE, *this,
+                               nullptr);
 }
 
 bool Hart::finished() const {

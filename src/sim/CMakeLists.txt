@@ -5,6 +5,7 @@ target_sources(besm666_sim PRIVATE
     ./config.cpp
     ./hart.cpp
     ./machine.cpp
+    ./hooks.cpp
 )
 target_link_libraries(besm666_sim PRIVATE
     besm666_include

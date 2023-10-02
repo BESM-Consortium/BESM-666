@@ -13,3 +13,6 @@
 [submodule "third_party/riscv-tests"]
 	path = third_party/riscv-tests
 	url = https://github.com/riscv-software-src/riscv-tests
+[submodule "third_party/capstone"]
+	path = third_party/capstone
+	url = https://github.com/capstone-engine/capstone
