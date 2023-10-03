@@ -1,5 +1,7 @@
 #include <cassert>
+#include <iostream>
 
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/sim/hart.hpp"
 
@@ -15,19 +17,22 @@ Hart::Hart(mem::PhysMem::SPtr pMem)
 
 void Hart::runCycle() {
     RV64UDWord pc = exec_.getState().read(exec::GPRF::PC);
-    assert(pc % 4 == 0);
+    assert(pc % 2 == 0);
+
+    // out-of-program control
+    prevPC_ = pc;
 
     // fetch
     RV64UWord instrBytecode = mmu_->loadWord(pc);
 
     // decode
     Instruction instr = dec_.parse(instrBytecode);
+    std::clog << "[HART] Fetched instruction " << instr.operation << std::endl;
 
     // execute
     exec_.exec(instr);
 
-    // out-of-program control
-    prevPC_ = pc;
+    exec::GPRFStateDumper(std::clog).dump(exec_.getState());
 }
 
 bool Hart::finished() const {

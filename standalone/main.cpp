@@ -1,8 +1,8 @@
-#include <CLI/Validators.hpp>
 #include <cstdlib>
 #include <iostream>
 
 #include "CLI/CLI.hpp"
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/machine.hpp"
 
@@ -24,10 +24,15 @@ int main(int argc, char *argv[]) {
     CLI11_PARSE(app, argc, argv);
 
     besm::sim::Config config = configBuilder.build();
-
     besm::sim::Machine machine(config);
+    std::clog << "[BESM-666] Created RISCV machine. Starting simulation"
+              << std::endl;
 
     machine.run();
+    std::clog << "[BESM-666] Simulation finished. Machine state is"
+              << std::endl;
+
+    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     return 0;
 }

@@ -5,6 +5,6 @@ target_sources(besm666_standalone PRIVATE
     ./main.cpp
 )
 target_link_libraries(besm666_standalone PRIVATE
-    besm666::besm666_shared
+    besm666_shared
     CLI11::CLI11
 )
