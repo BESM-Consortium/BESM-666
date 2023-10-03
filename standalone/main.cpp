@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
 
     besm::sim::Config config = configBuilder.build();
     besm::sim::Machine machine(config);
+
     std::clog << "[BESM-666] INFO: Created RISCV machine." << std::endl;
 
     if (verboseLogging) {
@@ -89,6 +90,10 @@ int main(int argc, char *argv[]) {
 
     std::clog << "[BESM-666] INFO: Starting simulation" << std::endl;
     machine.run();
+    std::clog << "[BESM-666] Simulation finished. Machine state is"
+              << std::endl;
+
+    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     std::clog << "[BESM-666] Simulation finished. Machine state is"
               << std::endl;

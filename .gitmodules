@@ -16,3 +16,4 @@
 [submodule "third_party/capstone"]
 	path = third_party/capstone
 	url = https://github.com/capstone-engine/capstone
+
