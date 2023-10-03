@@ -15,9 +15,10 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
     besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
 
     cs_open(CS_ARCH_RISCV, CS_MODE_RISCV64, &CapstoneHandler);
-    std::atexit([]() { 
-            std::clog << "[BESM-666] VERBOSE: Verbose logger finished" << std::endl;
-            cs_close(&CapstoneHandler); });
+    std::atexit([]() {
+        std::clog << "[BESM-666] VERBOSE: Verbose logger finished" << std::endl;
+        cs_close(&CapstoneHandler);
+    });
 
     std::clog << "[BESM-666] VERBOSE: Verbose logging enabled" << std::endl;
 
@@ -37,7 +38,8 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
 
             if (count > 0) {
                 std::clog << "[BESM-666] VERBOSE: Disassembly\n\t"
-                          << instruction->mnemonic << " " << instruction->op_str << std::endl;
+                          << instruction->mnemonic << " " << instruction->op_str
+                          << std::endl;
             } else {
                 std::clog << "[BESM-666] VERBOSE: Failed to disasm bytecode"
                           << std::endl;
@@ -46,9 +48,11 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
             cs_free(instruction, count);
         });
 
-    hookManager->registerHook(besm::sim::HookManager::INSTRUCTION_EXECUTE,
-        [] (besm::sim::Hart const& hart, void const*) {
-            std::clog << "[BESM-666] VERBOSE: Force dumping machine state." << std::endl;
+    hookManager->registerHook(
+        besm::sim::HookManager::INSTRUCTION_EXECUTE,
+        [](besm::sim::Hart const &hart, void const *) {
+            std::clog << "[BESM-666] VERBOSE: Force dumping machine state."
+                      << std::endl;
             besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
         });
 }
