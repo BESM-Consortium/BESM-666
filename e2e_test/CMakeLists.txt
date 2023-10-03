@@ -11,10 +11,10 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
     target_link_options(besm666-e2eif PUBLIC
         "-T" "${CMAKE_CURRENT_SOURCE_DIR}/e2e-linker.ld"
         "-mcmodel=medany" "-fvisibility=hidden" "-nostdlib"
-        "-nostartfiles"
+        "-nostartfiles" "-lgcc"
     )
     target_compile_options(besm666-e2eif PUBLIC
-        "-march=rv64id"
+        "-march=rv64id" "-O2"
     )
 
     function(besm666_e2etest_asm SOURCE_NAME)
@@ -44,6 +44,7 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
 
     besm666_e2etest_asm(./mult-test.s)
     besm666_e2etest_c(./bubblesort-test.c)
+    besm666_e2etest_c(./primenumber-test.c)
 endif()
 
 if (DEFINED BESM666__SIMULATOR_BUILD)
