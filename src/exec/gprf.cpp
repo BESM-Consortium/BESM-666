@@ -7,7 +7,7 @@ void GPRFStateDumper::dump(GPRF const &gprf) {
 
     for (Register regId = 0; regId < GPRF::Size; ++regId) {
         RV64UDWord v = gprf.read(regId);
-        if(v == 0) {
+        if (v == 0) {
             continue;
         }
 

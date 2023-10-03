@@ -16,8 +16,7 @@ Hart::SPtr Hart::Create(mem::PhysMem::SPtr pMem,
 Hart::Hart(mem::PhysMem::SPtr pMem,
            std::shared_ptr<HookManager> const &hookManager)
     : mmu_(mem::MMU::Create(pMem)), exec_(mmu_), hookManager_(hookManager),
-      prevPC_(std::numeric_limits<RV64UDWord>::max()),
-      instrsExecuted_(0) {}
+      prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0) {}
 
 void Hart::runCycle() {
     RV64UDWord pc = exec_.getState().read(exec::GPRF::PC);
