@@ -7,7 +7,8 @@ Machine::Machine(sim::Config const &config) {
                 .loadElf(config.executablePath())
                 .build();
 
-    hart_ = sim::Hart::Create(pMem_);
+    hookManager_ = sim::HookManager::Create();
+    hart_ = sim::Hart::Create(pMem_, hookManager_);
 }
 
 void Machine::run() { hart_->run(); }

@@ -21,5 +21,9 @@ int main(int argc, char* argv[]) {
 
     besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
-    return machine.getState().read(besm::exec::GPRF::X10) == 1;
+    if(machine.getState().read(besm::exec::GPRF::X10) == 1) {
+        return 0;
+    } else {
+        return 1;
+    }
 }

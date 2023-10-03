@@ -1,4 +1,4 @@
-
+.option norvc
 .section .text
 .global start
 start:

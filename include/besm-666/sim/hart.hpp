@@ -9,10 +9,13 @@
 
 namespace besm::sim {
 
+class HookManager;
+
 class Hart : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<Hart>;
-    static SPtr Create(mem::PhysMem::SPtr pMem);
+    static SPtr Create(mem::PhysMem::SPtr pMem,
+                       std::shared_ptr<HookManager> const &hookManager);
 
     exec::GPRF const &getState() const { return exec_.getState(); }
 
@@ -22,11 +25,13 @@ public:
     void run();
 
 private:
-    explicit Hart(mem::PhysMem::SPtr pMem);
+    explicit Hart(mem::PhysMem::SPtr pMem,
+                  std::shared_ptr<HookManager> const &hookManager);
 
     dec::Decoder dec_;
     mem::MMU::SPtr mmu_;
     exec::Executor exec_;
+    std::shared_ptr<sim::HookManager> hookManager_;
 
     RV64UDWord prevPC_;
 };
