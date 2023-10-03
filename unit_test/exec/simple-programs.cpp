@@ -34,7 +34,7 @@ TEST(Executor, Sum) {
         {exec::GPRF::X2, exec::GPRF::X2, exec::GPRF::X0, 1,
          InstructionOp::ADDI},
         // PC = 20 - branch if iterator less than upper limit
-        {exec::GPRF::X0, exec::GPRF::X2, exec::GPRF::X3, util::Unsignify(-4),
+        {exec::GPRF::X0, exec::GPRF::X2, exec::GPRF::X3, util::Unsignify(-8),
          InstructionOp::BLT},
         // PC = 24 - terminating nop
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
@@ -81,7 +81,7 @@ TEST(Executor, Mul) {
         {exec::GPRF::X6, exec::GPRF::X2, exec::GPRF::X0, 1,
          InstructionOp::ANDI},
         // PC = 24 - skip adding if bit is not set
-        {exec::GPRF::X0, exec::GPRF::X6, exec::GPRF::X0, 4, InstructionOp::BEQ},
+        {exec::GPRF::X0, exec::GPRF::X6, exec::GPRF::X0, 8, InstructionOp::BEQ},
         // PC = 28 - add first factor to result is bit is set
         {exec::GPRF::X3, exec::GPRF::X3, exec::GPRF::X1, 0, InstructionOp::ADD},
         // PC = 32 - shift bits of second factor right
@@ -91,7 +91,7 @@ TEST(Executor, Mul) {
         {exec::GPRF::X1, exec::GPRF::X1, exec::GPRF::X0, 1,
          InstructionOp::SLLI},
         // PC = 40 - continue if second factor is not zero
-        {exec::GPRF::X0, exec::GPRF::X2, exec::GPRF::X0, util::Unsignify(-10),
+        {exec::GPRF::X0, exec::GPRF::X2, exec::GPRF::X0, util::Unsignify(-20),
          InstructionOp::BNE},
         // PC = 44 - terminating nop
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
