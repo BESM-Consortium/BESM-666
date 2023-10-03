@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <chrono>
 
 #include "besm-666/sim/hooks.hpp"
 #include "capstone/capstone.h"
@@ -84,10 +85,22 @@ int main(int argc, char *argv[]) {
     }
 
     std::clog << "[BESM-666] INFO: Starting simulation" << std::endl;
-    machine.run();
 
-    std::clog << "[BESM-666] Simulation finished. Machine state is"
-              << std::endl;
+    auto time_start = std::chrono::steady_clock::now();
+    machine.run();
+    auto time_end = std::chrono::steady_clock::now();
+
+    double ellapsedSecond = 
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+                time_end - time_start).count() * 1e-9;
+
+    size_t instrsExecuted = machine.getInstrsExecuted();
+
+    double mips = static_cast<double>(instrsExecuted) * 1e-6 / ellapsedSecond;
+
+    std::clog << "[BESM-666] Simulation finished." << std::endl;
+    std::clog << "[BESM-666] Time = " << ellapsedSecond << "s, Insns " <<
+        instrsExecuted << ", MIPS = " << mips << std::endl;
     besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     return 0;
