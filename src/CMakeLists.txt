@@ -3,6 +3,7 @@ target_include_directories(besm666_include INTERFACE
     "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
+target_compile_options(besm666_include INTERFACE "-O2")
 add_dependencies(besm666_include besm666_riscv_isa)
 
 add_library(besm666_shared SHARED)
