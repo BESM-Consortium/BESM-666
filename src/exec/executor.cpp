@@ -408,7 +408,7 @@ void Executor::exec_JALR(Instruction const instr) {
 
 void Executor::exec_BEQ(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
@@ -422,7 +422,7 @@ void Executor::exec_BEQ(Instruction const instr) {
 
 void Executor::exec_BNE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
@@ -436,7 +436,7 @@ void Executor::exec_BNE(Instruction const instr) {
 
 void Executor::exec_BLT(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
 
@@ -450,7 +450,7 @@ void Executor::exec_BLT(Instruction const instr) {
 
 void Executor::exec_BLTU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 
@@ -464,7 +464,7 @@ void Executor::exec_BLTU(Instruction const instr) {
 
 void Executor::exec_BGE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
 
@@ -478,7 +478,7 @@ void Executor::exec_BGE(Instruction const instr) {
 
 void Executor::exec_BGEU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(GPRF::PC);
-    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate) << 1;
+    RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
 

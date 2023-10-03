@@ -18,6 +18,7 @@ public:
                        std::shared_ptr<HookManager> const &hookManager);
 
     exec::GPRF const &getState() const { return exec_.getState(); }
+    size_t getInstrsExecuted() const { return instrsExecuted_; }
 
     void runCycle();
     bool finished() const;
@@ -34,6 +35,7 @@ private:
     std::shared_ptr<sim::HookManager> hookManager_;
 
     RV64UDWord prevPC_;
+    size_t instrsExecuted_;
 };
 
 } // namespace besm::sim
