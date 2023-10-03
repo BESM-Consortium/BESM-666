@@ -30,8 +30,8 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
             besm::RV64UWord bytecode =
                 *reinterpret_cast<besm::RV64UWord const *>(pBytecode);
             std::clog << "[BESM-666] VERBOSE: Fetched bytecode " << std::hex
-                      << bytecode << std::dec << " at pc = " 
-                      << std::hex << pc << std::dec << std::endl;
+                      << bytecode << std::dec << " at pc = " << std::hex << pc
+                      << std::dec << std::endl;
 
             cs_insn *instruction;
             size_t count = cs_disasm(
