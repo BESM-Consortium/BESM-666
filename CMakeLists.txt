@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 project(BESM-666 
-    LANGUAGES ASM CXX
+    LANGUAGES ASM C CXX
     VERSION 1.0.0
     DESCRIPTION "Pet RISCV Simulator"
 )
