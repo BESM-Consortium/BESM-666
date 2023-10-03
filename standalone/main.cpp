@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 
@@ -29,7 +30,8 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
             besm::RV64UWord bytecode =
                 *reinterpret_cast<besm::RV64UWord const *>(pBytecode);
             std::clog << "[BESM-666] VERBOSE: Fetched bytecode " << std::hex
-                      << bytecode << std::dec << " at pc = " << pc << std::endl;
+                      << bytecode << std::dec << " at pc = " << std::hex << pc
+                      << std::dec << std::endl;
 
             cs_insn *instruction;
             size_t count = cs_disasm(
@@ -81,7 +83,6 @@ int main(int argc, char *argv[]) {
 
     besm::sim::Config config = configBuilder.build();
     besm::sim::Machine machine(config);
-
     std::clog << "[BESM-666] INFO: Created RISCV machine." << std::endl;
 
     if (verboseLogging) {
@@ -89,14 +90,24 @@ int main(int argc, char *argv[]) {
     }
 
     std::clog << "[BESM-666] INFO: Starting simulation" << std::endl;
+
+    auto time_start = std::chrono::steady_clock::now();
     machine.run();
-    std::clog << "[BESM-666] Simulation finished. Machine state is"
-              << std::endl;
+    auto time_end = std::chrono::steady_clock::now();
 
-    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
+    double ellapsedSecond =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(time_end -
+                                                             time_start)
+            .count() *
+        1e-9;
 
-    std::clog << "[BESM-666] Simulation finished. Machine state is"
-              << std::endl;
+    size_t instrsExecuted = machine.getInstrsExecuted();
+
+    double mips = static_cast<double>(instrsExecuted) * 1e-6 / ellapsedSecond;
+
+    std::clog << "[BESM-666] Simulation finished." << std::endl;
+    std::clog << "[BESM-666] Time = " << ellapsedSecond << "s, Insns "
+              << instrsExecuted << ", MIPS = " << mips << std::endl;
     besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     return 0;

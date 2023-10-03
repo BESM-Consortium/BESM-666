@@ -363,7 +363,7 @@ TEST_F(RV64IExecutorTest, BEQ_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BEQ_False) {
     LoadImm12(exec::GPRF::X2, 15);
@@ -384,7 +384,7 @@ TEST_F(RV64IExecutorTest, BNE_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BNE_False) {
     LoadImm12(exec::GPRF::X2, 15);
@@ -405,7 +405,7 @@ TEST_F(RV64IExecutorTest, BLT_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BLT_False) {
     LoadImm12(exec::GPRF::X2, -2);
@@ -426,7 +426,7 @@ TEST_F(RV64IExecutorTest, BLTU_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BLTU_False) {
     LoadImm12(exec::GPRF::X2, 3);
@@ -447,7 +447,7 @@ TEST_F(RV64IExecutorTest, BGE_Greater_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BGE_Greater_False) {
     LoadImm12(exec::GPRF::X2, -3);
@@ -468,7 +468,7 @@ TEST_F(RV64IExecutorTest, BGE_Equal_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BGE_Equal_False) {
     LoadImm12(exec::GPRF::X2, -3);
@@ -489,7 +489,7 @@ TEST_F(RV64IExecutorTest, BGEU_Greater_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BGEU_Greater_False) {
     LoadImm12(exec::GPRF::X2, 2);
@@ -510,7 +510,7 @@ TEST_F(RV64IExecutorTest, BGEU_Equal_True) {
 
     Exec();
 
-    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 30);
+    EXPECT_EQ(ReadReg(exec::GPRF::PC), prevPC + 15);
 }
 TEST_F(RV64IExecutorTest, BGEU_Equal_False) {
     LoadImm12(exec::GPRF::X2, 2);

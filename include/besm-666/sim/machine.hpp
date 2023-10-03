@@ -14,6 +14,8 @@ public:
     void run();
 
     exec::GPRF const &getState() const;
+
+    size_t getInstrsExecuted() const { return hart_->getInstrsExecuted(); }
     sim::HookManager::SPtr getHookManager() { return hookManager_; }
 
 private:
