@@ -10,8 +10,12 @@ RISCV_SYSROOT ?= $(PWD)/../sysroot
 JOBS ?= 8
 
 .PHONY: all
-all: test test-e2e
+all: init format test test-e2e
 
+.PHONY: init
+init:
+	git submodule init
+	git submodule update
 
 .PHONY: format
 .SILENT: format
