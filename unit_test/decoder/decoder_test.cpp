@@ -26,7 +26,8 @@ class Decoder_I : public DecoderCommon {
 protected:
     bool equal(const Instruction lhs, const Instruction rhs) override {
         return lhs.operation == rhs.operation &&
-               lhs.immidiate == rhs.immidiate && lhs.rs1 == rhs.rs1;
+               lhs.immidiate == rhs.immidiate && lhs.rs1 == rhs.rs1 &&
+               lhs.rd == rhs.rd;
     }
 
     static Instruction buildInstr(Register rd, Register rs1, Immidiate imm,
@@ -605,6 +606,42 @@ TEST_F(Decoder_I, SRAIW) {
 TEST_F(Decoder_I, NOT_SRLIW_OR_SRAIW) {
     Instruction parsed = decoder.parse(0b01100000100000100101110010011011);
     ASSERT_EQ(parsed.operation, INV_OP);
+}
+
+TEST_F(Decoder_I, CSRRW) {
+    const auto instance = buildInstr(0b01010, 0b10111, 0b001000111100, CSRRW);
+    Instruction parsed = decoder.parse(0b00100011110010111001010101110011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, CSRRS) {
+    const auto instance = buildInstr(0b01101, 0b00100, 0b111110011100, CSRRS);
+    Instruction parsed = decoder.parse(0b11111001110000100010011011110011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, CSRRC) {
+    const auto instance = buildInstr(0b01011, 0b00110, 0b011001010001, CSRRC);
+    Instruction parsed = decoder.parse(0b01100101000100110011010111110011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, CSRRWI) {
+    const auto instance = buildInstr(0b10101, 0b01110, 0b101110111100, CSRRWI);
+    Instruction parsed = decoder.parse(0b10111011110001110101101011110011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, CSRRSI) {
+    const auto instance = buildInstr(0b11010, 0b10001, 0b110000010010, CSRRSI);
+    Instruction parsed = decoder.parse(0b11000001001010001110110101110011);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, CSRRCI) {
+    const auto instance = buildInstr(0b00011, 0b11001, 0b101111001011, CSRRCI);
+    Instruction parsed = decoder.parse(0b10111100101111001111000111110011);
+    EXPECT_TRUE(equal(parsed, instance));
 }
 
 TEST_F(Decoder_S, SD1) {
