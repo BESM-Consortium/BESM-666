@@ -14,8 +14,7 @@ all: init format test test-e2e
 
 .PHONY: init
 init:
-	git submodule init
-	git submodule update
+	git submodule update --init --recursive
 
 .PHONY: format
 .SILENT: format
