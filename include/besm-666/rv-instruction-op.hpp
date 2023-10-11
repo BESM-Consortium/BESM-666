@@ -63,6 +63,13 @@ enum InstructionOp {
     SLLW,
     SRLW,
     SRAW,
+    CSRRW,  // 1110011 , 001     , I
+    CSRRS,  // 1110011 , 010     , I
+    CSRRC,  // 1110011 , 011     , I
+    CSRRWI, // 1110011 , 101     , I
+    CSRRSI, // 1110011 , 110     , I
+    CSRRCI, // 1110011 , 111     , I
+
 };
 
 }
