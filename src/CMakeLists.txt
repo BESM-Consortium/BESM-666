@@ -19,6 +19,9 @@ PUBLIC
     besm666_decoder
     besm666_sim
 )
+target_link_options(besm666_shared PRIVATE
+    "-Wl,-export-dynamic"
+)
 
 add_subdirectory(memory)
 add_subdirectory(util)

@@ -7,5 +7,7 @@ target_sources(besm666_standalone PRIVATE
 target_link_libraries(besm666_standalone PRIVATE
     besm666_shared
     CLI11::CLI11
-    capstone::capstone
+)
+target_link_options(besm666_standalone PRIVATE
+    "-Wl,-export-dynamic"
 )

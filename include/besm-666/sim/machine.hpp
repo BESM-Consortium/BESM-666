@@ -1,9 +1,12 @@
 #pragma once
 
+#include <vector>
+
+#include "besm-666/util/non-copyable.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/hart.hpp"
 #include "besm-666/sim/hooks.hpp"
-#include "besm-666/util/non-copyable.hpp"
+#include "besm-666/sim/plugin.hpp"
 
 namespace besm::sim {
 
@@ -19,7 +22,10 @@ public:
     sim::HookManager::SPtr getHookManager() { return hookManager_; }
 
 private:
+    void loadPlugins(sim::Config const& config);
+
     HookManager::SPtr hookManager_;
+    std::vector<Plugin> plugins_;
     mem::PhysMem::SPtr pMem_;
     sim::Hart::SPtr hart_;
 };

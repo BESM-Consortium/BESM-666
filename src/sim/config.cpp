@@ -5,8 +5,16 @@ std::filesystem::path Config::executablePath() const {
     return data_.executablePath;
 }
 
+std::vector<std::string> const& Config::plugins() const {
+    return data_.plugins;
+}
+
 void ConfigBuilder::setExecutablePath(std::filesystem::path path) {
     data_.executablePath = path;
+}
+
+void ConfigBuilder::addPlugin(std::filesystem::path path) {
+    data_.plugins.push_back(path);
 }
 
 Config ConfigBuilder::build() {

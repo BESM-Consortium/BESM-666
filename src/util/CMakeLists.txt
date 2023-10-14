@@ -2,6 +2,7 @@
 add_library(besm666_util STATIC)
 target_sources(besm666_util PRIVATE
     ./elf-parser.cpp
+    ./dynamic-library.cpp
 )
 target_link_libraries(besm666_util
 PUBLIC
