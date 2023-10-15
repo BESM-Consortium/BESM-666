@@ -1,118 +1,128 @@
 #include <cassert>
+#include <memory>
 #include <stdexcept>
 
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/memory/ram.hpp"
+#include "besm-666/util/elf-parser.hpp"
 #include "besm-666/util/math.hpp"
 
 namespace besm::mem {
 
-PhysMemPagemap::PhysMemPagemap(size_t pageSize, size_t allocatorChunkSize)
-    : pageSize_(pageSize), allocator_(allocatorChunkSize, pageSize) {
-
-    if (pageSize == 0 || !Is2Pow(pageSize)) {
-        throw std::invalid_argument("Invalid page size");
-    }
-    if (allocatorChunkSize / pageSize == 0) {
-        throw std::invalid_argument("Invalid chunk size & page size ratio");
-    }
+RV64UChar PhysMem::loadByte(RV64Ptr address) const {
+    auto [range, device] = this->findDevice(address);
+    return device->loadByte(address - range.leftBorder());
+}
+RV64UHWord PhysMem::loadHWord(RV64Ptr address) const {
+    auto [range, device] = this->findDevice(address);
+    return device->loadHWord(address - range.leftBorder());
+}
+RV64UWord PhysMem::loadWord(RV64Ptr address) const {
+    auto [range, device] = this->findDevice(address);
+    return device->loadWord(address - range.leftBorder());
+}
+RV64UDWord PhysMem::loadDWord(RV64Ptr address) const {
+    auto [range, device] = this->findDevice(address);
+    return device->loadDWord(address - range.leftBorder());
 }
 
-PhysMemPagemap::PhysMemPagemap(PhysMemPagemap &&other)
-    : pageSize_(other.pageSize_), allocator_(std::move(other.allocator_)),
-      pagemap_(std::move(other.pagemap_)) {}
-
-void PhysMemPagemap::storeByte(RV64Ptr address, RV64UChar value) {
-    RV64UChar *pos = reinterpret_cast<RV64UChar *>(this->touchAddress(address));
-    *pos = value;
+void PhysMem::storeByte(RV64Ptr address, RV64UChar value) {
+    auto [range, device] = this->findDevice(address);
+    device->storeByte(address, value);
 }
-RV64UChar PhysMemPagemap::loadByte(RV64Ptr address) const {
-    RV64UChar const *pos =
-        reinterpret_cast<RV64UChar const *>(this->translateAddress(address));
-    return pos == nullptr ? 0 : *pos;
+void PhysMem::storeHWord(RV64Ptr address, RV64UHWord value) {
+    auto [range, device] = this->findDevice(address);
+    device->storeHWord(address, value);
 }
-
-RV64Size PhysMemPagemap::addr2PageId(RV64Ptr address) const {
-    return address / pageSize_;
+void PhysMem::storeWord(RV64Ptr address, RV64UWord value) {
+    auto [range, device] = this->findDevice(address);
+    device->storeWord(address, value);
 }
-RV64Size PhysMemPagemap::addr2PageOffset(RV64Ptr address) const {
-    return address & (pageSize_ - 1);
+void PhysMem::storeDWord(RV64Ptr address, RV64UDWord value) {
+    auto [range, device] = this->findDevice(address);
+    device->storeDWord(address, value);
 }
 
-void *PhysMemPagemap::touchAddress(RV64Ptr address) {
-    RV64Size pageId = this->addr2PageId(address);
-    auto pageItr = pagemap_.find(pageId);
-    if (pageItr == pagemap_.end()) {
-        Page page = {.id = pageId,
-                     .mem = reinterpret_cast<char *>(allocator_.allocPage())};
-        auto [itr, success] = pagemap_.insert(page);
-        assert(success);
-        pageItr = itr;
-    }
-
-    return pageItr->mem + this->addr2PageOffset(address);
-}
-
-void const *PhysMemPagemap::translateAddress(RV64Ptr address) const {
-    auto pageItr = pagemap_.find(this->addr2PageId(address));
-    if (pageItr == pagemap_.end()) {
-        return nullptr;
-    } else {
-        return pageItr->mem + this->addr2PageOffset(address);
+void PhysMem::storeContArea(RV64Ptr address, void const *data, size_t size) {
+    for (size_t i = 0; i < size; ++i) {
+        this->storeByte(address + i,
+                        *(reinterpret_cast<RV64UChar const *>(data) + i));
     }
 }
 
-bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::Page rhs) {
-    return lhs.id < rhs.id;
+std::pair<void const *, size_t> PhysMem::getHostAddress(RV64Ptr address) const {
+    auto [range, device] = this->findDevice(address);
+    return device->getHostAddress(address - range.leftBorder());
 }
-bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::PageId rhs) {
-    return lhs.id < rhs;
-}
-bool operator<(PhysMemPagemap::PageId lhs, PhysMemPagemap::Page rhs) {
-    return lhs < rhs.id;
-}
-
-PhysMem::PhysMem(PhysMem &&other) : pagemap_(std::move(other.pagemap_)) {}
-
-PhysMem::PhysMem(PhysMemPagemap &&pagemap) : pagemap_(std::move(pagemap)) {}
-
-PhysMemBuilder::PhysMemBuilder(size_t pageSize, size_t allocatorChunkSize)
-    : pagemap_(pageSize, allocatorChunkSize)
-#ifndef NDEBUG
-      ,
-      wasAlreadyBuilt_(false)
-#endif
-{
+std::pair<void *, size_t> PhysMem::getHostAddress(RV64Ptr address) {
+    auto [range, device] = this->findDevice(address);
+    return device->getHostAddress(address - range.leftBorder());
 }
 
-PhysMemBuilder &PhysMemBuilder::loadElf(const std::filesystem::path &elfPath) {
-    std::clog << "[PhysMem] Loading ELF file \'" << elfPath << "\'"
-              << std::endl;
-
-    auto parserPtr = besm::util::createParser(elfPath);
-    for (const auto &seg : parserPtr->getLoadableSegments()) {
-        std::clog << "\tLoading segment of size " << seg.size << " at address "
-                  << seg.address << std::endl;
-
-        this->loadContArea(seg.address, seg.data, seg.size);
-    }
-    return *this;
-}
-
-PhysMemBuilder &PhysMemBuilder::loadContArea(RV64Ptr address, void const *data,
-                                             RV64Size size) {
-    for (RV64Size i = 0; i < size; ++i) {
-        pagemap_.storeByte(address + i, *((RV64UChar const *)data + i));
+std::pair<util::Range<RV64Ptr>, std::shared_ptr<IPhysMemDevice>>
+PhysMem::findDevice(RV64Ptr address) const {
+    if (lastAccessedRange_.contains(address)) {
+        return std::make_pair(lastAccessedRange_, lastAccessedDevice_);
     }
 
-    return *this;
+    for (auto [range, device] : devices_) {
+        if (range.contains(address)) {
+            lastAccessedRange_ = range;
+            lastAccessedDevice_ = device;
+
+            return std::make_pair(range, device);
+        }
+    }
+
+    throw IPhysMemDevice::InvalidAddressError("Device not found");
 }
 
-PhysMem::SPtr PhysMemBuilder::build() {
-#ifndef NDEBUG
-    assert(!wasAlreadyBuilt_);
-    wasAlreadyBuilt_ = true;
-#endif
-    return PhysMem::SPtr(new PhysMem(std::move(pagemap_)));
+std::vector<PhysMem::DeviceDescriptor> PhysMem::getDevices() const {
+    std::vector<DeviceDescriptor> deviceDescriptors;
+    for (auto const &device : devices_) {
+        DeviceDescriptor descriptor = {
+            .range = device.first,
+            .device =
+                std::static_pointer_cast<IPhysMemDevice const>(device.second)};
+        deviceDescriptors.push_back(std::move(descriptor));
+    }
+
+    return deviceDescriptors;
+}
+
+void PhysMemBuilder::mapRAM(RV64Ptr address, size_t ramSize, size_t ramPageSize,
+                            size_t ramChunkSize) {
+    std::shared_ptr<IPhysMemDevice> ram =
+        std::make_shared<dev::RAM>(ramSize, ramPageSize, ramChunkSize);
+
+    this->mapDevice(ram, address);
+}
+
+void PhysMemBuilder::mapDevice(std::shared_ptr<IPhysMemDevice> const &device,
+                               RV64Ptr address) {
+    util::Range<RV64Ptr> range(address, address + device->getSize());
+
+    for (auto const &device : devices_) {
+        if (range.contains(device.first)) {
+            throw MappingIntersection("Invalid mapping");
+        }
+    }
+
+    devices_.insert(std::make_pair(range, device));
+}
+
+std::shared_ptr<PhysMem> PhysMemBuilder::build() {
+    return std::shared_ptr<PhysMem>(new PhysMem(std::move(devices_)));
+}
+
+PhysMemLoader::PhysMemLoader(std::shared_ptr<PhysMem> const &physMem)
+    : physMem_(physMem) {}
+
+void PhysMemLoader::loadElf(std::filesystem::path const &elfPath) {
+    std::unique_ptr<util::IElfParser> parser = util::createParser(elfPath);
+    for (auto const &segment : parser->getLoadableSegments()) {
+        physMem_->storeContArea(segment.address, segment.data, segment.size);
+    }
 }
 
 } // namespace besm::mem
