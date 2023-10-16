@@ -63,10 +63,10 @@ public:
     PhysMemBuilder() = default;
     ~PhysMemBuilder() = default;
 
-    void mapRAM(RV64Ptr address, size_t ramSize, size_t ramPageSize,
-                size_t ramChunkSize);
-    void mapUART();
-    void mapTimer();
+    PhysMemBuilder &mapRAM(RV64Ptr address, size_t ramSize, size_t ramPageSize,
+                           size_t ramChunkSize);
+    PhysMemBuilder &mapUART();
+    PhysMemBuilder &mapTimer();
 
     std::shared_ptr<PhysMem> build();
 
