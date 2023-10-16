@@ -4,12 +4,15 @@
 #include <filesystem>
 #include <functional>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace besm::sim {
 
 struct ConfigData {
     // Input files
     std::filesystem::path executablePath;
+    std::vector<std::string> plugins;
 };
 
 class InvalidConfiguration : public std::runtime_error {
@@ -22,6 +25,7 @@ public:
 class Config {
 public:
     std::filesystem::path executablePath() const;
+    std::vector<std::string> const &plugins() const;
 
 private:
     friend class ConfigBuilder;
@@ -35,6 +39,7 @@ public:
     ConfigBuilder() = default;
 
     void setExecutablePath(std::filesystem::path executablePath);
+    void addPlugin(std::filesystem::path path);
 
     Config build();
 

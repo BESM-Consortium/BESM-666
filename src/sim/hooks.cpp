@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include "besm-666/sim/hooks.hpp"
 

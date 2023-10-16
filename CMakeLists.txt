@@ -49,6 +49,8 @@ if(DEFINED BESM666__SIMULATOR_BUILD)
     include(GNUInstallDirs)
     include(CMakePackageConfigHelpers)
 
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
     find_package(Python3 REQUIRED)
     find_package(Git REQUIRED)
 
@@ -86,6 +88,7 @@ if(DEFINED BESM666__SIMULATOR_BUILD)
     add_subdirectory(src)
     add_subdirectory(standalone)
     add_subdirectory(third_party)
+    add_subdirectory(plugins)
 
     enable_testing()
     if (DEFINED BESM666_TEST_WITH_VALGRIND)
