@@ -40,8 +40,7 @@ TEST(Executor, Sum) {
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
          InstructionOp::ADD}};
 
-    mem::PhysMem::SPtr pMem =
-        mem::PhysMemBuilder(4096, 1024 * 1024 * 2).build();
+    std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
     mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
     exec::Executor exec(mmu);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
@@ -97,8 +96,7 @@ TEST(Executor, Mul) {
         {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
          InstructionOp::ADD}};
 
-    mem::PhysMem::SPtr pMem =
-        mem::PhysMemBuilder(4096, 1024 * 1024 * 2).build();
+    std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
     mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
     exec::Executor exec(mmu);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
