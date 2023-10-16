@@ -1,6 +1,7 @@
 #include <cassert>
 #include <memory>
 #include <stdexcept>
+#include <string.h>
 
 #include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/memory/ram.hpp"
@@ -28,25 +29,34 @@ RV64UDWord PhysMem::loadDWord(RV64Ptr address) const {
 
 void PhysMem::storeByte(RV64Ptr address, RV64UChar value) {
     auto [range, device] = this->findDevice(address);
-    device->storeByte(address, value);
+    device->storeByte(address - range.leftBorder(), value);
 }
 void PhysMem::storeHWord(RV64Ptr address, RV64UHWord value) {
     auto [range, device] = this->findDevice(address);
-    device->storeHWord(address, value);
+    device->storeHWord(address - range.leftBorder(), value);
 }
 void PhysMem::storeWord(RV64Ptr address, RV64UWord value) {
     auto [range, device] = this->findDevice(address);
-    device->storeWord(address, value);
+    device->storeWord(address - range.leftBorder(), value);
 }
 void PhysMem::storeDWord(RV64Ptr address, RV64UDWord value) {
     auto [range, device] = this->findDevice(address);
-    device->storeDWord(address, value);
+    device->storeDWord(address - range.leftBorder(), value);
 }
 
 void PhysMem::storeContArea(RV64Ptr address, void const *data, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        this->storeByte(address + i,
-                        *(reinterpret_cast<RV64UChar const *>(data) + i));
+    for (size_t i = 0; i < size;) {
+        auto [hostAddress, hostSize] = this->getHostAddress(address + i);
+        if (hostAddress == nullptr) {
+            this->storeByte(address + i,
+                            *(reinterpret_cast<char const *>(data) + i));
+            ++i;
+        } else {
+            size_t cpySize = std::min(size - i, hostSize);
+            memcpy(hostAddress, reinterpret_cast<char const *>(data) + i,
+                   cpySize);
+            i += cpySize;
+        }
     }
 }
 
@@ -90,12 +100,15 @@ std::vector<PhysMem::DeviceDescriptor> PhysMem::getDevices() const {
     return deviceDescriptors;
 }
 
-void PhysMemBuilder::mapRAM(RV64Ptr address, size_t ramSize, size_t ramPageSize,
-                            size_t ramChunkSize) {
+PhysMemBuilder &PhysMemBuilder::mapRAM(RV64Ptr address, size_t ramSize,
+                                       size_t ramPageSize,
+                                       size_t ramChunkSize) {
     std::shared_ptr<IPhysMemDevice> ram =
-        std::make_shared<dev::RAM>(ramSize, ramPageSize, ramChunkSize);
+        std::make_shared<RAM>(ramSize, ramPageSize, ramChunkSize);
 
     this->mapDevice(ram, address);
+
+    return *this;
 }
 
 void PhysMemBuilder::mapDevice(std::shared_ptr<IPhysMemDevice> const &device,
