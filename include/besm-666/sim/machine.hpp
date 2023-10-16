@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include "besm-666/util/non-copyable.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/hart.hpp"
 #include "besm-666/sim/hooks.hpp"
 #include "besm-666/sim/plugin.hpp"
+#include "besm-666/util/non-copyable.hpp"
 
 namespace besm::sim {
 
@@ -22,7 +22,7 @@ public:
     sim::HookManager::SPtr getHookManager() { return hookManager_; }
 
 private:
-    void loadPlugins(sim::Config const& config);
+    void loadPlugins(sim::Config const &config);
 
     HookManager::SPtr hookManager_;
     std::vector<Plugin> plugins_;

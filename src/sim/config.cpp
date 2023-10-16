@@ -5,7 +5,7 @@ std::filesystem::path Config::executablePath() const {
     return data_.executablePath;
 }
 
-std::vector<std::string> const& Config::plugins() const {
+std::vector<std::string> const &Config::plugins() const {
     return data_.plugins;
 }
 

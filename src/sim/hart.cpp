@@ -50,7 +50,8 @@ void Hart::run() {
     while (!this->finished()) {
         this->runCycle();
     }
-    hookManager_->triggerHooks(HookManager::SIMULATION_FINISHED, *this, nullptr);
+    hookManager_->triggerHooks(HookManager::SIMULATION_FINISHED, *this,
+                               nullptr);
 }
 
 } // namespace besm::sim

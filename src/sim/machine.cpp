@@ -17,10 +17,10 @@ void Machine::run() { hart_->run(); }
 
 exec::GPRF const &Machine::getState() const { return hart_->getState(); }
 
-void Machine::loadPlugins(sim::Config const& config) {
-    for(auto const& pluginCmd : config.plugins()) {
-        std::filesystem::path pluginPath = pluginCmd.substr(0,
-            pluginCmd.find(" "));
+void Machine::loadPlugins(sim::Config const &config) {
+    for (auto const &pluginCmd : config.plugins()) {
+        std::filesystem::path pluginPath =
+            pluginCmd.substr(0, pluginCmd.find(" "));
 
         Plugin plugin(pluginPath);
         plugin.init(hookManager_, pluginCmd, std::clog);

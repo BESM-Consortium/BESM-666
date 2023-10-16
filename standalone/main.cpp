@@ -24,10 +24,9 @@ int main(int argc, char *argv[]) {
         ->required()
         ->check(CLI::ExistingFile);
 
-    app.add_option_function<std::string>("-p,--plugin",
-        [&](std::string const& string) {
-            configBuilder.addPlugin(string);
-        },
+    app.add_option_function<std::string>(
+        "-p,--plugin",
+        [&](std::string const &string) { configBuilder.addPlugin(string); },
         "Use plugin with specified path during the simulation");
 
     CLI11_PARSE(app, argc, argv);

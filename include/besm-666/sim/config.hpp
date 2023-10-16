@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <filesystem>
 #include <functional>
-#include <vector>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace besm::sim {
 
@@ -25,7 +25,7 @@ public:
 class Config {
 public:
     std::filesystem::path executablePath() const;
-    std::vector<std::string> const& plugins() const;
+    std::vector<std::string> const &plugins() const;
 
 private:
     friend class ConfigBuilder;
