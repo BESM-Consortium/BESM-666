@@ -46,14 +46,3 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
     besm666_e2etest_c(./bubblesort-test.c)
     besm666_e2etest_c(./primenumber-test.c)
 endif()
-
-if (DEFINED BESM666__SIMULATOR_BUILD)
-    add_executable(besm666-a0-validator)
-    target_sources(besm666-a0-validator PRIVATE
-        ./a0-validator.cpp
-    )
-    target_link_libraries(besm666-a0-validator PRIVATE
-        besm666_shared
-    )
-endif()
-

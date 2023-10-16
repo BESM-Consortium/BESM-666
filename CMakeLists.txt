@@ -98,5 +98,5 @@ endif()
 
 if (DEFINED BESM666__E2E_TESTS_BUILD)
     enable_testing()
+    add_subdirectory(e2e_test)
 endif()
-add_subdirectory(e2e_test)
