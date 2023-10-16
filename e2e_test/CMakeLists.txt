@@ -26,7 +26,7 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
             "-x" "assembler-with-cpp")
         add_test(
             NAME ${TARGET_NAME} 
-            COMMAND ${CMAKE_BINARY_DIR}/../besm-666/e2e_test/besm666-a0-validator ${TARGET_NAME}
+            COMMAND ${CMAKE_BINARY_DIR}/../besm-666/standalone/besm666_standalone --a0-validation --executable ${TARGET_NAME}
         )
     endfunction(besm666_e2etest_asm)
 
@@ -38,7 +38,7 @@ if (DEFINED BESM666__E2E_TESTS_BUILD)
         target_link_libraries(${TARGET_NAME} PRIVATE besm666-e2eif)
         add_test(
             NAME ${TARGET_NAME} 
-            COMMAND ${CMAKE_BINARY_DIR}/../besm-666/e2e_test/besm666-a0-validator ${TARGET_NAME}
+            COMMAND ${CMAKE_BINARY_DIR}/../besm-666/standalone/besm666_standalone --a0-validation --executable ${TARGET_NAME}
         )
     endfunction(besm666_e2etest_c)
 

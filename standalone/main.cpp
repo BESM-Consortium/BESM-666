@@ -105,7 +105,8 @@ int main(int argc, char *argv[]) {
            "Setup physical memory range as RAM in format \'address,size\' (in "
            "bytes)")
         ->default_val("0,1073741824")
-        ->run_callback_for_default()->force_callback()
+        ->run_callback_for_default()
+        ->force_callback()
         ->group("Memory");
 
     app.add_option_function<size_t>(
@@ -113,14 +114,16 @@ int main(int argc, char *argv[]) {
            [&](size_t value) { configBuilder.setRamPageSize(value); },
            "Setup RAM page size in bytes")
         ->default_val(4096)
-        ->run_callback_for_default()->force_callback()
+        ->run_callback_for_default()
+        ->force_callback()
         ->group("Memory");
 
     app.add_option_function<size_t>(
            "--ram-chunk-size",
            [&](size_t value) { configBuilder.setRamChunkSize(value); })
         ->default_val(2 * 1024 * 1024)
-        ->run_callback_for_default()->force_callback()
+        ->run_callback_for_default()
+        ->force_callback()
         ->group("Memory");
 
     bool verboseLogging = false;
@@ -166,7 +169,7 @@ int main(int argc, char *argv[]) {
     besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
     if (a0Validation) {
-        if (machine.getState().read(besm::exec::GPRF::X11) == 1) {
+        if (machine.getState().read(besm::exec::GPRF::X10) == 1) {
             return 0;
         } else {
             return 1;
