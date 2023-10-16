@@ -8,9 +8,9 @@
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/non-copyable.hpp"
 
-namespace besm::dev {
+namespace besm::mem {
 
-class RAMPageAllocator : public INonCopyable {
+class RAMPageAllocator final : public INonCopyable {
 public:
     RAMPageAllocator(size_t pageSize, size_t chunkSize);
     RAMPageAllocator(RAMPageAllocator &&other) noexcept;
@@ -26,7 +26,7 @@ private:
     std::vector<Chunk> chunks_;
 };
 
-class RAMPageAllocator::Chunk : public INonCopyable {
+class RAMPageAllocator::Chunk final : public INonCopyable {
 public:
     Chunk(size_t pageSize, size_t chunkSize);
     Chunk(Chunk &&other) noexcept;
@@ -41,7 +41,7 @@ private:
     size_t pageSize_;
 };
 
-class RAM : public mem::IPhysMemDevice, public INonCopyable {
+class RAM final : public mem::IPhysMemDevice {
 public:
     RAM(RV64Size ramSize, size_t pageSize, size_t chunkSize);
     RAM(RAM &&other);
@@ -119,4 +119,4 @@ template <typename DataType> void RAM::store(RV64Ptr address, DataType value) {
     *reinterpret_cast<DataType *>(hostAddress) = value;
 }
 
-} // namespace besm::dev
+} // namespace besm::mem
