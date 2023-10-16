@@ -8,7 +8,7 @@
 #include "besm-666/memory/ram.hpp"
 #include "besm-666/util/math.hpp"
 
-namespace besm::dev {
+namespace besm::mem {
 
 RAMPageAllocator::Chunk::Chunk(size_t pageSize, size_t chunkSize)
     : data_(nullptr), size_(0), rower_(nullptr), pageSize_(pageSize) {
@@ -194,4 +194,4 @@ size_t RAM::getPageOffset(RV64Ptr address) const noexcept {
     return static_cast<size_t>(address) % pageSize_;
 }
 
-} // namespace besm::dev
+} // namespace besm::mem
