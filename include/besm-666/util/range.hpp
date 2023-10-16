@@ -13,6 +13,8 @@ public:
     bool contains(Range<Type> range) const noexcept;
     bool intersects(Range<Type> range) const noexcept;
 
+    Type size() const noexcept { return rightBorder_ - leftBorder_; }
+
     Type leftBorder() const noexcept { return leftBorder_; }
     Type rightBorder() const noexcept { return rightBorder_; }
 

@@ -1,6 +1,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 
 #include "besm-666/sim/hooks.hpp"
 #include "capstone/capstone.h"
@@ -9,6 +10,7 @@
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/machine.hpp"
+#include "besm-666/util/range.hpp"
 
 csh CapstoneHandler;
 
@@ -59,6 +61,21 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
         });
 }
 
+besm::util::Range<besm::RV64Ptr> ParseRange(std::string const &rangeString) {
+    auto pos = std::find(rangeString.begin(), rangeString.end(), ',');
+    if (pos == rangeString.end()) {
+        throw std::invalid_argument("Invalid range");
+    } else {
+        std::string leftBorderString(rangeString.begin(), pos);
+        std::string rightBorderString(pos + 1, rangeString.end());
+
+        besm::RV64Ptr leftBorder = std::stoull(leftBorderString);
+        besm::RV64Ptr rightBorder = leftBorder + std::stoull(rightBorderString);
+
+        return besm::util::Range<besm::RV64Ptr>(leftBorder, rightBorder);
+    }
+}
+
 int main(int argc, char *argv[]) {
     besm::sim::ConfigBuilder configBuilder;
 
@@ -72,18 +89,56 @@ int main(int argc, char *argv[]) {
            },
            "Setups the file to be executed with the simulator")
         ->required()
-        ->check(CLI::ExistingFile);
+        ->check(CLI::ExistingFile)
+        ->group("Input");
+
+    app.add_option_function<std::string>(
+           "--ram",
+           [&](std::string const &string) {
+               try {
+                   configBuilder.addRamRange(ParseRange(string));
+               } catch (...) {
+                   std::cerr << "Invalid range in --ram: " << string
+                             << std::endl;
+               }
+           },
+           "Setup physical memory range as RAM in format \'address,size\' (in "
+           "bytes)")
+        ->default_val("0,1073741824")
+        ->run_callback_for_default()->force_callback()
+        ->group("Memory");
+
+    app.add_option_function<size_t>(
+           "--ram-page-size",
+           [&](size_t value) { configBuilder.setRamPageSize(value); },
+           "Setup RAM page size in bytes")
+        ->default_val(4096)
+        ->run_callback_for_default()->force_callback()
+        ->group("Memory");
+
+    app.add_option_function<size_t>(
+           "--ram-chunk-size",
+           [&](size_t value) { configBuilder.setRamChunkSize(value); })
+        ->default_val(2 * 1024 * 1024)
+        ->run_callback_for_default()->force_callback()
+        ->group("Memory");
 
     bool verboseLogging = false;
     app.add_flag("-v,--verbose", verboseLogging,
                  "Enables per-instruction machine state logging")
-        ->default_val(false);
+        ->default_val(false)
+        ->group("Memory");
+
+    bool a0Validation = false;
+    app.add_flag("--a0-validation", a0Validation, "Enable a0 validator mode")
+        ->default_val(false)
+        ->group("Validation");
 
     CLI11_PARSE(app, argc, argv);
 
+    std::clog << "[BESM-666] INFO: Creating RISCV machine." << std::endl;
     besm::sim::Config config = configBuilder.build();
     besm::sim::Machine machine(config);
-    std::clog << "[BESM-666] INFO: Created RISCV machine." << std::endl;
 
     if (verboseLogging) {
         InitVerboseLogging(machine);
@@ -110,5 +165,13 @@ int main(int argc, char *argv[]) {
               << instrsExecuted << ", MIPS = " << mips << std::endl;
     besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
 
-    return 0;
+    if (a0Validation) {
+        if (machine.getState().read(besm::exec::GPRF::X11) == 1) {
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        return 0;
+    }
 }
