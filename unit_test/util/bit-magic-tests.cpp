@@ -83,3 +83,40 @@ TEST(ExtractBits, Dummy) {
 
     EXPECT_EQ(r, 0b1111);
 }
+
+TEST(ClearBits, Dummy) {
+    unsigned int v = 0b1111111;
+
+    unsigned int r = besm::util::ClearBits<unsigned int, 3, 2>(v);
+
+    EXPECT_EQ(r, 0b1100011);
+}
+
+TEST(ChangeBits, Dummy) {
+    unsigned int v = 0b11111111;
+    unsigned int newBits = 0b1010;
+
+    unsigned int r = besm::util::ChangeBits<unsigned int, 3, 2>(v, newBits);
+
+    EXPECT_EQ(r, 0b11101011);
+}
+
+TEST(ExtractMasked, Dummy) {
+    constexpr unsigned int Mask = 0b10001110000;
+    unsigned int value = 0b11101010111;
+
+    unsigned int r = besm::util::ExtractMasked<unsigned int, Mask>(value);
+
+    EXPECT_EQ(r, 0b1101);
+}
+
+TEST(InsertMasked, Dummy) {
+    constexpr unsigned int Mask = 0b1000111000;
+    unsigned int value = 0b1010;
+    unsigned int setPlace = 0b1111111111;
+
+    unsigned int r =
+        besm::util::InsertMasked<unsigned int, Mask>(value, setPlace);
+
+    EXPECT_EQ(r, 0b1111010111);
+}
