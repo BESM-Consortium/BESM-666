@@ -65,12 +65,11 @@ public:
 private:
     size_t ways_;
     size_t sets_;
-    size_t size = ways_ * sets_;
+    size_t size_ = ways_ * sets_;
     std::unique_ptr<CacheEntry<PayloadType, TagType>[]> cachedData_;
     std::unique_ptr<size_t[]> counters_;
 };
 
-// -------------------------------------------------------------------------------------------------------//
 
 //-------------Cache------------------//
 
@@ -132,7 +131,7 @@ Cache<PayloadType, TagType, HashFunction, TagFunction>::find(
             return cachedData_[i];
     }
 
-    return cachedData_[set]; // TODO: change
+    return cachedData_[set * ways_ + counters_[set]];
 }
 
 template <typename PayloadType, typename TagType,
@@ -147,7 +146,7 @@ Cache<PayloadType, TagType, HashFunction, TagFunction>::find(
             return cachedData_[i];
     }
 
-    return cachedData_[set]; // TODO: change
+    return cachedData_[set * ways_ + counters_[set]];
 }
 // end TODO
 
@@ -178,7 +177,7 @@ template <typename PayloadType, typename TagType,
           template <typename, typename> typename TagFunction>
 size_t
 Cache<PayloadType, TagType, HashFunction, TagFunction>::getSize() noexcept {
-    return size;
+    return size_;
 }
 
 template <typename PayloadType, typename TagType,
