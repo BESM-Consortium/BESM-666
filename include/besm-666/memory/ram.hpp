@@ -43,7 +43,7 @@ private:
 
 class RAM final : public mem::IPhysMemDevice {
 public:
-    RAM(RV64Size ramSize, size_t pageSize, size_t chunkSize);
+    RAM(size_t ramSize, size_t pageSize, size_t chunkSize);
     RAM(RAM &&other);
     virtual ~RAM() {}
 
