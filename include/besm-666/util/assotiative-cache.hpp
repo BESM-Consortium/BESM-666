@@ -70,7 +70,6 @@ private:
     std::unique_ptr<size_t[]> counters_;
 };
 
-
 //-------------Cache------------------//
 
 template <typename PayloadType, typename TagType,
