@@ -46,9 +46,6 @@ public:
     Type getType() const noexcept;
     std::string getTypeName() const;
 
-    static std::shared_ptr<IPhysMemDevice>
-    CreateRAM(size_t ramSize, size_t ramPageSize, size_t ramChunkSize);
-
 private:
     Type type_;
 };
