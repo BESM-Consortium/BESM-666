@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <ostream>
 
 namespace besm::util {
 
@@ -47,6 +48,12 @@ bool Range<Type>::intersects(Range<Type> range) const noexcept {
 
 template <typename Type> bool operator<(Range<Type> lhv, Range<Type> rhv) {
     return lhv.leftBorder() < rhv.leftBorder();
+}
+
+template<typename Type>
+std::ostream& operator<<(std::ostream& stream, Range<Type> const& range) {
+    stream << '[' << range.leftBorder() << ", " << range.rightBorder << ')';
+    return stream;
 }
 
 } // namespace besm::util
