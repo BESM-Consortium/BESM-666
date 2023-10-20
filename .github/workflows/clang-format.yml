@@ -9,7 +9,6 @@ on:
 jobs:
   formatting-check:
     name: Formatting Check of ${{ github.workspace }}/${{ matrix.path }} directory
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         path:
@@ -17,6 +16,8 @@ jobs:
           - 'include'
           - 'unit_test'
           - 'standalone'
+        os: [ ubuntu-latest, macos-12 ]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - name: Run clang-format style check for C/C++/Protobuf programs.

@@ -12,21 +12,24 @@ env:
 jobs:
   build:
     name: Running unit tests with ${{matrix.ctest_option}} option
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         ctect_option:
           - "-DBESM666_TEST_WITH_VALGRIND=OFF"
           - "-DBESM666_TEST_WITH_VALGRIND=ON"
+        os: [ ubuntu-latest, macos-12 ]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: recursive
 
     - name: install valgrind
+      if: matrix.os != 'macos-12'
       run: sudo apt update && sudo apt install -y valgrind
 
     - name: Configure CMake
+      if: !(matrix.os == 'macos-12' && matrix.ctect_option == "-DBESM666_TEST_WITH_VALGRIND=ON")
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{matrix.ctect_option}}
 
     - name: Build
