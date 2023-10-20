@@ -46,7 +46,7 @@ void PhysMem::storeDWord(RV64Ptr address, RV64UDWord value) {
 
 void PhysMem::storeContArea(RV64Ptr address, void const *data, size_t size) {
     for (size_t i = 0; i < size;) {
-        auto [hostAddress, hostSize] = this->getHostAddress(address + i);
+        auto [hostAddress, hostSize] = this->touchHostAddress(address + i);
         if (hostAddress == nullptr) {
             this->storeByte(address + i,
                             *(reinterpret_cast<char const *>(data) + i));
@@ -64,9 +64,9 @@ std::pair<void const *, size_t> PhysMem::getHostAddress(RV64Ptr address) const {
     auto [range, device] = this->findDevice(address);
     return device->getHostAddress(address - range.leftBorder());
 }
-std::pair<void *, size_t> PhysMem::getHostAddress(RV64Ptr address) {
+std::pair<void *, size_t> PhysMem::touchHostAddress(RV64Ptr address) {
     auto [range, device] = this->findDevice(address);
-    return device->getHostAddress(address - range.leftBorder());
+    return device->touchHostAddress(address - range.leftBorder());
 }
 
 std::pair<util::Range<RV64Ptr>, std::shared_ptr<IPhysMemDevice>>

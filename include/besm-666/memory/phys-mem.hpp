@@ -33,7 +33,7 @@ public:
     void storeContArea(RV64Ptr address, void const *data, size_t size);
 
     std::pair<void const *, size_t> getHostAddress(RV64Ptr address) const;
-    std::pair<void *, size_t> getHostAddress(RV64Ptr address);
+    std::pair<void *, size_t> touchHostAddress(RV64Ptr address);
 
     struct DeviceDescriptor {
         util::Range<RV64Ptr> const range;

@@ -39,7 +39,7 @@ public:
 
     virtual std::pair<void const *, size_t>
     getHostAddress(RV64Ptr address) const = 0;
-    virtual std::pair<void *, size_t> getHostAddress(RV64Ptr address) = 0;
+    virtual std::pair<void *, size_t> touchHostAddress(RV64Ptr address) = 0;
 
     virtual size_t getSize() const = 0;
 

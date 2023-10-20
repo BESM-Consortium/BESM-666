@@ -59,7 +59,7 @@ public:
 
     std::pair<void const *, size_t>
     getHostAddress(RV64Ptr address) const override;
-    std::pair<void *, size_t> getHostAddress(RV64Ptr address) override;
+    std::pair<void *, size_t> touchHostAddress(RV64Ptr address) override;
 
     size_t getSize() const noexcept override;
 
@@ -115,7 +115,7 @@ template <typename DataType> DataType RAM::load(RV64Ptr address) const {
 template <typename DataType> void RAM::store(RV64Ptr address, DataType value) {
     this->validateAddressAlignment<DataType>(address);
 
-    auto [hostAddress, size] = this->getHostAddress(address);
+    auto [hostAddress, size] = this->touchHostAddress(address);
     *reinterpret_cast<DataType *>(hostAddress) = value;
 }
 

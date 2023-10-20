@@ -138,7 +138,7 @@ std::pair<void const *, size_t> RAM::getHostAddress(RV64Ptr address) const {
                           pageSize_ - offset);
 }
 
-std::pair<void *, size_t> RAM::getHostAddress(RV64Ptr address) {
+std::pair<void *, size_t> RAM::touchHostAddress(RV64Ptr address) {
     size_t offset = this->getPageOffset(address);
     return std::make_pair(
         reinterpret_cast<char *>(this->touchPageAddress(address)) + offset,
