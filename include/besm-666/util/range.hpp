@@ -50,8 +50,8 @@ template <typename Type> bool operator<(Range<Type> lhv, Range<Type> rhv) {
     return lhv.leftBorder() < rhv.leftBorder();
 }
 
-template<typename Type>
-std::ostream& operator<<(std::ostream& stream, Range<Type> const& range) {
+template <typename Type>
+std::ostream &operator<<(std::ostream &stream, Range<Type> const &range) {
     stream << '[' << range.leftBorder() << ", " << range.rightBorder << ')';
     return stream;
 }
