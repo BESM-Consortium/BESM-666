@@ -45,7 +45,7 @@ class RAM final : public mem::IPhysMemDevice {
 public:
     RAM(size_t ramSize, size_t pageSize, size_t chunkSize);
     RAM(RAM &&other);
-    virtual ~RAM() {}
+    ~RAM() {}
 
     RV64UChar loadByte(RV64Ptr address) const override;
     RV64UHWord loadHWord(RV64Ptr address) const override;
