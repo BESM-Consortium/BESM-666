@@ -9,28 +9,22 @@
 
 namespace besm::util {
 
-template <typename PayloadType, typename TagType> struct TagCount {
-    TagType operator()(PayloadType payload) {
-        return payload * 2; // TODO: will be changed
-    }
-};
-
+// @todo #10:90m Implement TagFunction and HashFunction and get rid of keeping
+// tag in CacheEntry
 template <typename PayloadType, typename TagType> class CacheEntry {
 public:
     CacheEntry();
-    ~CacheEntry(){};
+    ~CacheEntry() = default;
 
-    void setPayload(PayloadType const &payload) noexcept(
+    void setPayload(PayloadType const &payload, TagType tag) noexcept(
         std::is_nothrow_copy_constructible_v<PayloadType>);
-    void setPayload(PayloadType &&payload) noexcept(
+    void setPayload(PayloadType &&payload, TagType tag) noexcept(
         std::is_nothrow_move_constructible_v<PayloadType>);
 
     PayloadType const &getPayload() const noexcept;
     PayloadType &getPayload() noexcept;
     TagType const &getTag() const noexcept;
-    void setTag(TagType tag) noexcept;
 
-    void validate() noexcept;
     void invalidate() noexcept;
     bool valid() const noexcept;
 
@@ -40,9 +34,15 @@ private:
     TagType tag_;
 };
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction = std::hash,
-          template <typename, typename> typename TagFunction = TagCount>
+template <typename PayloadType, typename TagType>
+using TagFunction = TagType (*)(PayloadType const &);
+
+template <typename PayloadType, typename HashType>
+using HashFunction = HashType (*)(PayloadType const &);
+
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
 class Cache {
 public:
     Cache(size_t ways, size_t sets);
@@ -59,157 +59,183 @@ public:
     void invalidate(TagType tag) noexcept;
     void invalidate() noexcept;
     size_t getSize() noexcept;
+    size_t getWays() noexcept;
+    size_t getSets() noexcept;
 
-    void dump() noexcept;
+    template <typename Cache> friend class CacheStateDumper;
 
 private:
     size_t ways_;
     size_t sets_;
     size_t size_ = ways_ * sets_;
-    std::unique_ptr<CacheEntry<PayloadType, TagType>[]> cachedData_;
     std::unique_ptr<size_t[]> counters_;
+
+protected:
+    std::unique_ptr<CacheEntry<PayloadType, TagType>[]> cachedData_;
 };
 
-//-------------Cache------------------//
+template <typename Cache> class CacheStateDumper {
+public:
+    CacheStateDumper(std::ostream &stream) : stream_(stream) {}
+    void dump(Cache &cache);
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-Cache<PayloadType, TagType, HashFunction, TagFunction>::Cache(size_t ways,
-                                                              size_t sets)
+private:
+    std::ostream &stream_;
+};
+
+//-------------CacheStateDumper------------------//
+template <typename Cache> void CacheStateDumper<Cache>::dump(Cache &cache) {
+
+    stream_ << "[Cache] State dump" << std::endl;
+
+    for (int i = 0; i < cache.getSets(); i++) {
+        for (int j = 0; j < cache.getWays(); j++) {
+            if (cache.cachedData_[i * cache.getWays() + j].valid())
+                stream_
+                    << cache.cachedData_[i * cache.getWays() + j].getPayload()
+                    << " ";
+            else
+                stream_ << "inv ";
+        }
+        stream_ << std::endl;
+    }
+
+    stream_ << "Size: " << cache.getSize() << std::endl;
+}
+
+//-------------Cache------------------//
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::Cache(size_t ways,
+                                                                size_t sets)
     : ways_(ways), sets_(sets) {
     cachedData_ =
         std::make_unique<CacheEntry<PayloadType, TagType>[]>(ways * sets);
     counters_ = std::make_unique<size_t[]>(sets);
 }
 
-// TODO: will be changed, test implementation
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-void Cache<PayloadType, TagType, HashFunction, TagFunction>::add(
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType const
         &payload) noexcept(std::is_nothrow_copy_constructible_v<PayloadType>) {
-    TagType tag = TagFunction<PayloadType, TagType>{}(payload);
-    auto set = HashFunction<TagType>{}(tag) % sets_;
+    TagType tag = TagFunc(payload);
+    auto set = HashFunc(tag) % sets_;
 
-    if (counters_[set] >= ways_)
-        counters_[set] = 0;
-
-    cachedData_[set * ways_ + counters_[set]].setPayload(payload);
-    cachedData_[set * ways_ + counters_[set]].setTag(tag);
-    counters_[set]++;
+    cachedData_[set * ways_ + counters_[set]].setPayload(payload, tag);
+    counters_[set] = (counters_[set] + 1) % ways_;
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-void Cache<PayloadType, TagType, HashFunction, TagFunction>::add(
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType
         &&payload) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
-    TagType tag = TagFunction<PayloadType, TagType>{}(payload);
-    auto set = HashFunction<TagType>{}(tag) % sets_;
+    TagType tag = TagFunc(payload);
+    auto set = HashFunc(tag) % sets_;
 
-    if (counters_[set] >= ways_)
-        counters_[set] = 0;
-
-    cachedData_[set * ways_ + counters_[set]].setPayload(payload);
-    cachedData_[set * ways_ + counters_[set]].setTag(tag);
-    counters_[set]++;
+    cachedData_[set * ways_ + counters_[set]].setPayload(std::move(payload),
+                                                         tag);
+    counters_[set] = (counters_[set] + 1) % ways_;
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
 CacheEntry<PayloadType, TagType> &
-Cache<PayloadType, TagType, HashFunction, TagFunction>::find(
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) noexcept {
-    auto set = HashFunction<TagType>{}(tag) % sets_;
+    std::cout << "Im in" << std::endl;
+    auto set = HashFunc(tag) % sets_;
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
         if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
             return cachedData_[i];
     }
-
     return cachedData_[set * ways_ + counters_[set]];
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
 CacheEntry<PayloadType, TagType> const &
-Cache<PayloadType, TagType, HashFunction, TagFunction>::find(
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) const noexcept {
-    auto set = HashFunction<TagType>{}(tag) % sets_;
-    for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
-        if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
-            return cachedData_[i];
-    }
-
-    return cachedData_[set * ways_ + counters_[set]];
+    std::cout << "Im in const" << std::endl;
+    return const_cast<CacheEntry<PayloadType, TagType> const &>(
+        (const_cast<Cache<PayloadType, TagType, HashType, TagFunc, HashFunc> *>(
+             this))
+            ->find(tag));
 }
-// end TODO
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-void Cache<PayloadType, TagType, HashFunction, TagFunction>::invalidate(
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::invalidate(
     TagType tag) noexcept {
-    auto set = HashFunction<TagType>{}(tag) % sets_;
+    auto set = HashFunc(tag) % sets_;
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
         if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
             cachedData_[i].invalidate();
     }
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-void Cache<PayloadType, TagType, HashFunction,
-           TagFunction>::invalidate() noexcept {
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+void Cache<PayloadType, TagType, HashType, TagFunc,
+           HashFunc>::invalidate() noexcept {
     for (int i = 0; i < getSize(); i++) {
         cachedData_[i].invalidate();
     }
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
 size_t
-Cache<PayloadType, TagType, HashFunction, TagFunction>::getSize() noexcept {
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSize() noexcept {
     return size_;
 }
 
-template <typename PayloadType, typename TagType,
-          template <typename> typename HashFunction,
-          template <typename, typename> typename TagFunction>
-void Cache<PayloadType, TagType, HashFunction, TagFunction>::dump() noexcept {
-    for (int i = 0; i < sets_; i++) {
-        for (int j = 0; j < ways_; j++) {
-            std::cout << cachedData_[i * ways_ + j].getPayload() << " ";
-        }
-        std::cout << std::endl;
-    }
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+size_t
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getWays() noexcept {
+    return ways_;
+}
+
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+size_t
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() noexcept {
+    return sets_;
 }
 
 //-------------CacheEntry------------------//
-
 template <typename PayloadType, typename TagType>
 CacheEntry<PayloadType, TagType>::CacheEntry() : valid_(false), tag_(0) {}
 
 template <typename PayloadType, typename TagType>
 void CacheEntry<PayloadType, TagType>::setPayload(
-    PayloadType const
-        &payload) noexcept(std::is_nothrow_copy_constructible_v<PayloadType>) {
+    PayloadType const &payload,
+    TagType tag) noexcept(std::is_nothrow_copy_constructible_v<PayloadType>) {
     payload_ = payload;
-    validate();
+    tag_ = tag;
+    valid_ = true;
 }
 
 template <typename PayloadType, typename TagType>
 void CacheEntry<PayloadType, TagType>::setPayload(
-    PayloadType
-        &&payload) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
+    PayloadType &&payload,
+    TagType tag) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
     payload_ = std::move(payload);
-    validate();
+    tag_ = tag;
+    valid_ = true;
 }
 
 template <typename PayloadType, typename TagType>
@@ -221,11 +247,6 @@ CacheEntry<PayloadType, TagType>::getPayload() const noexcept {
 template <typename PayloadType, typename TagType>
 PayloadType &CacheEntry<PayloadType, TagType>::getPayload() noexcept {
     return payload_;
-}
-
-template <typename PayloadType, typename TagType>
-void CacheEntry<PayloadType, TagType>::validate() noexcept {
-    valid_ = true;
 }
 
 template <typename PayloadType, typename TagType>
@@ -241,10 +262,5 @@ bool CacheEntry<PayloadType, TagType>::valid() const noexcept {
 template <typename PayloadType, typename TagType>
 TagType const &CacheEntry<PayloadType, TagType>::getTag() const noexcept {
     return tag_;
-}
-
-template <typename PayloadType, typename TagType>
-void CacheEntry<PayloadType, TagType>::setTag(TagType tag) noexcept {
-    tag_ = tag;
 }
 } // namespace besm::util
