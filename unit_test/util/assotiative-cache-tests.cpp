@@ -65,27 +65,27 @@ struct TLBEntry {
 };
 
 template <typename PayloadType, typename TagType>
-TagType TLBTag(PayloadType const& entry) {
+TagType TLBTag(PayloadType const &entry) {
     return entry.virtualPageId;
 }
 
 template <typename TagType, typename HashType>
-HashType TLBHash(TagType const& tag) {
+HashType TLBHash(TagType const &tag) {
     return tag & (TLBSets - 1);
 }
 
 TEST(AssotiativeCache, ComplexPayload) {
-    using TLBCache = besm::util::Cache<TLBEntry, besm::RV64Ptr, besm::RV64Ptr, 
-          TLBTag, TLBHash> ;
+    using TLBCache = besm::util::Cache<TLBEntry, besm::RV64Ptr, besm::RV64Ptr,
+                                       TLBTag, TLBHash>;
 
     TLBCache cache(TLBWays, TLBSets);
 
     // Everyone goes to the same way. 1:1 mapping
-    cache.add(TLBEntry { 64 * 0, 64 * 0 });
-    cache.add(TLBEntry { 64 * 1, 64 * 1 });
-    cache.add(TLBEntry { 64 * 2, 64 * 2 });
-    cache.add(TLBEntry { 64 * 3, 64 * 3 });
-    cache.add(TLBEntry { 64 * 4, 64 * 4 });
+    cache.add(TLBEntry{64 * 0, 64 * 0});
+    cache.add(TLBEntry{64 * 1, 64 * 1});
+    cache.add(TLBEntry{64 * 2, 64 * 2});
+    cache.add(TLBEntry{64 * 3, 64 * 3});
+    cache.add(TLBEntry{64 * 4, 64 * 4});
 
     auto entry = cache.find(64 * 4);
     EXPECT_TRUE(entry.valid());
