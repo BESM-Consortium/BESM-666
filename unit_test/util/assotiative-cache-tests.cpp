@@ -1,3 +1,4 @@
+#include "besm-666/riscv-types.hpp"
 #include "besm-666/util/assotiative-cache.hpp"
 #include <gtest/gtest.h>
 
@@ -52,4 +53,44 @@ TEST_F(CacheTest, counters) {
     EXPECT_EQ(cache.getCounter(5 * 2 % 25), 0);
     EXPECT_EQ(cache.getCounter(25 * 2 % 25), 1);
     EXPECT_EQ(cache.getCounter(42 * 2 % 25), 1);
+}
+
+constexpr size_t TLBSets = 64;
+constexpr size_t TLBWays = 4;
+
+struct TLBEntry {
+    // page id = page address / page size
+    besm::RV64Size virtualPageId;
+    besm::RV64Size physicalPageId;
+};
+
+besm::RV64Ptr TLBTag(TLBEntry const& entry) {
+    return entry.virtualPageId;
+}
+
+besm::RV64Ptr TLBHash(TLBEntry const& entry) {
+    return entry.virtualPageId & (TLBSets - 1);
+}
+
+TEST(AssotiativeCache, ComplexPayload) {
+    using TLBCache = besm::util::Cache<TLBEntry, besm::RV64Ptr, besm::RV64Ptr, 
+          TLBTag, TLBHash> ;
+
+    TLBCache cache(TLBWays, TLBSets);
+
+    // Everyone goes to the same way. 1:1 mapping
+    cache.add(TLBEntry { 64 * 0, 64 * 0 });
+    cache.add(TLBEntry { 64 * 1, 64 * 1 });
+    cache.add(TLBEntry { 64 * 2, 64 * 2 });
+    cache.add(TLBEntry { 64 * 3, 64 * 3 });
+    cache.add(TLBEntry { 64 * 4, 64 * 4 });
+
+    auto entry = cache.find(64 * 4);
+    EXPECT_TRUE(entry.valid());
+    EXPECT_EQ(entry.getTag(), 64 * 64);
+    EXPECT_EQ(entry.getPayload().virtualPageId, 64 * 4);
+    EXPECT_EQ(entry.getPayload().physicalPageId, 64 * 4);
+
+    auto lostEntry = cache.find(64 * 0);
+    EXPECT_FALSE(lostEntry.valid());
 }
