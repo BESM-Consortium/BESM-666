@@ -3,9 +3,9 @@
 #include <gtest/gtest.h>
 
 using namespace besm::util;
-template <typename PayloadType, typename HashType>
-HashType fhash(PayloadType const &payload) {
-    return std::hash<PayloadType>{}(payload);
+template <typename TagType, typename HashType>
+HashType fhash(TagType const &tag) {
+    return std::hash<TagType>{}(tag);
 }
 
 template <typename PayloadType, typename TagType>
@@ -64,12 +64,14 @@ struct TLBEntry {
     besm::RV64Size physicalPageId;
 };
 
-besm::RV64Ptr TLBTag(TLBEntry const& entry) {
+template <typename PayloadType, typename TagType>
+TagType TLBTag(PayloadType const& entry) {
     return entry.virtualPageId;
 }
 
-besm::RV64Ptr TLBHash(TLBEntry const& entry) {
-    return entry.virtualPageId & (TLBSets - 1);
+template <typename TagType, typename HashType>
+HashType TLBHash(TagType const& tag) {
+    return tag & (TLBSets - 1);
 }
 
 TEST(AssotiativeCache, ComplexPayload) {
@@ -87,7 +89,7 @@ TEST(AssotiativeCache, ComplexPayload) {
 
     auto entry = cache.find(64 * 4);
     EXPECT_TRUE(entry.valid());
-    EXPECT_EQ(entry.getTag(), 64 * 64);
+    EXPECT_EQ(entry.getTag(), 64 * 4);
     EXPECT_EQ(entry.getPayload().virtualPageId, 64 * 4);
     EXPECT_EQ(entry.getPayload().physicalPageId, 64 * 4);
 
