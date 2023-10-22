@@ -218,8 +218,8 @@ Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() noexcept {
 template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<PayloadType, HashType> HashFunc>
-size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getCounter(size_t set) noexcept {
+size_t Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getCounter(
+    size_t set) noexcept {
     return counters_[set];
 }
 
