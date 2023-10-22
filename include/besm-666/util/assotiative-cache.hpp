@@ -61,6 +61,7 @@ public:
     size_t getSize() noexcept;
     size_t getWays() noexcept;
     size_t getSets() noexcept;
+    size_t getCounter(size_t set) noexcept;
 
     template <typename Cache> friend class CacheStateDumper;
 
@@ -212,6 +213,14 @@ template <typename PayloadType, typename TagType, typename HashType,
 size_t
 Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() noexcept {
     return sets_;
+}
+
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<PayloadType, HashType> HashFunc>
+size_t
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getCounter(size_t set) noexcept {
+    return counters_[set];
 }
 
 //-------------CacheEntry------------------//
