@@ -9,7 +9,7 @@
 
 namespace besm::util {
 
-// @todo #10:90m Implement TagFunction and HashFunction and get rid of keeping
+// @todo #71:90m Implement TagFunction and HashFunction and get rid of keeping
 // tag in CacheEntry
 template <typename PayloadType, typename TagType> class CacheEntry {
 public:
@@ -148,7 +148,6 @@ template <typename PayloadType, typename TagType, typename HashType,
 CacheEntry<PayloadType, TagType> &
 Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) noexcept {
-    std::cout << "Im in" << std::endl;
     auto set = HashFunc(tag) % sets_;
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
         if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
@@ -163,7 +162,6 @@ template <typename PayloadType, typename TagType, typename HashType,
 CacheEntry<PayloadType, TagType> const &
 Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) const noexcept {
-    std::cout << "Im in const" << std::endl;
     return const_cast<CacheEntry<PayloadType, TagType> const &>(
         (const_cast<Cache<PayloadType, TagType, HashType, TagFunc, HashFunc> *>(
              this))

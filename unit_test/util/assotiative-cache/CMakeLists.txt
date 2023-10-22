@@ -1,0 +1,1 @@
+besm666_test(assotiative-cache-test.cpp)
