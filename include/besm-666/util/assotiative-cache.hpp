@@ -220,24 +220,24 @@ void Cache<PayloadType, TagType, HashType, TagFunc,
 template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
-size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSize() const noexcept {
+size_t Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSize()
+    const noexcept {
     return size_;
 }
 
 template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
-size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getWays() const noexcept {
+size_t Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getWays()
+    const noexcept {
     return ways_;
 }
 
 template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
-size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() const noexcept {
+size_t Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets()
+    const noexcept {
     return sets_;
 }
 
