@@ -180,7 +180,6 @@ Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
             return cachedData_[i];
     }
 
-    cachedData_[set * ways_ + counters_[set]].invalidate();
     return cachedData_[set * ways_ + counters_[set]];
 }
 
