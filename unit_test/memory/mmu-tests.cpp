@@ -6,7 +6,10 @@
 using namespace besm;
 
 TEST(mmu_tests, storeByte) {
-    mem::PhysMem::SPtr pMem = mem::PhysMemBuilder(4096).build();
+    std::shared_ptr<mem::PhysMem> pMem =
+        mem::PhysMemBuilder()
+            .mapRAM(0, 1024 * 1024 * 1024, 4096, 2 * 1024 * 1024)
+            .build();
     mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
 
     constexpr RV64Ptr const ADDR = 1000;

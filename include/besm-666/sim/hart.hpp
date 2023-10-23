@@ -14,7 +14,7 @@ class HookManager;
 class Hart : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<Hart>;
-    static SPtr Create(mem::PhysMem::SPtr pMem,
+    static SPtr Create(std::shared_ptr<mem::PhysMem> const &pMem,
                        std::shared_ptr<HookManager> const &hookManager);
 
     exec::GPRF const &getState() const { return exec_.getState(); }
@@ -26,7 +26,7 @@ public:
     void run();
 
 private:
-    explicit Hart(mem::PhysMem::SPtr pMem,
+    explicit Hart(std::shared_ptr<mem::PhysMem> const &pMem,
                   std::shared_ptr<HookManager> const &hookManager);
 
     dec::Decoder dec_;

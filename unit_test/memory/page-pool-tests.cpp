@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "besm-666/memory/page-allocator.hpp"
+#include "besm-666/memory/ram.hpp"
 
 char *MMapReturnValue = nullptr;
 
@@ -23,7 +23,7 @@ int __wrap_besm666_munmap(void *addr, size_t len) { return 0; }
 
 TEST(page_allocator, out_of_memory) {
     MMapReturnValue = nullptr;
-    EXPECT_THROW(besm::mem::PageAllocator pageAllocator(1024 * 1024, 4096);
+    EXPECT_THROW(besm::mem::RAMPageAllocator pageAllocator(4096, 1024 * 1024);
                  pageAllocator.allocPage();, std::bad_alloc);
 }
 
@@ -32,7 +32,7 @@ TEST(page_allocator, page_overlapping) {
     constexpr size_t ChunkSize = PageSize * 2;
     MMapReturnValue = new char[ChunkSize];
 
-    besm::mem::PageAllocator allocator(ChunkSize, PageSize);
+    besm::mem::RAMPageAllocator allocator(PageSize, ChunkSize);
 
     size_t pageAddr1 = reinterpret_cast<size_t>(allocator.allocPage());
 
@@ -51,7 +51,7 @@ TEST(page_allocator, page_writting) {
     constexpr size_t ChunkSize = PageSize * 2;
     MMapReturnValue = new char[ChunkSize];
 
-    besm::mem::PageAllocator allocator(ChunkSize, PageSize);
+    besm::mem::RAMPageAllocator allocator(PageSize, ChunkSize);
 
     void *page1 = allocator.allocPage();
     for (char *c = reinterpret_cast<char *>(page1);
