@@ -48,13 +48,8 @@ public:
     Cache(size_t ways, size_t sets);
     ~Cache() { invalidate(); };
 
-    Cache(Cache&& other) :
-        ways_(other.ways_),
-        sets_(other.sets_),
-        size_(other.size_),
-        counters_(std::move(other.counters_)),
-        cachedData_(std::move(other.cachedData_)) {}
-
+    Cache(Cache &&other) noexcept;
+    Cache &operator=(Cache &&other) noexcept;
 
     void add(PayloadType const &payload) noexcept(
         std::is_nothrow_copy_constructible_v<PayloadType>);
@@ -113,6 +108,29 @@ template <typename Cache> void CacheStateDumper<Cache>::dump(Cache &cache) {
 }
 
 //-------------Cache------------------//
+
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<TagType, HashType> HashFunc>
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::Cache(
+    Cache<PayloadType, TagType, HashType, TagFunc, HashFunc> &&other) noexcept
+    : ways_(other.ways_), sets_(other.sets_), size_(other.size_),
+      counters_(std::move(other.counters_)),
+      cachedData_(std::move(other.cachedData_)) {}
+
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<TagType, HashType> HashFunc>
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc> &
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::operator=(
+    Cache<PayloadType, TagType, HashType, TagFunc, HashFunc> &&other) noexcept {
+    std::swap(ways_, other.ways_);
+    std::swap(sets_, other.sets_);
+    std::swap(size_, other.size_);
+    std::swap(counters_, other.counters_);
+    std::swap(cachedData_, other.cachedData_);
+}
+
 template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
