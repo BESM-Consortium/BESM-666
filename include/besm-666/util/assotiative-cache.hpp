@@ -46,7 +46,6 @@ template <typename PayloadType, typename TagType, typename HashType,
 class Cache {
 public:
     Cache(size_t ways, size_t sets);
-    ~Cache() { invalidate(); };
 
     Cache(Cache &&other) noexcept;
     Cache &operator=(Cache &&other) noexcept;
