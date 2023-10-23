@@ -60,9 +60,9 @@ public:
 
     void invalidate(TagType tag) noexcept;
     void invalidate() noexcept;
-    size_t getSize() noexcept;
-    size_t getWays() noexcept;
-    size_t getSets() noexcept;
+    size_t getSize() const noexcept;
+    size_t getWays() const noexcept;
+    size_t getSets() const noexcept;
     size_t getCounter(size_t set) noexcept;
 
     template <typename Cache> friend class CacheStateDumper;
@@ -222,7 +222,7 @@ template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
 size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSize() noexcept {
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSize() const noexcept {
     return size_;
 }
 
@@ -230,7 +230,7 @@ template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
 size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getWays() noexcept {
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getWays() const noexcept {
     return ways_;
 }
 
@@ -238,7 +238,7 @@ template <typename PayloadType, typename TagType, typename HashType,
           TagFunction<PayloadType, TagType> TagFunc,
           HashFunction<TagType, HashType> HashFunc>
 size_t
-Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() noexcept {
+Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getSets() const noexcept {
     return sets_;
 }
 
