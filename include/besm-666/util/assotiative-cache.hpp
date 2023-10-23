@@ -48,6 +48,14 @@ public:
     Cache(size_t ways, size_t sets);
     ~Cache() { invalidate(); };
 
+    Cache(Cache&& other) :
+        ways_(other.ways_),
+        sets_(other.sets_),
+        size_(other.size_),
+        counters_(std::move(other.counters_)),
+        cachedData_(std::move(other.cachedData_)) {}
+
+
     void add(PayloadType const &payload) noexcept(
         std::is_nothrow_copy_constructible_v<PayloadType>);
     void add(PayloadType &&payload) noexcept(
