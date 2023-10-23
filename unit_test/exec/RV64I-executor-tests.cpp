@@ -10,7 +10,9 @@ using namespace besm;
 class RV64IExecutorTest : public testing::Test {
 public:
     RV64IExecutorTest()
-        : pMem(mem::PhysMemBuilder(4096, 2 * 1024 * 1024).build()),
+        : pMem(mem::PhysMemBuilder()
+                   .mapRAM(0, 1 * 1024 * 1024, 4096, 2 * 1024 * 1024)
+                   .build()),
           mmu(mem::MMU::Create(pMem)), exec(mmu) {}
 
 protected:
@@ -62,7 +64,7 @@ protected:
     void Exec() { exec.exec(instr); }
 
     Instruction instr;
-    mem::PhysMem::SPtr pMem;
+    std::shared_ptr<mem::PhysMem> pMem;
     mem::MMU::SPtr mmu;
     exec::Executor exec;
 };
@@ -525,7 +527,7 @@ TEST_F(RV64IExecutorTest, BGEU_Equal_False) {
 
 TEST_F(RV64IExecutorTest, LOAD_Positive) {
     constexpr const RV64UDWord BASE = 42;
-    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord OFFSET = 22;
     constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
 
     LoadImm12(exec::GPRF::X2, BASE);
@@ -560,7 +562,7 @@ TEST_F(RV64IExecutorTest, LOAD_Positive) {
 
 TEST_F(RV64IExecutorTest, LOAD_Negative) {
     constexpr const RV64UDWord BASE = 42;
-    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord OFFSET = 22;
     constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
 
     LoadImm12(exec::GPRF::X2, BASE);
@@ -595,7 +597,7 @@ TEST_F(RV64IExecutorTest, LOAD_Negative) {
 
 TEST_F(RV64IExecutorTest, STORE) {
     constexpr const RV64UDWord BASE = 42;
-    constexpr const RV64UDWord OFFSET = 10;
+    constexpr const RV64UDWord OFFSET = 22;
     constexpr const RV64UDWord ADDRESS = BASE + OFFSET;
 
     LoadImm12(exec::GPRF::X2, BASE);

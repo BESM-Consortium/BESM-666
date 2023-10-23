@@ -8,12 +8,12 @@
 
 namespace besm::sim {
 
-Hart::SPtr Hart::Create(mem::PhysMem::SPtr pMem,
+Hart::SPtr Hart::Create(std::shared_ptr<mem::PhysMem> const &pMem,
                         std::shared_ptr<HookManager> const &hookManager) {
     return std::shared_ptr<Hart>(new Hart(pMem, hookManager));
 }
 
-Hart::Hart(mem::PhysMem::SPtr pMem,
+Hart::Hart(std::shared_ptr<mem::PhysMem> const &pMem,
            std::shared_ptr<HookManager> const &hookManager)
     : mmu_(mem::MMU::Create(pMem)), exec_(mmu_), hookManager_(hookManager),
       prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0) {}
