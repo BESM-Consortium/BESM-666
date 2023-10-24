@@ -161,6 +161,12 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
             case 0b1:
                 operation = EBREAK;
                 break;
+            case 0b000100000010:
+                operation = SRET;
+                break;
+            case 0b001100000010:
+                operation = MRET;
+                break;
             }
         }
         break;
