@@ -9,7 +9,7 @@
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
-#include "besm-666/exec/mstatus.hpp"
+#include "besm-666/exec/csrs.hpp"
 
 namespace besm::exec {
 
