@@ -24,8 +24,10 @@ public:
     void storeWord(RV64Ptr address, RV64Word value);
     void storeDWord(RV64Ptr address, RV64DWord value);
 
-    std::pair<void *, size_t> getHostAddress(RV64Ptr address);
-    std::pair<void const *, size_t> getHostAddress(RV64Ptr address) const;
+    std::pair<void *, size_t> touchHostAddress(RV64Ptr vaddress);
+    std::pair<void const *, size_t> getHostAddress(RV64Ptr vaddress) const {
+        return pMem_->getHostAddress(translateAddress(vaddress));
+    }
 
 private:
     explicit MMU(std::shared_ptr<PhysMem> const &pMem)

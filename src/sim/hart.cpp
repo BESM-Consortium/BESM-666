@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <utility>
 
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/memory/phys-mem.hpp"
@@ -14,8 +15,9 @@ Hart::SPtr Hart::Create(std::shared_ptr<mem::PhysMem> const &pMem,
 }
 
 Hart::Hart(std::shared_ptr<mem::PhysMem> const &pMem,
-           std::shared_ptr<HookManager> const &hookManager)
-    : mmu_(mem::MMU::Create(pMem)), exec_(mmu_), hookManager_(hookManager),
+           std::shared_ptr<HookManager> hookManager)
+    : mmu_(mem::MMU::Create(pMem)), dec_(mmu_), exec_(mmu_),
+      hookManager_(std::move(hookManager)),
       prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0) {}
 
 void Hart::runCycle() {
@@ -26,7 +28,7 @@ void Hart::runCycle() {
     prevPC_ = pc;
 
     // fetch
-    RV64UWord instrBytecode = mmu_->loadWord(pc);
+    RV64UWord instrBytecode = dec_.fetch(pc);
     hookManager_->triggerHooks(HookManager::INSTRUCTION_FETCH, *this,
                                &instrBytecode);
 

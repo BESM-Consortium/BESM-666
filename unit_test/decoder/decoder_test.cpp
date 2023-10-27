@@ -6,7 +6,7 @@ using namespace besm;
 
 class DecoderCommon : public ::testing::Test {
 protected:
-    const besm::dec::Decoder decoder{};
+    const besm::dec::Decoder decoder{nullptr};
 
     [[nodiscard]] virtual bool equal(Instruction lhs, Instruction rhs) = 0;
     void SetUp() override {}
