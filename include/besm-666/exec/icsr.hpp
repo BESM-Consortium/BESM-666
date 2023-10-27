@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 
-#include "besm-666/config.hpp"
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
@@ -31,7 +30,7 @@ public:
     Id getId() const noexcept { return id_; }
 
     virtual RV64UDWord read() const noexcept = 0;
-    virtual Exception write(RV64UDWord value) noexcept = 0;
+    virtual bool write(RV64UDWord value) noexcept = 0;
 
 protected:
     virtual void onUpdate() noexcept = 0;

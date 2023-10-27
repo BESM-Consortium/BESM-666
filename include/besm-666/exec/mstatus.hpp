@@ -1,6 +1,5 @@
 #pragma once
 
-#include "besm-666/config.hpp"
 #include "besm-666/exec/csr.hpp"
 #include "besm-666/exec/icsr.hpp"
 #include "besm-666/riscv-types.hpp"

@@ -144,10 +144,8 @@ public:
 
     void reset() { CSRStructureUnroller<Fields...>::reset(); }
 
-    Exception write(RV64UDWord value) noexcept override final {
-        Exception e = CSRStructureUnroller<Fields...>::extract(value)
-                          ? Exception::NO_EXCEPTION
-                          : Exception::ILLEGAL_INSTRUCTION;
+    bool write(RV64UDWord value) noexcept override final {
+        bool e = CSRStructureUnroller<Fields...>::extract(value);
         this->onUpdate();
         return e;
     }

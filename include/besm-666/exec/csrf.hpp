@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "besm-666/config.hpp"
 #include "besm-666/exec/icsr.hpp"
 #include "besm-666/riscv-types.hpp"
 #include "besm-666/util/bit-magic.hpp"

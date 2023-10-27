@@ -20,7 +20,7 @@ TEST(CSRStructure, Dummy) {
     EXPECT_TRUE(reg.set<Field2Type>(2));
     EXPECT_EQ(reg.get<Field2Type>(), 2);
 
-    EXPECT_EQ(reg.write(0b1010110), Exception::NO_EXCEPTION);
+    EXPECT_TRUE(reg.write(0b1010110));
     EXPECT_EQ(reg.get<Field1Type>(), 0b10);
     EXPECT_EQ(reg.get<Field2Type>(), 0b01);
     EXPECT_EQ(reg.get<Field3Type>(), 0); // WPRI Specification WORKS !!!!
