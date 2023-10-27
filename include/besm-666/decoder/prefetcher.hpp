@@ -36,7 +36,7 @@ private:
     /**
      * Number of continuous bytes starting from {@link Prefetcher::start_}
      */
-    size_t len_;
+    RV64Size len_;
 };
 
 } // namespace besm::dec
