@@ -24,7 +24,7 @@ public:
     void storeWord(RV64Ptr address, RV64Word value);
     void storeDWord(RV64Ptr address, RV64DWord value);
 
-    std::pair<void *, size_t> touchHostAddress(RV64Ptr vaddress);
+    std::pair<void *, RV64Size> touchHostAddress(RV64Ptr vaddress);
     std::pair<void const *, RV64Size> getHostAddress(RV64Ptr vaddress) const {
         return pMem_->getHostAddress(translateAddress(vaddress));
     }

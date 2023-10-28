@@ -26,7 +26,7 @@ private:
     /**
      * Hosted address of continuous bytes.
      */
-    const void *saved_;
+    const RV64UWord *saved_;
 
     /**
      * Virtual address that corresponds to {@link Prefetcher::saved_}.

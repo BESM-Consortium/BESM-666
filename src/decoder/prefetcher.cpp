@@ -1,4 +1,5 @@
 #include "besm-666/decoder/prefetcher.hpp"
+#include <cassert>
 
 namespace besm::dec {
 
@@ -8,15 +9,16 @@ Prefetcher::Prefetcher(mem::MMU::SPtr mmu)
 RV64UWord Prefetcher::loadWord(RV64Ptr vaddress) {
     if (vaddress > start_ && vaddress < start_ + len_) {
         // this address was already load
-        return *(RV64UWord *)((uint8_t *)saved_ + vaddress - start_);
+        assert((vaddress - start_) % sizeof(RV64UWord) == 0);
+        return *(saved_ + (vaddress - start_) / sizeof(RV64UWord));
     } else {
         // load address
         auto pair = mmu_->getHostAddress(vaddress);
         if (pair.second > 0) {
             start_ = vaddress;
             len_ = pair.second;
-            saved_ = pair.first;
-            return *(RV64UWord *)saved_;
+            saved_ = static_cast<const RV64UWord *>(pair.first);
+            return *saved_;
         }
         return mmu_->loadWord(vaddress);
     }
