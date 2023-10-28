@@ -27,10 +27,10 @@ public:
 
 private:
     explicit Hart(std::shared_ptr<mem::PhysMem> const &pMem,
-                  std::shared_ptr<HookManager> const &hookManager);
+                  std::shared_ptr<HookManager> hookManager);
 
-    dec::Decoder dec_;
     mem::MMU::SPtr mmu_;
+    dec::Decoder dec_;
     exec::Executor exec_;
     std::shared_ptr<sim::HookManager> hookManager_;
 
