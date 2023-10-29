@@ -13,7 +13,7 @@ template <size_t From>
 static inline Register ExtractRegister(RV64UWord bytecode) {
     return ExtractBits<RV64UWord, Register, REG_WIDTH, From>(bytecode);
 }
-Instruction dec::Decoder::parse(RV64UWord bytecode) const {
+Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
     const Opcode opcode = ExtractBits<RV64UWord, OPCODE_WIDTH>(bytecode);
     const uint8_t func3 =
         ExtractBits<RV64UWord, FUNC3_WIDTH, FUNC3_SHIFT>(bytecode);
@@ -124,7 +124,6 @@ inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
                        .immidiate = (bytecode & IMM_MASK),
                        .operation = operation};
 }
-//
 Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
                                   InstructionOp operation,
                                   const Opcode opcode) {
@@ -203,7 +202,6 @@ Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
                        .immidiate = imm1_4 | imm5_10 | imm11 | imm12,
                        .operation = operation};
 }
-//
 Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                                   const InstructionOp operation) {
     // format J: imm[20, 10:11, 11, 19:12] [rd(5 bits)] [opcode(7 bits)]
