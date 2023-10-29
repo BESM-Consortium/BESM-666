@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "besm-666/autogen/operations-matrix.hpp"
+#include "besm-666/basic-block.hpp"
 #include "besm-666/decoder/prefetcher.hpp"
 #include "besm-666/instruction.hpp"
 
@@ -32,6 +33,8 @@ public:
      * @return {@link Instruction} struct.
      */
     [[nodiscard]] besm::Instruction parse(RV64UWord bytecode) const;
+
+    besm::BasicBlock parseBB(RV64Ptr address);
 
     RV64UWord fetch(RV64Ptr address) { return prefetcher_.loadWord(address); }
 

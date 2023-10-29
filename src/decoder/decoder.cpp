@@ -125,6 +125,7 @@ inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
                        .immidiate = (bytecode & IMM_MASK),
                        .operation = operation};
 }
+//
 Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
                                   InstructionOp operation,
                                   const Opcode opcode) {
@@ -203,7 +204,7 @@ Instruction dec::Decoder::parse_B(const RV64UWord bytecode,
                        .immidiate = imm1_4 | imm5_10 | imm11 | imm12,
                        .operation = operation};
 }
-
+//
 Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                                   const InstructionOp operation) {
     // format J: imm[20, 10:11, 11, 19:12] [rd(5 bits)] [opcode(7 bits)]
@@ -217,4 +218,9 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
     return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
                        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
                        .operation = operation};
+}
+besm::BasicBlock dec::Decoder::parseBB(RV64Ptr address) {
+    BasicBlock bb{};
+    while (bb.put(parse(fetch(address)))) {}
+    return bb;
 }

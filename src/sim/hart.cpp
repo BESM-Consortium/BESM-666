@@ -27,6 +27,8 @@ void Hart::runCycle() {
     // out-of-program control
     prevPC_ = pc;
 
+//    exec_.execBB(dec_.parseBB(pc));
+
     // fetch
     RV64UWord instrBytecode = dec_.fetch(pc);
     hookManager_->triggerHooks(HookManager::INSTRUCTION_FETCH, *this,

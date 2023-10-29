@@ -1,5 +1,6 @@
 #pragma once
 
+#include "besm-666/basic-block.hpp"
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
 #include "besm-666/memory/mmu.hpp"
@@ -12,6 +13,7 @@ public:
     explicit Executor(mem::MMU::SPtr mmu) : mmu_(std::move(mmu)) {}
 
     void exec(Instruction const instr);
+    void execBB(const BasicBlock &bb);
 
     inline GPRF const &getState() const { return gprf_; }
 
