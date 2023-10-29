@@ -18,7 +18,7 @@ public:
      * Basic block is completed if either the \p capacity is exceeded or a jump
      * instruction is appeared
      *
-     * \param [in] instr
+     * \param [in] instr instruction
      * \returns \p true if instruction was put successfully
      * \returns \p false if basic block is completed and instruction can't be
      * put

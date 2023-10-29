@@ -34,6 +34,13 @@ public:
      */
     [[nodiscard]] besm::Instruction parse(RV64UWord bytecode) const;
 
+    /**
+     * \brief Parses instructions starting from the \p address while until the
+     * complete base block is retrieved
+     *
+     * \param [in] address address to start
+     * \returns basic block
+     */
     besm::BasicBlock parseBB(RV64Ptr address);
 
     RV64UWord fetch(RV64Ptr address) { return prefetcher_.loadWord(address); }
