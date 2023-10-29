@@ -13,8 +13,7 @@ template <size_t From>
 static inline Register ExtractRegister(RV64UWord bytecode) {
     return ExtractBits<RV64UWord, Register, REG_WIDTH, From>(bytecode);
 }
-
-Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
+Instruction dec::Decoder::parse(RV64UWord bytecode) const {
     const Opcode opcode = ExtractBits<RV64UWord, OPCODE_WIDTH>(bytecode);
     const uint8_t func3 =
         ExtractBits<RV64UWord, FUNC3_WIDTH, FUNC3_SHIFT>(bytecode);
@@ -220,7 +219,10 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
                        .operation = operation};
 }
 besm::BasicBlock dec::Decoder::parseBB(RV64Ptr address) {
-    BasicBlock bb{};
-    while (bb.put(parse(fetch(address)))) {}
+    BasicBlock bb{address};
+    int i = 0;
+    while (bb.put(parse(fetch(address + i * 4)))) {
+        i++;
+    }
     return bb;
 }

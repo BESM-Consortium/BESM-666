@@ -27,7 +27,8 @@ void Hart::runCycle() {
     // out-of-program control
     prevPC_ = pc;
 
-//    exec_.execBB(dec_.parseBB(pc));
+//    BasicBlock bb = dec_.parseBB(pc);
+//    exec_.execBB(bb);
 
     // fetch
     RV64UWord instrBytecode = dec_.fetch(pc);

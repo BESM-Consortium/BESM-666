@@ -16,8 +16,10 @@ struct Instruction {
     RV64UDWord immidiate;
     InstructionOp operation;
 
-    constexpr bool isJump() const {
-        return (operation == JAL || operation == JALR);
+    bool isJump() const {
+        return (operation == JAL || operation == JALR || operation == BEQ ||
+                operation == BNE || operation == BLT || operation == BGE ||
+                operation == BLTU || operation == BGEU);
     }
 
     static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
