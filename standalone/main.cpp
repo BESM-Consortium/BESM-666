@@ -33,11 +33,13 @@ void InitVerboseLoggingBB(besm::sim::Machine &machine) {
                       << bb.size() << "; at start pc: dec = " << bb.startPC()
                       << ", hex = " << std::hex << bb.startPC() << std::dec
                       << std::endl;
-            std::clog << "[BESM-666] VERBOSE: Basic block contains instructions: "
-                      << std::endl;
+            std::clog
+                << "[BESM-666] VERBOSE: Basic block contains instructions: "
+                << std::endl;
             for (const auto &i : bb) {
-                std::clog << "\topcode = " << i.operation << "; isJump = "
-                          << std::boolalpha << i.isJump() << std::endl;
+                std::clog << "\topcode = " << i.operation
+                          << "; isJump = " << std::boolalpha << i.isJump()
+                          << std::endl;
             }
         });
 

@@ -28,8 +28,7 @@ void Hart::runCycle() {
     prevPC_ = pc;
 
     BasicBlock bb = dec_.parseBB(pc);
-    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this,
-                               &bb);
+    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this, &bb);
     exec_.execBB(bb);
     hookManager_->triggerHooks(HookManager::BASIC_BLOCK_EXECUTE, *this,
                                nullptr);
