@@ -9,7 +9,13 @@ namespace besm::sim {
 
 class HookManager {
 public:
-    enum Event { INSTRUCTION_FETCH, INSTRUCTION_DECODE, INSTRUCTION_EXECUTE };
+    enum Event {
+        INSTRUCTION_FETCH,
+        INSTRUCTION_DECODE,
+        INSTRUCTION_EXECUTE,
+        BASIC_BLOCK_PARSE,
+        BASIC_BLOCK_EXECUTE
+    };
 
     using SPtr = std::shared_ptr<HookManager>;
     using Callback = void (*)(sim::Hart const &hart, void const *extraArg);

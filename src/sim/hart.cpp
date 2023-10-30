@@ -27,6 +27,15 @@ void Hart::runCycle() {
     // out-of-program control
     prevPC_ = pc;
 
+    BasicBlock bb = dec_.parseBB(pc);
+    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this,
+                               &bb);
+    exec_.execBB(bb);
+    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_EXECUTE, *this,
+                               nullptr);
+    instrsExecuted_ += bb.size();
+
+#ifdef false
     // fetch
     RV64UWord instrBytecode = dec_.fetch(pc);
     hookManager_->triggerHooks(HookManager::INSTRUCTION_FETCH, *this,
@@ -41,6 +50,7 @@ void Hart::runCycle() {
     hookManager_->triggerHooks(HookManager::INSTRUCTION_EXECUTE, *this,
                                nullptr);
     ++instrsExecuted_;
+#endif
 }
 
 bool Hart::finished() const {

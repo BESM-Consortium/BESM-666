@@ -19,15 +19,20 @@ public:
      * instruction is appeared
      *
      * \param [in] instr instruction
-     * \returns \p true if instruction was put successfully
-     * \returns \p false if basic block is completed and instruction can't be
-     * put
+     * \returns \p true if instruction was put successfully and it wasn't last
+     * instruction in basic block
+     * \returns \p false if last instruction in basic block was put or if basic
+     * block is completed and no more instructions can be put
      */
     bool put(Instruction instr) {
-        if (sz_ >= capacity || instrs_[sz_ - 1].isJump()) {
+        if (isComplete_) {
             return false;
         }
         instrs_[sz_++] = instr;
+        if (sz_ == capacity || instr.isJump()) {
+            isComplete_ = true;
+            return false;
+        }
         return true;
     }
     constexpr size_t size() const { return sz_; }
@@ -47,6 +52,7 @@ private:
     RV64Ptr startPC_;
     std::array<Instruction, capacity> instrs_;
     size_t sz_ = 0;
+    bool isComplete_ = false;
 };
 
 } // namespace besm

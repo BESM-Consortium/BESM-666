@@ -14,6 +14,42 @@
 
 csh CapstoneHandler;
 
+void InitVerboseLoggingBB(besm::sim::Machine &machine) {
+    besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
+
+    std::atexit([]() {
+        std::clog << "[BESM-666] VERBOSE: Verbose logger finished" << std::endl;
+        cs_close(&CapstoneHandler);
+    });
+
+    std::clog << "[BESM-666] VERBOSE: Verbose logging enabled" << std::endl;
+
+    hookManager->registerHook(
+        besm::sim::HookManager::BASIC_BLOCK_PARSE,
+        [](besm::sim::Hart const &hart, void const *pBasicBlock) {
+            besm::BasicBlock bb =
+                *reinterpret_cast<besm::BasicBlock const *>(pBasicBlock);
+            std::clog << "[BESM-666] VERBOSE: Parsed basic block of size = "
+                      << bb.size() << "; at start pc: dec = " << bb.startPC()
+                      << ", hex = " << std::hex << bb.startPC() << std::dec
+                      << std::endl;
+            std::clog << "[BESM-666] VERBOSE: Basic block contains instructions: "
+                      << std::endl;
+            for (const auto &i : bb) {
+                std::clog << "\topcode = " << i.operation << "; isJump = "
+                          << std::boolalpha << i.isJump() << std::endl;
+            }
+        });
+
+    hookManager->registerHook(
+        besm::sim::HookManager::BASIC_BLOCK_EXECUTE,
+        [](besm::sim::Hart const &hart, void const *) {
+            std::clog << "[BESM-666] VERBOSE: Force dumping machine state."
+                      << std::endl;
+            besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
+        });
+}
+
 void InitVerboseLogging(besm::sim::Machine &machine) {
     besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
 
@@ -144,7 +180,7 @@ int main(int argc, char *argv[]) {
     besm::sim::Machine machine(config);
 
     if (verboseLogging) {
-        InitVerboseLogging(machine);
+        InitVerboseLoggingBB(machine);
     }
 
     std::clog << "[BESM-666] INFO: Starting simulation" << std::endl;
