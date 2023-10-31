@@ -29,4 +29,10 @@ using RV64UWord = uint32_t;
 using RV64UHWord = uint16_t;
 using RV64UDWord = uint64_t;
 
+constexpr RV64UDWord XLEN = 64;
+constexpr RV64UDWord IALIGN = 32;
+constexpr RV64UDWord MXLEN = 64;
+
+enum ExceptionId { EXCEPTION_ILLEGAL_INSTR = 1 };
+
 } // namespace besm
