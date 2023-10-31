@@ -69,7 +69,8 @@ enum InstructionOp {
     CSRRWI, // 1110011 , 101     , I
     CSRRSI, // 1110011 , 110     , I
     CSRRCI, // 1110011 , 111     , I
-
+    SRET,
+    MRET
 };
 
 }

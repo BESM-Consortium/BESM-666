@@ -543,10 +543,31 @@ TEST_F(Decoder_I, EBREAK) {
     EXPECT_TRUE(equal(parsed, instance));
 }
 
+TEST_F(Decoder_I, SRET) {
+    const auto instance = buildInstr(0b0, 0b0, 0b100000010, SRET);
+    Instruction parsed = decoder.parse(0b00010000001000000000000001110011);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, MRET) {
+    const auto instance = buildInstr(0b0, 0b0, 0b1100000010, MRET);
+    Instruction parsed = decoder.parse(0b00110000001000000000000001110011);
+    EXPECT_EQ(parsed.operation, instance.operation);
+    EXPECT_EQ(parsed.immidiate, instance.immidiate);
+    EXPECT_TRUE(equal(parsed, instance));
+}
+
 TEST_F(Decoder_I, NOT_EACALL_AND_EBREAK) {
     const auto instance = buildInstr(0b0, 0b0, 0b1, EBREAK);
     Instruction parsed = decoder.parse(0b100001000000001110011);
     EXPECT_FALSE(equal(parsed, instance));
+}
+
+TEST_F(Decoder_I, NOT_SRET_AND_MRET) {
+    Instruction parsed = decoder.parse(0b01110000001000000000000001110011);
+    EXPECT_EQ(parsed.operation, INV_OP);
 }
 
 TEST_F(Decoder_I, LWU1) {
