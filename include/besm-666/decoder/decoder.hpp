@@ -41,7 +41,7 @@ public:
      * \param [in] address address to start
      * \returns basic block
      */
-    besm::BasicBlock parseBB(RV64Ptr address);
+    besm::BasicBlock assembleBB(RV64Ptr address);
 
     RV64UWord fetch(RV64Ptr address) { return prefetcher_.loadWord(address); }
 

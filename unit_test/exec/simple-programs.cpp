@@ -116,11 +116,12 @@ protected:
         instrs_ = std::move(instrs);
     }
 
-    BasicBlock parseBB() {
+    BasicBlock assembleBB() {
         RV64Ptr bbStartPC = exec_.getState().read(exec::GPRF::PC);
         BasicBlock bb{bbStartPC};
         int i = 0;
-        while (bb.put(instrs_[bbStartPC / 4 - startPC_ / 4 + i])) {
+        while (bb.put(instrs_[bbStartPC / sizeof(RV64UWord) -
+                              startPC_ / sizeof(RV64UWord) + i])) {
             i++;
         }
         return bb;
@@ -157,7 +158,7 @@ TEST_F(ExecutorBBTest, SingleBB) {
                 {exec::GPRF::X0, exec::GPRF::X0, exec::GPRF::X0, 0,
                  InstructionOp::JAL}}});
     BasicBlock bb{0};
-    bb = parseBB();
+    bb = assembleBB();
     exec_.execBB(bb);
 
     EXPECT_EQ(exec_.getState().read(exec::GPRF::X3), 15);
@@ -202,7 +203,7 @@ TEST_F(ExecutorBBTest, Sum) {
 
     BasicBlock bb{0};
     while (bb.startPC() != 24) {
-        bb = parseBB();
+        bb = assembleBB();
         exec_.execBB(bb);
     }
 
@@ -260,7 +261,7 @@ TEST_F(ExecutorBBTest, Mul) {
 
     BasicBlock bb{0};
     while (bb.startPC() != 44) {
-        bb = parseBB();
+        bb = assembleBB();
         exec_.execBB(bb);
     }
 

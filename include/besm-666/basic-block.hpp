@@ -38,8 +38,8 @@ public:
     constexpr size_t size() const { return sz_; }
     constexpr RV64Ptr startPC() { return startPC_; }
 
-    using It = std::array<Instruction, 32>::iterator;
-    using ConstIt = std::array<Instruction, 32>::const_iterator;
+    using It = std::array<Instruction, capacity>::iterator;
+    using ConstIt = std::array<Instruction, capacity>::const_iterator;
     It begin() { return instrs_.begin(); }
     It end() { return instrs_.begin() + sz_; }
     ConstIt begin() const { return instrs_.cbegin(); }
