@@ -59,6 +59,33 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
                       << std::endl;
             besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
         });
+
+    hookManager->registerHook(
+        besm::sim::HookManager::BASIC_BLOCK_PARSE,
+        [](besm::sim::Hart const &hart, void const *pBasicBlock) {
+            besm::BasicBlock bb =
+                *reinterpret_cast<besm::BasicBlock const *>(pBasicBlock);
+            std::clog << "[BESM-666] VERBOSE: Parsed basic block of size = "
+                      << bb.size() << "; at start pc: dec = " << bb.startPC()
+                      << ", hex = " << std::hex << bb.startPC() << std::dec
+                      << std::endl;
+            std::clog
+                << "[BESM-666] VERBOSE: Basic block contains instructions: "
+                << std::endl;
+            for (const auto &i : bb) {
+                std::clog << "\topcode = " << i.operation
+                          << "; isJump = " << std::boolalpha << i.isJump()
+                          << std::endl;
+            }
+        });
+
+    hookManager->registerHook(
+        besm::sim::HookManager::BASIC_BLOCK_EXECUTE,
+        [](besm::sim::Hart const &hart, void const *) {
+            std::clog << "[BESM-666] VERBOSE: Force dumping machine state."
+                      << std::endl;
+            besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
+        });
 }
 
 besm::util::Range<besm::RV64Ptr> ParseRange(std::string const &rangeString) {

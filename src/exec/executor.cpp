@@ -686,4 +686,10 @@ void Executor::exec_SRAW(Instruction const instr) {
 
 void Executor::nextPC() { gprf_.write(GPRF::PC, gprf_.read(GPRF::PC) + 4); }
 
+void Executor::execBB(const BasicBlock &bb) {
+    for (const auto &instr : bb) {
+        exec(instr);
+    }
+}
+
 } // namespace besm::exec

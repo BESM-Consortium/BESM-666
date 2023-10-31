@@ -24,23 +24,15 @@ void Hart::runCycle() {
     RV64UDWord pc = exec_.getState().read(exec::GPRF::PC);
     assert(pc % 2 == 0);
 
-    // out-of-program control
-    prevPC_ = pc;
-
-    // fetch
-    RV64UWord instrBytecode = dec_.fetch(pc);
-    hookManager_->triggerHooks(HookManager::INSTRUCTION_FETCH, *this,
-                               &instrBytecode);
-
-    // decode
-    Instruction instr = dec_.parse(instrBytecode);
-    hookManager_->triggerHooks(HookManager::INSTRUCTION_DECODE, *this, &instr);
-
-    // execute
-    exec_.exec(instr);
-    hookManager_->triggerHooks(HookManager::INSTRUCTION_EXECUTE, *this,
+    RV64Ptr startPC = pc;
+    BasicBlock bb = dec_.assembleBB(startPC);
+    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this, &bb);
+    exec_.execBB(bb);
+    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_EXECUTE, *this,
                                nullptr);
-    ++instrsExecuted_;
+    // out-of-program control
+    prevPC_ = startPC + bb.size() - 1;
+    instrsExecuted_ += bb.size();
 }
 
 bool Hart::finished() const {

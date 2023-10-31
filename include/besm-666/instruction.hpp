@@ -16,6 +16,17 @@ struct Instruction {
     RV64UDWord immidiate;
     InstructionOp operation;
 
+    /**
+     * @todo #39:90min We can place all jump instructions consequently in
+     *    InstructionOp enum and check the condition of kind 'does the current
+     *    instruction fit in jump operations range'.
+     */
+    bool isJump() const {
+        return (operation == JAL || operation == JALR || operation == BEQ ||
+                operation == BNE || operation == BLT || operation == BGE ||
+                operation == BLTU || operation == BGEU);
+    }
+
     static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
 };
 
