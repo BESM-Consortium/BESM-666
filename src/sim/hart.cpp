@@ -34,7 +34,7 @@ void Hart::runCycle() {
     prevPC_ = startPC + bb.size() - 1;
     instrsExecuted_ += bb.size();
 
-#ifdef false
+#if false
     prevPC_ = pc;
     // fetch
     RV64UWord instrBytecode = dec_.fetch(pc);
