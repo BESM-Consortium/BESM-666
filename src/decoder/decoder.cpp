@@ -220,8 +220,8 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
 besm::BasicBlock dec::Decoder::assembleBB(RV64Ptr address) {
     BasicBlock bb{address};
     int i = 0;
-    while (bb.put(parse(fetch(address + i * sizeof(RV64UWord))))) {
-        i++;
+    while (bb.put(parse(fetch(address + i)))) {
+        i += sizeof(RV64UWord);
     }
     return bb;
 }

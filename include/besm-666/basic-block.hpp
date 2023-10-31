@@ -25,12 +25,8 @@ public:
      * block is completed and no more instructions can be put
      */
     bool put(Instruction instr) {
-        if (isComplete_) {
-            return false;
-        }
         instrs_[sz_++] = instr;
-        if (sz_ == capacity || instr.isJump()) {
-            isComplete_ = true;
+        if (sz_ >= capacity || instr.isJump()) {
             return false;
         }
         return true;
@@ -52,7 +48,6 @@ private:
     RV64Ptr startPC_;
     std::array<Instruction, capacity> instrs_;
     size_t sz_ = 0;
-    bool isComplete_ = false;
 };
 
 } // namespace besm
