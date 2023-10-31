@@ -1,96 +1,92 @@
 #pragma once
 
 #include <filesystem>
+#include <map>
 #include <memory>
-#include <set>
 
-#include "besm-666/memory/page-allocator.hpp"
+#include "besm-666/memory/phys-mem-device.hpp"
 #include "besm-666/riscv-types.hpp"
+#include "besm-666/util/dummy-exception.hpp"
 #include "besm-666/util/elf-parser.hpp"
 #include "besm-666/util/non-copyable.hpp"
+#include "besm-666/util/range.hpp"
 
 namespace besm::mem {
 
-class PhysMemPagemap : public INonCopyable {
-public:
-    using PageId = RV64Size;
-    struct Page {
-        RV64Size const id;
-        char *const mem;
-    };
-    using Pagemap = std::set<Page, std::less<>>;
-
-    PhysMemPagemap(size_t pageSize, size_t allocatorChunkSize);
-    PhysMemPagemap(PhysMemPagemap &&other);
-    ~PhysMemPagemap() = default;
-
-    void storeByte(RV64Ptr address, RV64UChar value);
-    RV64UChar loadByte(RV64Ptr address) const;
-
-private:
-    RV64Size addr2PageId(RV64Ptr address) const;
-    RV64Size addr2PageOffset(RV64Ptr address) const;
-    void *touchAddress(RV64Ptr address);
-    void const *translateAddress(RV64Ptr address) const;
-
-    size_t const pageSize_;
-    PageAllocator allocator_;
-    Pagemap pagemap_;
-};
-
-bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::Page rhs);
-bool operator<(PhysMemPagemap::Page lhs, PhysMemPagemap::PageId rhs);
-bool operator<(PhysMemPagemap::PageId lhs, PhysMemPagemap::Page rhs);
+using PhysMemDeviceMap =
+    std::map<util::Range<RV64Ptr>, std::shared_ptr<IPhysMemDevice>>;
 
 class PhysMem : public INonCopyable {
 public:
-    using SPtr = std::shared_ptr<PhysMem>;
-
     ~PhysMem() = default;
-    PhysMem(PhysMem &&other);
 
-    template <typename RV64Type> void store(RV64Ptr address, RV64Type value);
-    template <typename RV64Type> RV64Type load(RV64Ptr address) const;
+    RV64UChar loadByte(RV64Ptr address) const;
+    RV64UHWord loadHWord(RV64Ptr address) const;
+    RV64UWord loadWord(RV64Ptr address) const;
+    RV64UDWord loadDWord(RV64Ptr address) const;
+
+    void storeByte(RV64Ptr address, RV64UChar value);
+    void storeHWord(RV64Ptr address, RV64UHWord value);
+    void storeWord(RV64Ptr address, RV64UWord value);
+    void storeDWord(RV64Ptr address, RV64UDWord value);
+
+    void storeContArea(RV64Ptr address, void const *data, size_t size);
+
+    std::pair<void const *, size_t> getHostAddress(RV64Ptr address) const;
+    std::pair<void *, size_t> touchHostAddress(RV64Ptr address);
+
+    struct DeviceDescriptor {
+        util::Range<RV64Ptr> const range;
+        std::shared_ptr<IPhysMemDevice const> const device;
+    };
+
+    std::vector<DeviceDescriptor> getDevices() const;
 
 private:
     friend class PhysMemBuilder;
-    PhysMem(PhysMemPagemap &&pagemap);
 
-    PhysMemPagemap pagemap_;
+    PhysMem(PhysMemDeviceMap &&devices)
+        : devices_(std::move(devices)), lastAccessedRange_(0, 0) {}
+
+    std::pair<util::Range<RV64Ptr>, std::shared_ptr<IPhysMemDevice>>
+    findDevice(RV64Ptr address) const;
+
+    PhysMemDeviceMap devices_;
+    mutable util::Range<RV64Ptr> lastAccessedRange_;
+    mutable std::shared_ptr<IPhysMemDevice> lastAccessedDevice_;
 };
 
-template <typename RV64Type>
-void PhysMem::store(RV64Ptr address, RV64Type value) {
-    for (RV64Ptr i = 0; i < sizeof(RV64Type); ++i) {
-        pagemap_.storeByte(address + i, *((RV64UChar *)&value + i));
-    }
-}
-template <typename RV64Type> RV64Type PhysMem::load(RV64Ptr address) const {
-    RV64Type result;
-    for (RV64Ptr i = 0; i < sizeof(RV64Type); ++i) {
-        *((RV64UChar *)&result + i) = pagemap_.loadByte(address + i);
-    }
-    return result;
-}
-
-class PhysMemBuilder : public INonCopyable {
+class PhysMemBuilder {
 public:
-    PhysMemBuilder(size_t pageSize,
-                   size_t allocatorChunkSize = PageAllocator::DefaultChunkSize);
+    BESM_UTIL_DUMMY_EXCEPTION(MappingIntersection);
+
+    PhysMemBuilder() = default;
     ~PhysMemBuilder() = default;
 
-    PhysMemBuilder &loadElf(const std::filesystem::path &elfPath);
-    PhysMemBuilder &loadContArea(RV64Ptr address, void const *data,
-                                 RV64Size size);
+    PhysMemBuilder &mapRAM(RV64Ptr address, size_t ramSize, size_t ramPageSize,
+                           size_t ramChunkSize);
+    PhysMemBuilder &mapUART();
+    PhysMemBuilder &mapTimer();
 
-    PhysMem::SPtr build();
+    std::shared_ptr<PhysMem> build();
 
 private:
-    PhysMemPagemap pagemap_;
+    void mapDevice(std::shared_ptr<IPhysMemDevice> const &device,
+                   RV64Ptr address);
 
-#ifndef NDEBUG
-    bool wasAlreadyBuilt_;
-#endif
+    PhysMemDeviceMap devices_;
+};
+
+class PhysMemLoader {
+public:
+    PhysMemLoader(std::shared_ptr<PhysMem> const &physMem);
+
+    void loadElf(std::filesystem::path const &elfPath);
+    void loadIso(std::filesystem::path const &isoPath);
+    void loadBin(RV64Ptr address, std::filesystem::path const &isoPath);
+
+private:
+    std::shared_ptr<PhysMem> physMem_;
 };
 
 } // namespace besm::mem

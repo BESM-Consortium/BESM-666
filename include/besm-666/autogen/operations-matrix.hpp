@@ -1169,13 +1169,13 @@ constexpr static Cell INSTR_WHO[128][8] = {
     }, // opcode: 0b1110010
     {
         {I, INV_OP},
+        {I, CSRRW},
+        {I, CSRRS},
+        {I, CSRRC},
         {I, INV_OP},
-        {I, INV_OP},
-        {I, INV_OP},
-        {I, INV_OP},
-        {I, INV_OP},
-        {I, INV_OP},
-        {I, INV_OP},
+        {I, CSRRWI},
+        {I, CSRRSI},
+        {I, CSRRCI},
     }, // opcode: 0b1110011
     {
         {ILLEGAL, INV_OP},

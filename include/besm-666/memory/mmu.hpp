@@ -12,7 +12,7 @@ class MMU : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<MMU>;
 
-    static MMU::SPtr Create(PhysMem::SPtr pMem);
+    static MMU::SPtr Create(std::shared_ptr<PhysMem> const &pMem);
 
     RV64UChar loadByte(RV64Ptr address) const;
     RV64UHWord loadHWord(RV64Ptr address) const;
@@ -24,12 +24,18 @@ public:
     void storeWord(RV64Ptr address, RV64Word value);
     void storeDWord(RV64Ptr address, RV64DWord value);
 
+    std::pair<void *, RV64Size> touchHostAddress(RV64Ptr vaddress);
+    std::pair<void const *, RV64Size> getHostAddress(RV64Ptr vaddress) const {
+        return pMem_->getHostAddress(translateAddress(vaddress));
+    }
+
 private:
-    explicit MMU(PhysMem::SPtr pMem) : pMem_(std::move(pMem)) {}
+    explicit MMU(std::shared_ptr<PhysMem> const &pMem)
+        : pMem_(std::move(pMem)) {}
 
     RV64Ptr translateAddress(RV64Ptr address) const;
 
-    PhysMem::SPtr pMem_;
+    std::shared_ptr<PhysMem> pMem_;
 };
 
 } // namespace besm::mem

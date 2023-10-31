@@ -5,6 +5,7 @@ target_link_libraries(besm666_testif INTERFACE
     besm666_exec 
     besm666_memory 
     besm666_decoder
+    besm666_util
     gmock_main 
     gmock 
     gtest
@@ -20,7 +21,7 @@ endfunction(besm666_test)
 
 besm666_test(./dummy_test.cpp)
 
-set(DIRS memory decoder exec util elfgen)
+set(DIRS decoder exec memory util elfgen)
 foreach(DIR ${DIRS})
     add_subdirectory(${DIR})
 endforeach()

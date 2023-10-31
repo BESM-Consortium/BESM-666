@@ -1,5 +1,6 @@
 #pragma once
 
+#include "besm-666/memory/phys-mem.hpp"
 #include "besm-666/sim/config.hpp"
 #include "besm-666/sim/hart.hpp"
 #include "besm-666/sim/hooks.hpp"
@@ -20,7 +21,7 @@ public:
 
 private:
     HookManager::SPtr hookManager_;
-    mem::PhysMem::SPtr pMem_;
+    std::shared_ptr<mem::PhysMem> pMem_;
     sim::Hart::SPtr hart_;
 };
 

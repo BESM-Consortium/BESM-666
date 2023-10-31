@@ -1,9 +1,12 @@
 #pragma once
-#include "besm-666/autogen/operations-matrix.hpp"
-#include "besm-666/instruction.hpp"
+
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
+
+#include "besm-666/autogen/operations-matrix.hpp"
+#include "besm-666/decoder/prefetcher.hpp"
+#include "besm-666/instruction.hpp"
 
 namespace besm::dec {
 
@@ -21,6 +24,8 @@ private:
     static constexpr RV64UWord RS2_MASK = 0b11111 << RS2_SHIFT;
 
 public:
+    explicit Decoder(mem::MMU::SPtr mmu) : prefetcher_(std::move(mmu)) {}
+
     /**
      * Give the {@link Instruction} by the bytecode word.
      * @param bytecode word.
@@ -28,7 +33,11 @@ public:
      */
     [[nodiscard]] besm::Instruction parse(RV64UWord bytecode) const;
 
+    RV64UWord fetch(RV64Ptr address) { return prefetcher_.loadWord(address); }
+
 private:
+    Prefetcher prefetcher_;
+
     static inline Instruction parse_R(RV64UWord bytecode, Opcode opcode,
                                       uint8_t func3);
 
