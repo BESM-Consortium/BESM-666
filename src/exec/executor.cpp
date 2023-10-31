@@ -169,10 +169,24 @@ void Executor::exec(Instruction const instr) {
     case PAUSE:
         // can't find this instruction in docs
         break;
+    case MRET:
     default:
         std::terminate();
         break;
     }
+}
+
+void Executor::raiseIllegalInstruction() {
+    // To raise illegal instruction exception in proper way firstly we need
+    // to provide PC where an exception occured through mepc register
+    csrf_.mepc.set<MEPC::Value>(gprf_.read(GPRF::PC));
+
+    // The next step is to set up illegal instruction bit in mcause register.
+    // Also we need to zero interrupt bit, because we are throwing an exception,
+    // not interrupt =)
+    // TODO
+    
+    // Then we need to save current mode, stored in mstatus
 }
 
 void Executor::exec_ADDI(Instruction const instr) {

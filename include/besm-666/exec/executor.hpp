@@ -1,6 +1,7 @@
 #pragma once
 
 #include "besm-666/basic-block.hpp"
+#include "besm-666/exec/csrf.hpp"
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
 #include "besm-666/memory/mmu.hpp"
@@ -18,6 +19,8 @@ public:
     inline GPRF const &getState() const { return gprf_; }
 
 private:
+    void raiseIllegalInstruction();
+
     void exec_ADDI(Instruction const instr);
     void exec_SLTI(Instruction const instr);
     void exec_SLTIU(Instruction const instr);
@@ -78,9 +81,13 @@ private:
     void exec_SRLW(Instruction const instr);
     void exec_SRAW(Instruction const instr);
 
+    void exec_MRET(Instruction const instr);
+    void exec_SRET(Instruction const instr);
+
     void nextPC();
 
     GPRF gprf_;
+    CSRF csrf_;
     mem::MMU::SPtr mmu_;
 };
 
