@@ -22,12 +22,29 @@ class MStatus final : public CSRStructure<MStatusDefs::SIE, MStatusDefs::MIE,
                       public MStatusDefs {
 public:
     MStatus(CSRF &csrf) : CSRStructure(csrf, ICSR::MSTATUS) {}
-    virtual ~MStatus() = default;
+    ~MStatus() = default;
 };
 
 class MEPCDefs {
 public:
-    using Value = CSRWARLField<
+    static bool ValueValidator(RV64UDWord value) {
+        return (value & (IALIGN / 8 - 1)) == 0 &&
+            (value & (MXLEN - 1)) == value;
+    }
+
+    using Value = CSRWARLField<MXLEN, ValueValidator>;
+};
+
+class MEPC final : public CSRStructure<MEPCDefs::Value>,
+                   public MEPCDefs {
+public:
+    MEPC(CSRF &csrf) : CSRStructure(csrf, ICSR::MEPC) {}
+
+};
+
+class MCauseDefs {
+public:
+
 };
 
 } // namespace besm::exec
