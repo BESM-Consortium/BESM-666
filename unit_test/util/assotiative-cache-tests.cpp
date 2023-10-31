@@ -29,16 +29,16 @@ protected:
 
 TEST_F(CacheTest, find) {
     using namespace besm::util;
-    EXPECT_EQ(cache.find(5 * 2).getPayload(), 5);
-    EXPECT_EQ(cache.find(25 * 2).getPayload(), 25);
-    EXPECT_EQ(cache.find(42 * 2).getPayload(), 42);
+    EXPECT_EQ(cache.find(ftag<int, int>(5)).getPayload(), 5);
+    EXPECT_EQ(cache.find(ftag<int, int>(25)).getPayload(), 25);
+    EXPECT_EQ(cache.find(ftag<int, int>(42)).getPayload(), 42);
 }
 
 TEST_F(CacheTest, valid) {
     using namespace besm::util;
-    EXPECT_TRUE(cache.find(5 * 2).valid());
-    EXPECT_TRUE(cache.find(25 * 2).valid());
-    EXPECT_TRUE(cache.find(42 * 2).valid());
+    EXPECT_TRUE(cache.find(ftag<int, int>(5)).valid());
+    EXPECT_TRUE(cache.find(ftag<int, int>(25)).valid());
+    EXPECT_TRUE(cache.find(ftag<int, int>(42)).valid());
 }
 
 TEST_F(CacheTest, invalid) {
@@ -93,6 +93,9 @@ TEST(AssotiativeCache, ComplexPayload) {
     EXPECT_EQ(entry.getPayload().virtualPageId, 64 * 4);
     EXPECT_EQ(entry.getPayload().physicalPageId, 64 * 4);
 
-    auto lostEntry = cache.find(64 * 0);
-    EXPECT_FALSE(lostEntry.valid());
+    // find() was changed and doesn't invalidate Entry in case of cache miss so
+    // this test isn't actual for now.
+
+    // auto lostEntry = cache.find(64 * 0);
+    // EXPECT_FALSE(lostEntry.valid());
 }
