@@ -14,6 +14,32 @@
 
 csh CapstoneHandler;
 
+void OnBBParse(besm::sim::Hart const &hart, void const *pBB) {
+    besm::BasicBlock const &bb =
+        *reinterpret_cast<besm::BasicBlock const *>(pBB);
+
+    besm::RV64Ptr pc = bb.startPC();
+    besm::RV64Size size = bb.size();
+
+    std::clog << "[BESM-666] VERBOSE: Fetched BB of size " << size << " at "
+              << pc << ":\n";
+    for (besm::RV64Ptr instrAddr = pc; instrAddr < pc + size * 4;
+         instrAddr += 4) {
+        besm::RV64UWord bytecode = hart.getMMU().loadWord(instrAddr);
+
+        cs_insn *instruction;
+        size_t count = cs_disasm(CapstoneHandler,
+                                 reinterpret_cast<uint8_t const *>(&bytecode),
+                                 4, instrAddr, 0, &instruction);
+
+        if (count == 1) {
+            std::clog << "\t" << instruction->address << ": ";
+            std::clog << instruction->mnemonic << " " << instruction->op_str
+                      << std::endl;
+        }
+    }
+}
+
 void InitVerboseLogging(besm::sim::Machine &machine) {
     besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
 
@@ -60,24 +86,8 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
             besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
         });
 
-    hookManager->registerHook(
-        besm::sim::HookManager::BASIC_BLOCK_PARSE,
-        [](besm::sim::Hart const &hart, void const *pBasicBlock) {
-            besm::BasicBlock bb =
-                *reinterpret_cast<besm::BasicBlock const *>(pBasicBlock);
-            std::clog << "[BESM-666] VERBOSE: Parsed basic block of size = "
-                      << bb.size() << "; at start pc: dec = " << bb.startPC()
-                      << ", hex = " << std::hex << bb.startPC() << std::dec
-                      << std::endl;
-            std::clog
-                << "[BESM-666] VERBOSE: Basic block contains instructions: "
-                << std::endl;
-            for (const auto &i : bb) {
-                std::clog << "\topcode = " << i.operation
-                          << "; isJump = " << std::boolalpha << i.isJump()
-                          << std::endl;
-            }
-        });
+    hookManager->registerHook(besm::sim::HookManager::BASIC_BLOCK_PARSE,
+                              OnBBParse);
 
     hookManager->registerHook(
         besm::sim::HookManager::BASIC_BLOCK_EXECUTE,
