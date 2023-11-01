@@ -18,6 +18,8 @@ public:
                        std::shared_ptr<HookManager> const &hookManager);
 
     exec::GPRF const &getState() const { return exec_.getState(); }
+    exec::CSRF const &getCSRF() const { return exec_.getCSRF(); }
+    mem::MMU const &getMMU() const { return *mmu_; }
     size_t getInstrsExecuted() const { return instrsExecuted_; }
 
     void runCycle();
