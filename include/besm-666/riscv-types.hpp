@@ -33,7 +33,7 @@ constexpr RV64UDWord XLEN = 64;
 constexpr RV64UDWord IALIGN = 32;
 constexpr RV64UDWord MXLEN = 64;
 
-enum ExceptionId { 
+enum ExceptionId {
     EXCEPTION_INSTR_ADDR_MISALIGNED = 0,
     EXCEPTION_ACCESS_FAULT = 1,
     EXCEPTION_ILLEGAL_INSTR = 2,
