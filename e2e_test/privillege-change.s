@@ -8,14 +8,15 @@
 
 .align 4
 trap_vector:
-    // we got into the trap, success!
-    li a0, 1
-    jalr zero, ra, 0
+    j test_failure
+    j test_failure
+    j test_success
 
 .align 4
 start:
     // setting up trap vector address
     la t0, trap_vector
+    ori t0, t0, 1
     csrw mtvec, t0
     // entering to the user mode
     la t0, usermode_entry
@@ -23,8 +24,7 @@ start:
     mret
 
     // dead code, that successfully terminates program with 0 error code
-    li a0, 0
-    jalr zero, ra, 0
+    j test_failure
 
 .align 4
 usermode_entry:
@@ -37,5 +37,12 @@ usermode_entry:
     csrw mstatus, t0
 
     // dead code, that successfully terminates program with 0 error code
+    j test_failure
+
+test_failure:
     li a0, 0
-    jalr zero, ra, 0
+    ret
+
+test_success:
+    li a0, 1
+    ret
