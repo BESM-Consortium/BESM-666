@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
 #include <type_traits>
 
 namespace besm::util {
@@ -105,7 +106,12 @@ struct MaskedExtractor<Type, Mask, Count, Series, Filled, Count> {
 
 template <typename Type, Type Mask> constexpr Type ExtractMasked(Type value) {
     static_assert(std::is_unsigned_v<Type>);
-    return MaskedExtractor<Type, Mask, 0, 0, 0, sizeof(Type) * 8>::Do(value);
+    if constexpr (Mask == ~static_cast<Type>(0)) {
+        return value;
+    } else {
+        return MaskedExtractor<Type, Mask, 0, 0, 0, sizeof(Type) * 8>::Do(
+            value);
+    }
 }
 
 template <typename Type, Type Mask, size_t Pos, size_t Series, size_t Set,
@@ -135,15 +141,21 @@ struct MaskedInserter<Type, Mask, Count, Series, Set, Count> {
         if constexpr (SeriesMaskOffset == Count) {
             return static_cast<Type>(setPlace);
         } else {
-            return ChangeBits<Type, Series, Set>(value, setPlace);
+            return ChangeBits<Type, Series, SeriesMaskOffset>(
+                setPlace, ExtractBits<Type, Series, Set>(value));
         }
     }
 };
 
 template <typename Type, Type Mask>
 constexpr Type InsertMasked(Type value, Type setPlace) {
-    return MaskedInserter<Type, Mask, 0, 0, 0, sizeof(Type) * 8>::Do(value,
-                                                                     setPlace);
+    static_assert(std::is_unsigned_v<Type>);
+    if constexpr (Mask == ~static_cast<Type>(0)) {
+        return value;
+    } else {
+        return MaskedInserter<Type, Mask, 0, 0, 0, sizeof(Type) * 8>::Do(
+            value, setPlace);
+    }
 }
 
 } // namespace besm::util
