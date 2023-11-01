@@ -642,8 +642,8 @@ void Executor::exec_SD(Instruction const instr) {
     this->nextPC();
 }
 
-void Executor::exec_ECALL(Instruction const instr) { 
-    switch(csrf_.getPrivillege()) {
+void Executor::exec_ECALL(Instruction const instr) {
+    switch (csrf_.getPrivillege()) {
     case PRIVILLEGE_USER:
         this->raiseException(EXCEPTION_ECALL_UMODE);
         break;
@@ -796,7 +796,13 @@ void Executor::exec_CSRRW(Instruction const instr) {
 }
 
 void Executor::exec_CSRRS(Instruction const instr) {
-    auto status = csrf_.setBits(instr.immidiate, gprf_.read(instr.rs1));
+    std::variant<bool, RV64UDWord> status;
+    if (instr.rs1 == GPRF::X0) {
+        status = csrf_.read(instr.immidiate);
+    } else {
+        status = csrf_.setBits(instr.immidiate, gprf_.read(instr.rs1));
+    }
+
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
         return;
