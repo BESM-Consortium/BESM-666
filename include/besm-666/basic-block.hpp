@@ -32,7 +32,7 @@ public:
         return true;
     }
     constexpr size_t size() const { return sz_; }
-    constexpr RV64Ptr startPC() { return startPC_; }
+    constexpr RV64Ptr startPC() const { return startPC_; }
 
     using It = std::array<Instruction, capacity>::iterator;
     using ConstIt = std::array<Instruction, capacity>::const_iterator;
