@@ -24,7 +24,8 @@ struct Instruction {
     bool isJump() const {
         return (operation == JAL || operation == JALR || operation == BEQ ||
                 operation == BNE || operation == BLT || operation == BGE ||
-                operation == BLTU || operation == BGEU);
+                operation == BLTU || operation == BGEU || operation == MRET ||
+                operation == SRET || operation == ECALL);
     }
 
     static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
