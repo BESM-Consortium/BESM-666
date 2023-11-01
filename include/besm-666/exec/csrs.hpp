@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "besm-666/exec/csr.hpp"
 #include "besm-666/exec/icsr.hpp"
 #include "besm-666/riscv-types.hpp"
@@ -28,23 +30,37 @@ public:
 class MEPCDefs {
 public:
     static bool ValueValidator(RV64UDWord value) {
-        return (value & (IALIGN / 8 - 1)) == 0 &&
-            (value & (MXLEN - 1)) == value;
+        return value % (IALIGN / 8) == 0;
     }
 
-    using Value = CSRWARLField<MXLEN, ValueValidator>;
+    using Value = CSRWARLField<~static_cast<RV64UDWord>(0), ValueValidator>;
 };
 
-class MEPC final : public CSRStructure<MEPCDefs::Value>,
-                   public MEPCDefs {
+class MEPC final : public CSRStructure<MEPCDefs::Value>, public MEPCDefs {
 public:
     MEPC(CSRF &csrf) : CSRStructure(csrf, ICSR::MEPC) {}
-
 };
 
 class MCauseDefs {
 public:
+};
 
+class MTVecDefs {
+public:
+    static constexpr RV64UDWord DirectMode = 0;
+    static constexpr RV64UDWord VectoredMode = 1;
+
+    static bool ModeValidator(RV64UDWord mode) { return mode <= 1; }
+    static bool BaseValidator(RV64UDWord base) { return base % 4 == 0; }
+
+    using Mode = CSRWARLField<0b11, ModeValidator>;
+    using Base = CSRWARLField<~static_cast<RV64UDWord>(0b11), BaseValidator>;
+};
+
+class MTVec : public CSRStructure<MTVecDefs::Mode, MTVecDefs::Base>,
+              public MTVecDefs {
+public:
+    MTVec(CSRF &csrf) : CSRStructure(csrf, ICSR::MTVEC) {}
 };
 
 } // namespace besm::exec

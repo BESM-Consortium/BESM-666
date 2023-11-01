@@ -17,6 +17,7 @@ public:
     void execBB(const BasicBlock &bb);
 
     inline GPRF const &getState() const { return gprf_; }
+    inline CSRF const &getCSRF() const { return csrf_; }
 
 private:
     void raiseIllegalInstruction();
@@ -84,11 +85,21 @@ private:
     void exec_MRET(Instruction const instr);
     void exec_SRET(Instruction const instr);
 
+    void exec_CSRRW(Instruction const instr);
+    void exec_CSRRS(Instruction const instr);
+    void exec_CSRRC(Instruction const instr);
+
+    void exec_CSRRWI(Instruction const instr);
+    void exec_CSRRSI(Instruction const instr);
+    void exec_CSRRCI(Instruction const instr);
+
     void nextPC();
 
     GPRF gprf_;
     CSRF csrf_;
     mem::MMU::SPtr mmu_;
+
+    bool exceptionHappened_ = false;
 };
 
 } // namespace besm::exec

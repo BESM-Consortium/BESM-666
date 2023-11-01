@@ -2,6 +2,7 @@
 #include "besm-666/util/bit-magic.hpp"
 
 #include <iostream>
+#include <variant>
 namespace besm::exec {
 
 void Executor::exec(Instruction const instr) {
@@ -170,6 +171,29 @@ void Executor::exec(Instruction const instr) {
         // can't find this instruction in docs
         break;
     case MRET:
+        exec_MRET(instr);
+        break;
+    case SRET:
+        exec_SRET(instr);
+        break;
+    case CSRRW:
+        exec_CSRRW(instr);
+        break;
+    case CSRRS:
+        exec_CSRRS(instr);
+        break;
+    case CSRRC:
+        exec_CSRRC(instr);
+        break;
+    case CSRRWI:
+        exec_CSRRWI(instr);
+        break;
+    case CSRRSI:
+        exec_CSRRSI(instr);
+        break;
+    case CSRRCI:
+        exec_CSRRCI(instr);
+        break;
     default:
         std::terminate();
         break;
@@ -177,16 +201,20 @@ void Executor::exec(Instruction const instr) {
 }
 
 void Executor::raiseIllegalInstruction() {
-    // To raise illegal instruction exception in proper way firstly we need
-    // to provide PC where an exception occured through mepc register
+    csrf_.mstatus.set<MStatus::MPIE>(csrf_.mstatus.get<MStatus::MIE>());
+    csrf_.mstatus.set<MStatus::MIE>(0);
+    csrf_.mstatus.set<MStatus::MPP>(csrf_.getPrivillege());
+    csrf_.setPrivillege(PRIVILLEGE_MACHINE);
+
     csrf_.mepc.set<MEPC::Value>(gprf_.read(GPRF::PC));
 
-    // The next step is to set up illegal instruction bit in mcause register.
-    // Also we need to zero interrupt bit, because we are throwing an exception,
-    // not interrupt =)
-    // TODO
-    
-    // Then we need to save current mode, stored in mstatus
+    if (csrf_.mtvec.get<MTVec::Mode>() == MTVec::VectoredMode) {
+        std::terminate();
+    } else {
+        gprf_.write(GPRF::PC, csrf_.mtvec.get<MTVec::Base>() * 4);
+    }
+
+    exceptionHappened_ = true;
 }
 
 void Executor::exec_ADDI(Instruction const instr) {
@@ -698,11 +726,111 @@ void Executor::exec_SRAW(Instruction const instr) {
     this->nextPC();
 }
 
+void Executor::exec_MRET(Instruction const instr) {
+    if (csrf_.getPrivillege() != PRIVILLEGE_MACHINE) {
+        this->raiseIllegalInstruction();
+    }
+
+    csrf_.setPrivillege(csrf_.mstatus.get<MStatus::MPP>());
+    csrf_.mstatus.set<MStatus::MIE>(csrf_.mstatus.get<MStatus::MPIE>());
+    csrf_.mstatus.set<MStatus::MPIE>(1);
+    csrf_.mstatus.set<MStatus::MPP>(PRIVILLEGE_USER);
+    // csrf_.mstatus.set<MStatus::MPRV>(0);
+
+    gprf_.write(GPRF::PC, csrf_.mepc.get<MEPC::Value>());
+}
+
+void Executor::exec_SRET(Instruction const instr) {
+    /*
+    csrf_.setPrivillege(csrf_.mstatus.get<MStatus::SPP>());
+    csrf_.mstatus.set<MStatus::SIE>(csrf_.mstatus.get<MStatus::SPIE>());
+    csrf_.mstatus.set<MStatus::SPIE>(1);
+    csrf_.mstatus.set<MStatus::SPP>(PRIVILLEGE_USER);
+    // csrf_.mstatus.set<MStatus::MPRV>(0);
+
+    gprf_.write(GPRF::PC, csrf_.mepc.get<MEPC::Value>());
+    */
+    std::terminate();
+}
+
+void Executor::exec_CSRRW(Instruction const instr) {
+    auto status = csrf_.write(instr.immidiate, gprf_.read(instr.rs1));
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+
+void Executor::exec_CSRRS(Instruction const instr) {
+    auto status = csrf_.setBits(instr.immidiate, gprf_.read(instr.rs1));
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+void Executor::exec_CSRRC(Instruction const instr) {
+    auto status = csrf_.clearBits(instr.immidiate, gprf_.read(instr.rs1));
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+
+void Executor::exec_CSRRWI(Instruction const instr) {
+    auto status = csrf_.write(instr.immidiate, instr.rs1);
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+void Executor::exec_CSRRSI(Instruction const instr) {
+    auto status = csrf_.setBits(instr.immidiate, instr.rs1);
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+void Executor::exec_CSRRCI(Instruction const instr) {
+    auto status = csrf_.clearBits(instr.immidiate, instr.rs1);
+    if (std::holds_alternative<bool>(status)) {
+        this->raiseIllegalInstruction();
+        return;
+    }
+
+    gprf_.write(instr.rd, std::get<RV64UDWord>(status));
+
+    this->nextPC();
+}
+
 void Executor::nextPC() { gprf_.write(GPRF::PC, gprf_.read(GPRF::PC) + 4); }
 
 void Executor::execBB(const BasicBlock &bb) {
     for (const auto &instr : bb) {
         exec(instr);
+        if (exceptionHappened_) {
+            exceptionHappened_ = false;
+            break;
+        }
     }
 }
 

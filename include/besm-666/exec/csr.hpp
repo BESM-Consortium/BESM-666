@@ -1,7 +1,9 @@
 #pragma once
 
+#include <bitset>
 #include <cassert>
 #include <cstddef>
+#include <iostream>
 #include <type_traits>
 
 #include "besm-666/exec/icsr.hpp"
@@ -92,6 +94,7 @@ bool CSRField<Mask, Spec, Val, ResetValue>::set(RV64UDWord value) noexcept {
     }
 
     rawRegister_ = util::InsertMasked<RV64UDWord, Mask>(value, rawRegister_);
+
     return true;
 }
 

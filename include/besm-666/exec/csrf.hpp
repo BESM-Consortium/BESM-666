@@ -14,39 +14,41 @@
 
 namespace besm::exec {
 
-enum PrivillegeLevel {
-    PRIVILLEGE_MACHINE = 0,
-    PRIVILLEGE_HYPERVISOR = 1,
-    PRIVILLEGE_SUPERVISOR = 2,
-    PRIVILLEGE_USER = 3
-};
+constexpr RV64UDWord PRIVILLEGE_MACHINE = 3;
+constexpr RV64UDWord PRIVILLEGE_SUPERVISOR = 1;
+constexpr RV64UDWord PRIVILLEGE_USER = 0;
 
 class CSRF {
 public:
     CSRF();
     ~CSRF() = default;
 
-    std::variant<bool, RV64UDWord> write(RV64UDWord rawId, RV64UDWord value) noexcept;
+    std::variant<bool, RV64UDWord> write(RV64UDWord rawId,
+                                         RV64UDWord value) noexcept;
     std::variant<bool, RV64UDWord> read(RV64UDWord rawId) const noexcept;
     std::variant<bool, RV64UDWord> setBits(RV64UDWord rawId,
-                                        RV64UDWord mask) noexcept;
+                                           RV64UDWord mask) noexcept;
     std::variant<bool, RV64UDWord> clearBits(RV64UDWord rawId,
-                                          RV64UDWord mask) noexcept;
-
-    MStatus mstatus;
-    MEPC mepc;
+                                             RV64UDWord mask) noexcept;
 
     void addRegister(ICSR &reg);
 
-    PrivillegeLevel getPrivillege() const noexcept;
+    RV64UDWord getPrivillege() const noexcept { return privillege_; }
+    void setPrivillege(RV64UDWord p) noexcept { privillege_ = p; }
 
 private:
-    static PrivillegeLevel registerPrivillege(ICSR::Id id) noexcept;
+    static RV64UDWord registerPrivillege(ICSR::Id id) noexcept;
     static bool registerReadOnly(ICSR::Id id) noexcept;
 
     bool fitPrivillege(ICSR::Id id) const noexcept;
 
-    PrivillegeLevel privillege_;
+    RV64UDWord privillege_;
     std::unordered_map<ICSR::Id, std::reference_wrapper<ICSR>> registers_;
+
+public:
+    MStatus mstatus;
+    MEPC mepc;
+    MTVec mtvec;
 };
+
 } // namespace besm::exec

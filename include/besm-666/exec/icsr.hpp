@@ -21,6 +21,7 @@ public:
 
         MSTATUS = 0x300,
         MEPC = 0x341,
+        MTVEC = 0x305,
 
         NUM_IDS
     };
