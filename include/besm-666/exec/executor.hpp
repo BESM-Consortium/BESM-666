@@ -20,6 +20,7 @@ public:
     inline CSRF const &getCSRF() const { return csrf_; }
 
 private:
+    void raiseException(ExceptionId id);
     void raiseIllegalInstruction();
 
     void exec_ADDI(Instruction const instr);
@@ -69,8 +70,8 @@ private:
     void exec_FENCE_TSO(Instruction const instr) { this->nextPC(); }
 
     // Will be implemented after CSR system release
-    void exec_ECALL(Instruction const instr) { this->nextPC(); }
-    void exec_EBREAK(Instruction const instr) { this->nextPC(); }
+    void exec_ECALL(Instruction const instr);
+    void exec_EBREAK(Instruction const instr);
 
     void exec_ADDIW(Instruction const instr);
     void exec_SLLIW(Instruction const instr);

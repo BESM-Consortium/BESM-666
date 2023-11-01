@@ -167,9 +167,6 @@ void Executor::exec(Instruction const instr) {
     case SRAW:
         exec_SRAW(instr);
         break;
-    case PAUSE:
-        // can't find this instruction in docs
-        break;
     case MRET:
         exec_MRET(instr);
         break;
@@ -195,26 +192,36 @@ void Executor::exec(Instruction const instr) {
         exec_CSRRCI(instr);
         break;
     default:
-        std::terminate();
+        this->raiseIllegalInstruction();
         break;
     }
 }
 
-void Executor::raiseIllegalInstruction() {
+void Executor::raiseException(ExceptionId id) {
+
     csrf_.mstatus.set<MStatus::MPIE>(csrf_.mstatus.get<MStatus::MIE>());
     csrf_.mstatus.set<MStatus::MIE>(0);
     csrf_.mstatus.set<MStatus::MPP>(csrf_.getPrivillege());
     csrf_.setPrivillege(PRIVILLEGE_MACHINE);
 
-    csrf_.mepc.set<MEPC::Value>(gprf_.read(GPRF::PC));
+    csrf_.mcause.set<MCause::Interrupt>(0);
+    csrf_.mcause.set<MCause::ExceptionCode>(id);
 
+    RV64Ptr newPC;
     if (csrf_.mtvec.get<MTVec::Mode>() == MTVec::VectoredMode) {
-        std::terminate();
+        newPC = (csrf_.mtvec.get<MTVec::Base>() + id) * 4;
     } else {
-        gprf_.write(GPRF::PC, csrf_.mtvec.get<MTVec::Base>() * 4);
+        newPC = csrf_.mtvec.get<MTVec::Base>() * 4;
     }
 
+    csrf_.mepc.set<MEPC::Value>(gprf_.read(GPRF::PC));
+    gprf_.write(GPRF::PC, newPC);
+
     exceptionHappened_ = true;
+}
+
+void Executor::raiseIllegalInstruction() {
+    this->raiseException(EXCEPTION_ILLEGAL_INSTR);
 }
 
 void Executor::exec_ADDI(Instruction const instr) {
@@ -633,6 +640,29 @@ void Executor::exec_SD(Instruction const instr) {
     mmu_->storeDWord(address, value);
 
     this->nextPC();
+}
+
+void Executor::exec_ECALL(Instruction const instr) { 
+    switch(csrf_.getPrivillege()) {
+    case PRIVILLEGE_USER:
+        this->raiseException(EXCEPTION_ECALL_UMODE);
+        break;
+
+    case PRIVILLEGE_SUPERVISOR:
+        this->raiseException(EXCEPTION_ECALL_SMODE);
+        break;
+
+    case PRIVILLEGE_MACHINE:
+        this->raiseException(EXCEPTION_ECALL_MMODE);
+        break;
+
+    default:
+        std::terminate();
+        break;
+    }
+}
+void Executor::exec_EBREAK(Instruction const instr) {
+    this->raiseException(EXCEPTION_BREAKPOINT);
 }
 
 void Executor::exec_ADDIW(Instruction const instr) {

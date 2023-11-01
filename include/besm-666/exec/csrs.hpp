@@ -43,6 +43,14 @@ public:
 
 class MCauseDefs {
 public:
+    using Interrupt = CSRUncheckedField<static_cast<RV64UDWord>(1) << (MXLEN - 1)>;
+    using ExceptionCode = CSRUncheckedField<(static_cast<RV64UDWord>(1) << (MXLEN - 1)) - 1>;
+};
+
+class MCause : public CSRStructure<MCauseDefs::Interrupt, MCauseDefs::ExceptionCode>,
+               public MCauseDefs {
+public:
+    MCause(CSRF& csrf) : CSRStructure(csrf, ICSR::MCAUSE) {}
 };
 
 class MTVecDefs {

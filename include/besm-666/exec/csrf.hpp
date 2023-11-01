@@ -49,6 +49,7 @@ public:
     MStatus mstatus;
     MEPC mepc;
     MTVec mtvec;
+    MCause mcause;
 };
 
 } // namespace besm::exec
