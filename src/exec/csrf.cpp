@@ -8,7 +8,7 @@
 namespace besm::exec {
 
 CSRF::CSRF()
-    : mstatus(*this), mepc(*this), mtvec(*this), mcause(*this),
+    : mhartid(*this), mstatus(*this), mepc(*this), mtvec(*this), mcause(*this),
       privillege_(PRIVILLEGE_MACHINE) {}
 
 std::variant<bool, RV64UDWord> CSRF::write(RV64UDWord rawId,

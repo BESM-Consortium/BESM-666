@@ -43,14 +43,17 @@ public:
 
 class MCauseDefs {
 public:
-    using Interrupt = CSRUncheckedField<static_cast<RV64UDWord>(1) << (MXLEN - 1)>;
-    using ExceptionCode = CSRUncheckedField<(static_cast<RV64UDWord>(1) << (MXLEN - 1)) - 1>;
+    using Interrupt =
+        CSRUncheckedField<static_cast<RV64UDWord>(1) << (MXLEN - 1)>;
+    using ExceptionCode =
+        CSRUncheckedField<(static_cast<RV64UDWord>(1) << (MXLEN - 1)) - 1>;
 };
 
-class MCause : public CSRStructure<MCauseDefs::Interrupt, MCauseDefs::ExceptionCode>,
-               public MCauseDefs {
+class MCause
+    : public CSRStructure<MCauseDefs::Interrupt, MCauseDefs::ExceptionCode>,
+      public MCauseDefs {
 public:
-    MCause(CSRF& csrf) : CSRStructure(csrf, ICSR::MCAUSE) {}
+    MCause(CSRF &csrf) : CSRStructure(csrf, ICSR::MCAUSE) {}
 };
 
 class MTVecDefs {
@@ -69,6 +72,16 @@ class MTVec : public CSRStructure<MTVecDefs::Mode, MTVecDefs::Base>,
               public MTVecDefs {
 public:
     MTVec(CSRF &csrf) : CSRStructure(csrf, ICSR::MTVEC) {}
+};
+
+class MHartIDDefs {
+public:
+    using Value = CSRUncheckedField<0b11>;
+};
+
+class MHartID : public CSRStructure<MHartIDDefs::Value>, public MHartIDDefs {
+public:
+    MHartID(CSRF &csrf) : CSRStructure(csrf, ICSR::MHARTID) {}
 };
 
 } // namespace besm::exec

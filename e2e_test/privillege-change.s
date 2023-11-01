@@ -14,6 +14,9 @@ trap_vector:
 
 .align 4
 start:
+    csrr t0, mhartid
+    bnez t0, start
+
     // setting up trap vector address
     la t0, trap_vector
     ori t0, t0, 1

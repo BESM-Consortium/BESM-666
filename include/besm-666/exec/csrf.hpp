@@ -46,6 +46,7 @@ private:
     std::unordered_map<ICSR::Id, std::reference_wrapper<ICSR>> registers_;
 
 public:
+    MHartID mhartid;
     MStatus mstatus;
     MEPC mepc;
     MTVec mtvec;
