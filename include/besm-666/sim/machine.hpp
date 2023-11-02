@@ -17,7 +17,7 @@ public:
     sim::Hart const &getHart() const;
 
     size_t getInstrsExecuted() const { return hart_->getInstrsExecuted(); }
-    sim::HookManager const &getHookManager() { return *hookManager_; }
+    sim::HookManager &getHookManager() { return *hookManager_; }
 
 private:
     HookManager::SPtr hookManager_;

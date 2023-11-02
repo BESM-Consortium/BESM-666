@@ -9,7 +9,8 @@ namespace besm {
 
 class BasicBlock {
 public:
-    BasicBlock(RV64Ptr startPC) : startPC_(startPC) {}
+    BasicBlock() : startPC_(0), sz_(0) {}
+    BasicBlock(RV64Ptr startPC) : startPC_(startPC), sz_(0) {}
 
     static constexpr size_t capacity = 32;
 
