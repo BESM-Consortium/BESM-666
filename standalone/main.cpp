@@ -41,7 +41,7 @@ void OnBBParse(besm::sim::Hart const &hart, void const *pBB) {
 }
 
 void InitVerboseLogging(besm::sim::Machine &machine) {
-    besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
+    besm::sim::HookManager const &hookManager = machine.getHookManager();
 
     cs_open(CS_ARCH_RISCV, CS_MODE_RISCV64, &CapstoneHandler);
     std::atexit([]() {
@@ -205,10 +205,10 @@ int main(int argc, char *argv[]) {
     std::clog << "[BESM-666] Simulation finished." << std::endl;
     std::clog << "[BESM-666] Time = " << ellapsedSecond << "s, Insns "
               << instrsExecuted << ", MIPS = " << mips << std::endl;
-    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
+    besm::exec::GPRFStateDumper(std::clog).dump(machine.getHart().getGPRF());
 
     if (a0Validation) {
-        if (machine.getState().read(besm::exec::GPRF::X10) == 1) {
+        if (machine.getHart().getGPRF().read(besm::exec::GPRF::X10) == 1) {
             return 0;
         } else {
             return 1;

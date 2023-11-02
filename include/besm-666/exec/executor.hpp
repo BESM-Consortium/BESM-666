@@ -6,12 +6,14 @@
 #include "besm-666/instruction.hpp"
 #include "besm-666/memory/mmu.hpp"
 #include "besm-666/rv-instruction-op.hpp"
+#include "besm-666/sim/hooks.hpp"
 
 namespace besm::exec {
 
 class Executor {
 public:
-    explicit Executor(mem::MMU::SPtr mmu) : mmu_(std::move(mmu)) {}
+    explicit Executor(mem::MMU::SPtr mmu, sim::HookManager::SPtr hookManager)
+        : mmu_(std::move(mmu)), hookManager_(hookManager) {}
 
     void exec(Instruction const instr);
     void execBB(const BasicBlock &bb);
@@ -99,6 +101,7 @@ private:
     GPRF gprf_;
     CSRF csrf_;
     mem::MMU::SPtr mmu_;
+    sim::HookManager::SPtr hookManager_;
 
     bool exceptionHappened_ = false;
 };

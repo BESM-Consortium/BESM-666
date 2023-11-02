@@ -3,6 +3,7 @@
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/sim/hooks.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
@@ -13,7 +14,7 @@ public:
         : pMem(mem::PhysMemBuilder()
                    .mapRAM(0, 1 * 1024 * 1024, 4096, 2 * 1024 * 1024)
                    .build()),
-          mmu(mem::MMU::Create(pMem)), exec(mmu) {}
+          mmu(mem::MMU::Create(pMem)), exec(mmu, hookManager_) {}
 
 protected:
     void SetupInstrR(InstructionOp op, Register rd, Register rs1,
@@ -66,6 +67,7 @@ protected:
     Instruction instr;
     std::shared_ptr<mem::PhysMem> pMem;
     mem::MMU::SPtr mmu;
+    sim::HookManager::SPtr hookManager_ = sim::HookManager::Create();
     exec::Executor exec;
 };
 

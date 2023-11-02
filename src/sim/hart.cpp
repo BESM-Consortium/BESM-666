@@ -16,7 +16,7 @@ Hart::SPtr Hart::Create(std::shared_ptr<mem::PhysMem> const &pMem,
 
 Hart::Hart(std::shared_ptr<mem::PhysMem> const &pMem,
            std::shared_ptr<HookManager> hookManager)
-    : mmu_(mem::MMU::Create(pMem)), dec_(mmu_), exec_(mmu_),
+    : mmu_(mem::MMU::Create(pMem)), dec_(mmu_), exec_(mmu_, hookManager),
       hookManager_(std::move(hookManager)),
       prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0) {}
 

@@ -6,6 +6,7 @@ target_link_libraries(besm666_testif INTERFACE
     besm666_memory 
     besm666_decoder
     besm666_util
+    besm666_sim
     gmock_main 
     gmock 
     gtest

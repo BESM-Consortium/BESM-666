@@ -14,10 +14,10 @@ public:
 
     void run();
 
-    exec::GPRF const &getState() const;
+    sim::Hart const &getHart() const;
 
     size_t getInstrsExecuted() const { return hart_->getInstrsExecuted(); }
-    sim::HookManager::SPtr getHookManager() { return hookManager_; }
+    sim::HookManager const &getHookManager() { return *hookManager_; }
 
 private:
     HookManager::SPtr hookManager_;

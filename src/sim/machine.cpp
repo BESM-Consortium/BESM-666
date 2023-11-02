@@ -28,6 +28,6 @@ Machine::Machine(sim::Config const &config) {
 
 void Machine::run() { hart_->run(); }
 
-exec::GPRF const &Machine::getState() const { return hart_->getState(); }
+sim::Hart const &Machine::getHart() const { return *hart_; }
 
 } // namespace besm::sim

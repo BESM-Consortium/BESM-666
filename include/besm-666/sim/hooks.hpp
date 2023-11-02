@@ -5,7 +5,6 @@
 
 #include "besm-666/basic-block.hpp"
 #include "besm-666/instruction.hpp"
-#include "besm-666/sim/hart.hpp"
 
 namespace besm::sim {
 
