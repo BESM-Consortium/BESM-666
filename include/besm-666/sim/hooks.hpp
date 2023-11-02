@@ -3,47 +3,43 @@
 #include <map>
 #include <memory>
 
+#include "besm-666/basic-block.hpp"
+#include "besm-666/instruction.hpp"
 #include "besm-666/sim/hart.hpp"
 
 namespace besm::sim {
 
 class HookManager {
 public:
-    enum Event {
-        INSTRUCTION_FETCH,
-        INSTRUCTION_DECODE,
-        INSTRUCTION_EXECUTE,
-        BASIC_BLOCK_PARSE,
-        BASIC_BLOCK_EXECUTE
-    };
+    // Be careful, the life time of trigger[---]Hook reference values is
+    // limited by the callback scope
+    using BBFetchCallback = void (*)(BasicBlock const &bb);
+    using InstrExecutedCallback = void (*)(Instruction const &instr);
 
     using SPtr = std::shared_ptr<HookManager>;
-    using Callback = void (*)(sim::Hart const &hart, void const *extraArg);
 
-    void registerHook(Event event, Callback callback);
-    void triggerHooks(Event event, Hart const &hart,
-                      void const *extraArg) const;
+    void registerBBFetchHook(BBFetchCallback callback);
+    void registerInstrExecHook(InstrExecutedCallback callback);
+
+    void triggerBBFetchHook(BasicBlock const &bb) const;
+    void triggerInstrExecHook(Instruction const &instr) const;
 
     static HookManager::SPtr Create();
 
 private:
+    enum Event {
+        BB_FETCHED,
+        INSTR_EXECUTED,
+    };
+
+    using Callback = void (*)(void const *extraArg);
+
     HookManager() = default;
-    void doTriggerHooks(HookManager::Event event, Hart const &hart,
-                        void const *extraArg) const;
+
+    void doRegisterHook(Event event, Callback callback);
+    void doTriggerHooks(HookManager::Event event, void const *extraArg) const;
 
     std::multimap<Event, Callback> hooks_;
 };
-
-inline void HookManager::triggerHooks(HookManager::Event event,
-                                      Hart const &hart,
-                                      void const *extraArg) const {
-#ifdef BESM666_HOOKS_ENABLED
-    this->doTriggerHooks(event, hart, extraArg);
-#else
-    (void)event;
-    (void)hart;
-    (void)extraArg;
-#endif
-}
 
 } // namespace besm::sim

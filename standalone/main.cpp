@@ -51,6 +51,7 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
 
     std::clog << "[BESM-666] VERBOSE: Verbose logging enabled" << std::endl;
 
+    /*
     hookManager->registerHook(
         besm::sim::HookManager::INSTRUCTION_FETCH,
         [](besm::sim::Hart const &hart, void const *pBytecode) {
@@ -96,6 +97,7 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
                       << std::endl;
             besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
         });
+        */
 }
 
 besm::util::Range<besm::RV64Ptr> ParseRange(std::string const &rangeString) {

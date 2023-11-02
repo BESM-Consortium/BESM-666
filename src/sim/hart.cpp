@@ -25,11 +25,12 @@ void Hart::runCycle() {
     assert(pc % 2 == 0);
 
     RV64Ptr startPC = pc;
+
     BasicBlock bb = dec_.assembleBB(startPC);
-    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this, &bb);
+    hookManager_->triggerBBFetchHook(bb);
+
     exec_.execBB(bb);
-    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_EXECUTE, *this,
-                               nullptr);
+
     // out-of-program control
     prevPC_ = startPC + bb.size() - 1;
     instrsExecuted_ += bb.size();
