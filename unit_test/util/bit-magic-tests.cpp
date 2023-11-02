@@ -120,3 +120,15 @@ TEST(InsertMasked, Dummy) {
 
     EXPECT_EQ(r, 0b1111010111);
 }
+
+TEST(InsertMasked, MTVecDummyCase) {
+    constexpr unsigned long long Mask = ~3ull;
+
+    unsigned long long value = 0x24;
+    unsigned long long setPlace = 0b1;
+
+    unsigned long long r =
+        besm::util::InsertMasked<unsigned long long, Mask>(value, setPlace);
+
+    EXPECT_EQ(r, (value << 2) + setPlace);
+}

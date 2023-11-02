@@ -1,6 +1,7 @@
 #pragma once
 
 #include "besm-666/basic-block.hpp"
+#include "besm-666/exec/csrf.hpp"
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
 #include "besm-666/memory/mmu.hpp"
@@ -16,8 +17,12 @@ public:
     void execBB(const BasicBlock &bb);
 
     inline GPRF const &getState() const { return gprf_; }
+    inline CSRF const &getCSRF() const { return csrf_; }
 
 private:
+    void raiseException(ExceptionId id);
+    void raiseIllegalInstruction();
+
     void exec_ADDI(Instruction const instr);
     void exec_SLTI(Instruction const instr);
     void exec_SLTIU(Instruction const instr);
@@ -65,8 +70,8 @@ private:
     void exec_FENCE_TSO(Instruction const instr) { this->nextPC(); }
 
     // Will be implemented after CSR system release
-    void exec_ECALL(Instruction const instr) { this->nextPC(); }
-    void exec_EBREAK(Instruction const instr) { this->nextPC(); }
+    void exec_ECALL(Instruction const instr);
+    void exec_EBREAK(Instruction const instr);
 
     void exec_ADDIW(Instruction const instr);
     void exec_SLLIW(Instruction const instr);
@@ -78,10 +83,24 @@ private:
     void exec_SRLW(Instruction const instr);
     void exec_SRAW(Instruction const instr);
 
+    void exec_MRET(Instruction const instr);
+    void exec_SRET(Instruction const instr);
+
+    void exec_CSRRW(Instruction const instr);
+    void exec_CSRRS(Instruction const instr);
+    void exec_CSRRC(Instruction const instr);
+
+    void exec_CSRRWI(Instruction const instr);
+    void exec_CSRRSI(Instruction const instr);
+    void exec_CSRRCI(Instruction const instr);
+
     void nextPC();
 
     GPRF gprf_;
+    CSRF csrf_;
     mem::MMU::SPtr mmu_;
+
+    bool exceptionHappened_ = false;
 };
 
 } // namespace besm::exec
