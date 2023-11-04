@@ -16,7 +16,7 @@ Hart::SPtr Hart::Create(std::shared_ptr<mem::PhysMem> const &pMem,
 
 Hart::Hart(std::shared_ptr<mem::PhysMem> const &pMem,
            std::shared_ptr<HookManager> hookManager)
-    : mmu_(mem::MMU::Create(pMem)), dec_(mmu_), exec_(mmu_),
+    : mmu_(mem::MMU::Create(pMem)), dec_(mmu_), exec_(mmu_, hookManager),
       hookManager_(std::move(hookManager)),
       prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0) {}
 
@@ -25,11 +25,12 @@ void Hart::runCycle() {
     assert(pc % 2 == 0);
 
     RV64Ptr startPC = pc;
+
     BasicBlock bb = dec_.assembleBB(startPC);
-    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_PARSE, *this, &bb);
+    hookManager_->triggerBBFetchHook(bb);
+
     exec_.execBB(bb);
-    hookManager_->triggerHooks(HookManager::BASIC_BLOCK_EXECUTE, *this,
-                               nullptr);
+
     // out-of-program control
     prevPC_ = startPC + bb.size() - 1;
     instrsExecuted_ += bb.size();

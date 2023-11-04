@@ -5,6 +5,7 @@
 #include "besm-666/exec/executor.hpp"
 #include "besm-666/instruction.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/sim/hooks.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
 using namespace besm;
@@ -43,7 +44,8 @@ TEST(Executor, Sum) {
 
     std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
     mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
-    exec::Executor exec(mmu);
+    sim::HookManager::SPtr hookManager = sim::HookManager::Create();
+    exec::Executor exec(mmu, hookManager);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
 
     while (pc <= 20) {
@@ -99,7 +101,8 @@ TEST(Executor, Mul) {
 
     std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
     mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
-    exec::Executor exec(mmu);
+    sim::HookManager::SPtr hookManager = sim::HookManager::Create();
+    exec::Executor exec(mmu, hookManager);
     RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
 
     while (pc <= 40) {
@@ -130,7 +133,8 @@ protected:
     std::vector<Instruction> instrs_;
     std::shared_ptr<mem::PhysMem> pMem_ = mem::PhysMemBuilder().build();
     mem::MMU::SPtr mmu_ = mem::MMU::Create(pMem_);
-    exec::Executor exec_{mmu_};
+    sim::HookManager::SPtr hookManager = sim::HookManager::Create();
+    exec::Executor exec_ = exec::Executor(mmu_, hookManager);
     RV64Ptr startPC_ = exec_.getState().read(exec::GPRF::PC);
 };
 

@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
@@ -11,9 +13,22 @@ void GPRFStateDumper::dump(GPRF const &gprf) {
             continue;
         }
 
-        stream_ << "x" << (int)regId << " (" << REG_ALIAS[regId] << "): ";
-        stream_ << "dec = " << v << " (" << util::Signify(v) << "), ";
+        stream_ << this->getRegName(regId);
+        stream_ << ": dec = " << v << " (" << util::Signify(v) << "), ";
         stream_ << std::hex << "hex = " << v << std::dec << std::endl;
     }
 }
+
+std::string GPRFStateDumper::getRegName(Register regId) const {
+    std::stringstream s;
+
+    if (regId < GPRF::Size) {
+        s << "x" << static_cast<int>(regId) << " (" << REG_ALIAS[regId] << ")";
+    } else {
+        s << "InvReg";
+    }
+
+    return s.str();
+}
+
 } // namespace besm::exec

@@ -74,6 +74,7 @@ public:
     GPRFStateDumper(std::ostream &stream) : stream_(stream) {}
 
     void dump(GPRF const &gprf);
+    std::string getRegName(Register regId) const;
 
 private:
     constexpr static char const *REG_ALIAS[] = {

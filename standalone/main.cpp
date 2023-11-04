@@ -3,45 +3,76 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "besm-666/sim/hooks.hpp"
+#include "besm-666/instruction.hpp"
 #include "capstone/capstone.h"
 
 #include "CLI/CLI.hpp"
+
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/sim/config.hpp"
+#include "besm-666/sim/hooks.hpp"
 #include "besm-666/sim/machine.hpp"
 #include "besm-666/util/range.hpp"
 
+bool optionDumpInstructions = false;
+bool optionDumpRegisters = false;
+
 csh CapstoneHandler;
+std::shared_ptr<besm::sim::Machine> Machine;
 
-void OnBBParse(besm::sim::Hart const &hart, void const *pBB) {
-    besm::BasicBlock const &bb =
-        *reinterpret_cast<besm::BasicBlock const *>(pBB);
+besm::RV64Ptr CurrentPC;
 
-    besm::RV64Ptr pc = bb.startPC();
-    besm::RV64Size size = bb.size();
+// TD: Dev CSR dumper
+// TD: Move pc to instr callback and remove bb fetch callback
+void OnBBFetch(besm::BasicBlock const &bb) {
+    std::clog << "[BESM-666] VERBOSE: Fetched basic block at PC = "
+              << bb.startPC() << std::endl;
 
-    std::clog << "[BESM-666] VERBOSE: Fetched BB of size " << size << " at "
-              << pc << ":\n";
-    for (besm::RV64Ptr instrAddr = pc; instrAddr < pc + size * 4;
-         instrAddr += 4) {
-        besm::RV64UWord bytecode = hart.getMMU().loadWord(instrAddr);
+    CurrentPC = bb.startPC();
+}
 
-        cs_insn *instruction;
-        size_t count = cs_disasm(CapstoneHandler,
-                                 reinterpret_cast<uint8_t const *>(&bytecode),
-                                 4, instrAddr, 0, &instruction);
+void DumpReg(besm::Register regId, besm::exec::GPRF const &gprf) {
+    besm::exec::GPRFStateDumper gprfDumper(std::clog);
+    if (regId < besm::exec::GPRF::Size) {
+        besm::RV64UDWord value = gprf.read(regId);
 
-        if (count == 1) {
-            std::clog << "\t" << instruction->address << ": ";
-            std::clog << instruction->mnemonic << " " << instruction->op_str
-                      << std::endl;
+        std::clog << '\t' << gprfDumper.getRegName(regId) << " = ";
+        std::clog << "0x" << std::hex << value << std::dec << " / " << value
+                  << std::endl;
+    }
+}
+
+void OnInstrExecuted(besm::Instruction const &instr) {
+    besm::sim::Hart const &hart = Machine->getHart();
+
+    besm::RV64UWord bytecode = hart.getMMU().loadWord(CurrentPC);
+    CurrentPC += 4;
+
+    cs_insn *disassembly;
+    size_t count =
+        cs_disasm(CapstoneHandler, reinterpret_cast<uint8_t const *>(&bytecode),
+                  4, CurrentPC, 1, &disassembly);
+
+    if (count != 1) {
+        std::clog << "\tunimp" << std::endl;
+    } else {
+        std::clog << std::hex << disassembly->address << std::dec << ": ";
+        std::clog << disassembly->mnemonic << ' ' << disassembly->op_str
+                  << std::endl;
+
+        if (optionDumpRegisters) {
+            DumpReg(instr.rd, hart.getGPRF());
+            DumpReg(instr.rs1, hart.getGPRF());
+            DumpReg(instr.rs2, hart.getGPRF());
+            std::clog << "imm = "
+                      << "0x" << std::hex << instr.immidiate << std::dec
+                      << " / " << instr.immidiate << std::endl;
         }
     }
 }
 
-void InitVerboseLogging(besm::sim::Machine &machine) {
-    besm::sim::HookManager::SPtr hookManager = machine.getHookManager();
+void InitVerboseLogging() {
+    besm::sim::HookManager const &hookManager = Machine->getHookManager();
 
     cs_open(CS_ARCH_RISCV, CS_MODE_RISCV64, &CapstoneHandler);
     std::atexit([]() {
@@ -51,51 +82,8 @@ void InitVerboseLogging(besm::sim::Machine &machine) {
 
     std::clog << "[BESM-666] VERBOSE: Verbose logging enabled" << std::endl;
 
-    hookManager->registerHook(
-        besm::sim::HookManager::INSTRUCTION_FETCH,
-        [](besm::sim::Hart const &hart, void const *pBytecode) {
-            besm::RV64UDWord pc = hart.getState().read(besm::exec::GPRF::PC);
-            besm::RV64UWord bytecode =
-                *reinterpret_cast<besm::RV64UWord const *>(pBytecode);
-            std::clog << "[BESM-666] VERBOSE: Fetched bytecode " << std::hex
-                      << bytecode << std::dec << " at pc = " << std::hex << pc
-                      << std::dec << std::endl;
-
-            cs_insn *instruction;
-            size_t count = cs_disasm(
-                CapstoneHandler, reinterpret_cast<uint8_t const *>(pBytecode),
-                4, hart.getState().read(besm::exec::GPRF::PC), 0, &instruction);
-
-            if (count > 0) {
-                std::clog << "[BESM-666] VERBOSE: Disassembly\n\t"
-                          << instruction->mnemonic << " " << instruction->op_str
-                          << std::endl;
-            } else {
-                std::clog << "[BESM-666] VERBOSE: Failed to disasm bytecode"
-                          << std::endl;
-            }
-
-            cs_free(instruction, count);
-        });
-
-    hookManager->registerHook(
-        besm::sim::HookManager::INSTRUCTION_EXECUTE,
-        [](besm::sim::Hart const &hart, void const *) {
-            std::clog << "[BESM-666] VERBOSE: Force dumping machine state."
-                      << std::endl;
-            besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
-        });
-
-    hookManager->registerHook(besm::sim::HookManager::BASIC_BLOCK_PARSE,
-                              OnBBParse);
-
-    hookManager->registerHook(
-        besm::sim::HookManager::BASIC_BLOCK_EXECUTE,
-        [](besm::sim::Hart const &hart, void const *) {
-            std::clog << "[BESM-666] VERBOSE: Force dumping machine state."
-                      << std::endl;
-            besm::exec::GPRFStateDumper(std::clog).dump(hart.getState());
-        });
+    Machine->getHookManager().registerBBFetchHook(OnBBFetch);
+    Machine->getHookManager().registerInstrExecHook(OnInstrExecuted);
 }
 
 besm::util::Range<besm::RV64Ptr> ParseRange(std::string const &rangeString) {
@@ -163,11 +151,15 @@ int main(int argc, char *argv[]) {
         ->force_callback()
         ->group("Memory");
 
-    bool verboseLogging = false;
-    app.add_flag("-v,--verbose", verboseLogging,
+    app.add_flag("-v,--verbose", optionDumpInstructions,
                  "Enables per-instruction machine state logging")
         ->default_val(false)
-        ->group("Memory");
+        ->group("Debug");
+
+    app.add_flag("-V,--very-verbose", optionDumpRegisters,
+                 "Enables per-instruction machine state logging")
+        ->default_val(false)
+        ->group("Debug");
 
     bool a0Validation = false;
     app.add_flag("--a0-validation", a0Validation, "Enable a0 validator mode")
@@ -176,18 +168,18 @@ int main(int argc, char *argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
-    std::clog << "[BESM-666] INFO: Creating RISCV machine." << std::endl;
+    std::clog << "[BESM-666] INFO: Creating RISCV Machine->" << std::endl;
     besm::sim::Config config = configBuilder.build();
-    besm::sim::Machine machine(config);
+    Machine = std::make_unique<besm::sim::Machine>(config);
 
-    if (verboseLogging) {
-        InitVerboseLogging(machine);
+    if (optionDumpInstructions) {
+        InitVerboseLogging();
     }
 
     std::clog << "[BESM-666] INFO: Starting simulation" << std::endl;
 
     auto time_start = std::chrono::steady_clock::now();
-    machine.run();
+    Machine->run();
     auto time_end = std::chrono::steady_clock::now();
 
     double ellapsedSecond =
@@ -196,17 +188,16 @@ int main(int argc, char *argv[]) {
             .count() *
         1e-9;
 
-    size_t instrsExecuted = machine.getInstrsExecuted();
-
+    size_t instrsExecuted = Machine->getInstrsExecuted();
     double mips = static_cast<double>(instrsExecuted) * 1e-6 / ellapsedSecond;
 
     std::clog << "[BESM-666] Simulation finished." << std::endl;
     std::clog << "[BESM-666] Time = " << ellapsedSecond << "s, Insns "
               << instrsExecuted << ", MIPS = " << mips << std::endl;
-    besm::exec::GPRFStateDumper(std::clog).dump(machine.getState());
+    besm::exec::GPRFStateDumper(std::clog).dump(Machine->getHart().getGPRF());
 
     if (a0Validation) {
-        if (machine.getState().read(besm::exec::GPRF::X10) == 1) {
+        if (Machine->getHart().getGPRF().read(besm::exec::GPRF::X10) == 1) {
             return 0;
         } else {
             return 1;
