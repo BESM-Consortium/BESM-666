@@ -10,7 +10,7 @@ namespace besm {
 class BasicBlock {
 public:
     BasicBlock() : startPC_(0), sz_(0) {}
-    BasicBlock(RV64Ptr startPC) : startPC_(startPC), sz_(0) {}
+    BasicBlock(RV64UDWord startPC) : startPC_(startPC), sz_(0) {}
 
     static constexpr size_t capacity = 32;
 
@@ -33,7 +33,12 @@ public:
         return true;
     }
     constexpr size_t size() const { return sz_; }
-    constexpr RV64Ptr startPC() const { return startPC_; }
+    constexpr RV64UDWord startPC() const { return startPC_; }
+    void setStartPC(RV64UDWord startPC) { startPC_ = startPC; }
+    void resetBB() {
+        sz_ = 0;
+        startPC_ = -1;
+    }
 
     using It = std::array<Instruction, capacity>::iterator;
     using ConstIt = std::array<Instruction, capacity>::const_iterator;
@@ -46,7 +51,7 @@ public:
     constexpr Instruction &operator[](int i) { return instrs_[i]; }
 
 private:
-    RV64Ptr startPC_;
+    RV64UDWord startPC_;
     std::array<Instruction, capacity> instrs_;
     size_t sz_ = 0;
 };

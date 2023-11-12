@@ -42,6 +42,7 @@ public:
      * \returns basic block
      */
     besm::BasicBlock assembleBB(RV64Ptr address);
+    void assembleBB(BasicBlock &bb);
 
     RV64UWord fetch(RV64Ptr address) { return prefetcher_.loadWord(address); }
 
