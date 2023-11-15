@@ -33,7 +33,8 @@ void Hart::runCycle() {
         exec_.execBB(bb);
     } else {
         /*
-         * @todo #82:30m remove this branch by adding another functionality to cache
+         * @todo #82:30m remove this branch by adding another functionality to
+         * cache
          */
 
         if (entry.valid())
