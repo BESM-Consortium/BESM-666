@@ -1,11 +1,7 @@
-const int SIZE = 14; // N queens.
+#define SIZE 14 // N queens.
 
-// I don't know why you can't create board[SIZE][SIZE],
-// this fucking shit swears at variable.
-// So, you need to change the number in both places.
-
-int board[14][14];
-int results_count = 0; // Number of solves.
+int board[SIZE][SIZE];
+int results_count = 0;
 
 int tryQueen(int a, int b)
 {
