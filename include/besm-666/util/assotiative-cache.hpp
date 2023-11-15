@@ -150,7 +150,7 @@ void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType const
         &payload) noexcept(std::is_nothrow_copy_constructible_v<PayloadType>) {
     TagType tag = TagFunc(payload);
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
 
     cachedData_[set * ways_ + counters_[set]].setPayload(payload, tag);
     counters_[set] = (counters_[set] + 1) % ways_;
@@ -163,7 +163,7 @@ void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType
         &&payload) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
     TagType tag = TagFunc(payload);
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
 
     cachedData_[set * ways_ + counters_[set]].setPayload(std::move(payload),
                                                          tag);
@@ -176,7 +176,7 @@ template <typename PayloadType, typename TagType, typename HashType,
 CacheEntry<PayloadType, TagType> &
 Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) noexcept {
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
         if (cachedData_[i].valid() && cachedData_[i].getTag() == tag)
             return cachedData_[i];
@@ -202,7 +202,7 @@ template <typename PayloadType, typename TagType, typename HashType,
           HashFunction<TagType, HashType> HashFunc>
 void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::invalidate(
     TagType tag) noexcept {
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
         if (cachedData_[i].valid() && cachedData_[i].getTag() == tag)
             cachedData_[i].invalidate();
@@ -256,7 +256,7 @@ template <typename PayloadType, typename TagType, typename HashType,
           HashFunction<TagType, HashType> HashFunc>
 void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::incCounter(
     TagType tag) noexcept {
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
     counters_[set]++;
 }
 

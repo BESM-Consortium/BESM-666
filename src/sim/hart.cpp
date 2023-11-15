@@ -32,6 +32,8 @@ void Hart::runCycle() {
     if (entry.valid() && entry.getTag() == pc) {
         exec_.execBB(bb);
     } else {
+        // TODO: remove this branch by adding another functionality to cache
+
         if (entry.valid())
             bb.resetBB();
 

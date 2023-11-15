@@ -18,10 +18,11 @@ TagType BBTag(PayloadType const &payload) {
 
 template <typename TagType, typename HashType>
 HashType BBHash(TagType const &tag) {
-    // Can be used: tag, std::hash<TagType>{}(tag), (tag & 0x7F8) >> 3.
-    // (tag & 0x7F8) >> 3 repeats hash every 128 byte aka num of set.
+    // Can be used: tag % sets, std::hash<TagType>{}(tag) % sets, (tag & 0x1FC)
+    // >> 2. (tag & 0x1FC) >> 2 repeats hash every 128 byte aka num of set.
+    // Value range of (tag & 0x1FC) >> 2 is [0, 128].
 
-    return tag; // straight mapping
+    return (tag & 0x1FC) >> 2;
 }
 
 class HookManager;

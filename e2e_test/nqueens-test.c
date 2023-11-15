@@ -1,4 +1,4 @@
-#define SIZE 14 // N queens.
+#define SIZE 12 // N queens.
 
 int board[SIZE][SIZE];
 int results_count = 0;
