@@ -5,7 +5,7 @@
 using namespace besm::util;
 template <typename TagType, typename HashType>
 HashType fhash(TagType const &tag) {
-    return std::hash<TagType>{}(tag);
+    return std::hash<TagType>{}(tag) % 25;
 }
 
 template <typename PayloadType, typename TagType>

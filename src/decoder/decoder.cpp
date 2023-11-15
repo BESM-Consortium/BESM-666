@@ -231,3 +231,10 @@ besm::BasicBlock dec::Decoder::assembleBB(RV64Ptr address) {
     }
     return bb;
 }
+
+void dec::Decoder::assembleBB(BasicBlock &bb) {
+    int i = 0;
+    while (bb.put(parse(fetch(bb.startPC() + i)))) {
+        i += sizeof(RV64UWord);
+    }
+}

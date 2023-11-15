@@ -24,6 +24,7 @@ public:
     PayloadType const &getPayload() const noexcept;
     PayloadType &getPayload() noexcept;
     TagType const &getTag() const noexcept;
+    // void setTag(TagType tag) noexcept { tag_ = tag; }
 
     void invalidate() noexcept;
     bool valid() const noexcept;
@@ -64,6 +65,7 @@ public:
     size_t getWays() const noexcept;
     size_t getSets() const noexcept;
     size_t getCounter(size_t set) noexcept;
+    void incCounter(TagType tag) noexcept;
 
     template <typename Cache> friend class CacheStateDumper;
 
@@ -148,7 +150,7 @@ void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType const
         &payload) noexcept(std::is_nothrow_copy_constructible_v<PayloadType>) {
     TagType tag = TagFunc(payload);
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
 
     cachedData_[set * ways_ + counters_[set]].setPayload(payload, tag);
     counters_[set] = (counters_[set] + 1) % ways_;
@@ -161,7 +163,7 @@ void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::add(
     PayloadType
         &&payload) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
     TagType tag = TagFunc(payload);
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
 
     cachedData_[set * ways_ + counters_[set]].setPayload(std::move(payload),
                                                          tag);
@@ -174,9 +176,9 @@ template <typename PayloadType, typename TagType, typename HashType,
 CacheEntry<PayloadType, TagType> &
 Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::find(
     TagType tag) noexcept {
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
-        if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
+        if (cachedData_[i].valid() && cachedData_[i].getTag() == tag)
             return cachedData_[i];
     }
 
@@ -200,9 +202,9 @@ template <typename PayloadType, typename TagType, typename HashType,
           HashFunction<TagType, HashType> HashFunc>
 void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::invalidate(
     TagType tag) noexcept {
-    auto set = HashFunc(tag) % sets_;
+    auto set = HashFunc(tag);
     for (auto i = set * ways_; i < set * ways_ + ways_; i++) {
-        if (cachedData_[i].getTag() == tag && cachedData_[i].valid())
+        if (cachedData_[i].valid() && cachedData_[i].getTag() == tag)
             cachedData_[i].invalidate();
     }
 }
@@ -249,9 +251,19 @@ size_t Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::getCounter(
     return counters_[set];
 }
 
+template <typename PayloadType, typename TagType, typename HashType,
+          TagFunction<PayloadType, TagType> TagFunc,
+          HashFunction<TagType, HashType> HashFunc>
+void Cache<PayloadType, TagType, HashType, TagFunc, HashFunc>::incCounter(
+    TagType tag) noexcept {
+    auto set = HashFunc(tag);
+    counters_[set]++;
+}
+
 //-------------CacheEntry------------------//
 template <typename PayloadType, typename TagType>
-CacheEntry<PayloadType, TagType>::CacheEntry() : valid_(false), tag_(0) {}
+CacheEntry<PayloadType, TagType>::CacheEntry()
+    : valid_(false), tag_(0), payload_(PayloadType{}) {}
 
 template <typename PayloadType, typename TagType>
 void CacheEntry<PayloadType, TagType>::setPayload(
