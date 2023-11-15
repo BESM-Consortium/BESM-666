@@ -1,14 +1,12 @@
-const int SIZE = 12; // Размер.
+const int SIZE = 14; // N queens.
 
-// Я хз почему нельзя создать board[SIZE][SIZE],
-// это ебучее говно ругается на variable переменную.
-// Короче нужно менять чиселку в обоих местах.
+// I don't know why you can't create board[SIZE][SIZE],
+// this fucking shit swears at variable.
+// So, you need to change the number in both places.
 
-int board[12][12];
-int results_count = 0; // Количество решений.
- 
-// Функция tryQueen() - проверяет нет ли уже установленных ферзей,
-// по вертикали, диагоналям.
+int board[14][14];
+int results_count = 0; // Number of solves.
+
 int tryQueen(int a, int b)
 {
     for(int i = 0; i < a; ++i)
@@ -18,7 +16,7 @@ int tryQueen(int a, int b)
             return 0;
         }
     }
-    
+
     for(int i = 1; i <= a && b-i >= 0; ++i)
     {
         if(board[a-i][b-i])
@@ -26,7 +24,7 @@ int tryQueen(int a, int b)
             return 0;
         }
     }
-    
+
     for(int i = 1; i <= a && b+i < SIZE; i++)
     {
         if(board[a-i][b+i])
@@ -34,17 +32,14 @@ int tryQueen(int a, int b)
             return 0;
         }
     }
-    
+
     return 1;
 }
- 
-// Функция setQueen() - пробует найти результаты решений.
-void setQueen(int a) // a - номер очередной строки в которую нужно поставить очередного ферзя.
+
+void setQueen(int a)
 {   
     for(int i = 0; i < SIZE; ++i)
     {
-        // Здесь проверяем, что если поставим в board[a][i] ферзя (единицу),
-        // то он будет единственным в этой строке, столбце и диагоналях.
         if(tryQueen(a, i))
         {
             board[a][i] = 1;
@@ -52,13 +47,13 @@ void setQueen(int a) // a - номер очередной строки в кот
             board[a][i] = 0;
         }
     }
-    
-    return; // Опционально.
+
+    return;
 }
- 
+
 int start()
 {
     setQueen(0);
-    
+
     return 1;
 }
