@@ -2,9 +2,11 @@
 #include <iostream>
 #include <utility>
 
-#include "besm-666/exec/executor.hpp"
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/instruction.hpp"
+#include "besm-666/memory/mmu.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/sim/hart.hpp"
 #include "besm-666/sim/hooks.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
@@ -43,17 +45,16 @@ TEST(Executor, Sum) {
          InstructionOp::ADD}};
 
     std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
-    mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
     sim::HookManager::SPtr hookManager = sim::HookManager::Create();
-    exec::Executor exec(mmu, hookManager);
-    RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
+    sim::Hart::SPtr hart = sim::Hart::Create(pMem, hookManager);
+    RV64UDWord pc = hart->getGPRF().read(exec::GPRF::PC);
 
     while (pc <= 20) {
-        exec.exec(instrs[pc / 4]);
-        pc = exec.getState().read(exec::GPRF::PC);
+        hart->exec(instrs[pc / 4]);
+        pc = hart->getGPRF().read(exec::GPRF::PC);
     }
 
-    EXPECT_EQ(exec.getState().read(exec::GPRF::X1), 10);
+    EXPECT_EQ(hart->getGPRF().read(exec::GPRF::X1), 10);
 }
 
 /*
@@ -100,17 +101,16 @@ TEST(Executor, Mul) {
          InstructionOp::ADD}};
 
     std::shared_ptr<mem::PhysMem> pMem = mem::PhysMemBuilder().build();
-    mem::MMU::SPtr mmu = mem::MMU::Create(pMem);
     sim::HookManager::SPtr hookManager = sim::HookManager::Create();
-    exec::Executor exec(mmu, hookManager);
-    RV64UDWord pc = exec.getState().read(exec::GPRF::PC);
+    sim::Hart::SPtr hart = sim::Hart::Create(pMem, hookManager);
+    RV64UDWord pc = hart->getGPRF().read(exec::GPRF::PC);
 
     while (pc <= 40) {
-        exec.exec(instrs[pc / 4]);
-        pc = exec.getState().read(exec::GPRF::PC);
+        hart->exec(instrs[pc / 4]);
+        pc = hart->getGPRF().read(exec::GPRF::PC);
     }
 
-    EXPECT_EQ(exec.getState().read(exec::GPRF::X3), 15 * 8);
+    EXPECT_EQ(hart->getGPRF().read(exec::GPRF::X3), 15 * 8);
 }
 
 class ExecutorBBTest : public ::testing::Test {
@@ -120,7 +120,7 @@ protected:
     }
 
     BasicBlock assembleBB() {
-        RV64Ptr bbStartPC = exec_.getState().read(exec::GPRF::PC);
+        RV64Ptr bbStartPC = hart_->getGPRF().read(exec::GPRF::PC);
         BasicBlock bb{bbStartPC};
         int i = 0;
         while (bb.put(instrs_[bbStartPC / sizeof(RV64UWord) -
@@ -132,10 +132,9 @@ protected:
 
     std::vector<Instruction> instrs_;
     std::shared_ptr<mem::PhysMem> pMem_ = mem::PhysMemBuilder().build();
-    mem::MMU::SPtr mmu_ = mem::MMU::Create(pMem_);
     sim::HookManager::SPtr hookManager = sim::HookManager::Create();
-    exec::Executor exec_ = exec::Executor(mmu_, hookManager);
-    RV64Ptr startPC_ = exec_.getState().read(exec::GPRF::PC);
+    sim::Hart::SPtr hart_ = sim::Hart::Create(pMem_, hookManager);
+    RV64Ptr startPC_ = hart_->getGPRF().read(exec::GPRF::PC);
 };
 
 /*
@@ -163,9 +162,9 @@ TEST_F(ExecutorBBTest, SingleBB) {
                  InstructionOp::JAL}}});
     BasicBlock bb{0};
     bb = assembleBB();
-    exec_.execBB(bb);
+    hart_->execBB(bb);
 
-    EXPECT_EQ(exec_.getState().read(exec::GPRF::X3), 15);
+    EXPECT_EQ(hart_->getGPRF().read(exec::GPRF::X3), 15);
 }
 
 /*
@@ -208,10 +207,10 @@ TEST_F(ExecutorBBTest, Sum) {
     BasicBlock bb{0};
     while (bb.startPC() != 24) {
         bb = assembleBB();
-        exec_.execBB(bb);
+        hart_->execBB(bb);
     }
 
-    EXPECT_EQ(exec_.getState().read(exec::GPRF::X1), 10);
+    EXPECT_EQ(hart_->getGPRF().read(exec::GPRF::X1), 10);
 }
 
 /*
@@ -266,8 +265,8 @@ TEST_F(ExecutorBBTest, Mul) {
     BasicBlock bb{0};
     while (bb.startPC() != 44) {
         bb = assembleBB();
-        exec_.execBB(bb);
+        hart_->execBB(bb);
     }
 
-    EXPECT_EQ(exec_.getState().read(exec::GPRF::X3), 15 * 8);
+    EXPECT_EQ(hart_->getGPRF().read(exec::GPRF::X3), 15 * 8);
 }

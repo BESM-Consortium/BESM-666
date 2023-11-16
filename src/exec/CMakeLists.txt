@@ -2,7 +2,6 @@
 
 add_library(besm666_exec STATIC)
 target_sources(besm666_exec PRIVATE
-    ./executor.cpp
     ./gprf.cpp
     ./csrf.cpp
     ./icsr.cpp
