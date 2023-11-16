@@ -46,6 +46,11 @@ public:
     It end() { return instrs_.begin() + sz_; }
     ConstIt begin() const { return instrs_.cbegin(); }
     ConstIt end() const { return instrs_.cbegin() + sz_; }
+    ConstIt nextInstr() const {
+        auto current = currentInstr_;
+        currentInstr_++;
+        return current;
+    }
 
     constexpr const Instruction &operator[](int i) const { return instrs_[i]; }
     constexpr Instruction &operator[](int i) { return instrs_[i]; }
@@ -54,6 +59,7 @@ private:
     RV64UDWord startPC_;
     std::array<Instruction, capacity> instrs_;
     size_t sz_ = 0;
+    mutable ConstIt currentInstr_ = instrs_.begin();
 };
 
 } // namespace besm

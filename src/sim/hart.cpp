@@ -207,15 +207,16 @@ void Hart::exec(const Instruction instr) {
     }
 }
 void Hart::execBB(const BasicBlock &bb) {
-    for (const auto &instr : bb) {
-        exec(instr);
-
-        hookManager_->triggerInstrExecHook(instr);
-
+    auto it = bb.nextInstr();
+    while (it != bb.end()) {
+        exec(*it);
+        hookManager_->triggerInstrExecHook(*it);
         if (exceptionHappened_) {
             exceptionHappened_ = false;
             break;
         }
+
+        it = bb.nextInstr();
     }
 }
 
@@ -267,7 +268,8 @@ void Hart::runCycle() {
 bool Hart::finished() const { return gprf_.read(exec::GPRF::PC) == prevPC_; }
 
 void Hart::run() {
-    static_assert(sizeof(sim::Hart::HANDLER_ARR) / sizeof(sim::Hart::Handler) == (InstructionOp::MRET + 1));
+    static_assert(sizeof(sim::Hart::HANDLER_ARR) / sizeof(sim::Hart::Handler) ==
+                  (InstructionOp::MRET + 1));
     while (!this->finished()) {
         this->runCycle();
     }
@@ -300,9 +302,7 @@ void Hart::raiseIllegalInstruction() {
     this->raiseException(EXCEPTION_ILLEGAL_INSTR);
 }
 
-void Hart::exec_INV_OP(Instruction const instr) {
-    raiseIllegalInstruction();
-}
+void Hart::exec_INV_OP(Instruction const instr) { raiseIllegalInstruction(); }
 void Hart::exec_ADDI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
