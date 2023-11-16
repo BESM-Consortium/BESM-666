@@ -35,17 +35,19 @@ public:
         besm::util::Cache<BasicBlock, RV64UDWord, RV64UDWord, BBTag, BBHash>;
     static SPtr Create(std::shared_ptr<mem::PhysMem> const &pMem,
                        std::shared_ptr<HookManager> const &hookManager);
-    using Handler = void (Hart::*)(Instruction const);
+    using Handler = void (Hart::*)();
 
-    void exec(Instruction const instr);
+#if true
+    void exec(const Instruction instr);
     void execBB(const BasicBlock &bb);
+    void runCycle();
+#endif
 
     exec::GPRF const &getGPRF() const { return gprf_; }
     exec::CSRF const &getCSRF() const { return csrf_; }
     mem::MMU const &getMMU() const { return *mmu_; }
     size_t getInstrsExecuted() const { return instrsExecuted_; }
 
-    void runCycle();
     bool finished() const;
 
     void run();
@@ -56,7 +58,7 @@ private:
     dec::Decoder dec_;
     exec::GPRF gprf_;
     exec::CSRF csrf_;
-    BasicBlock currentBB_;
+    BasicBlock& currentBB_;
     std::shared_ptr<sim::HookManager> hookManager_;
 
     bool exceptionHappened_ = false;
@@ -70,82 +72,82 @@ private:
     void raiseException(ExceptionId id);
     void raiseIllegalInstruction();
 
-    void exec_INV_OP(Instruction const instr);
-    void exec_ADDI(Instruction const instr);
-    void exec_SLTI(Instruction const instr);
-    void exec_SLTIU(Instruction const instr);
-    void exec_ANDI(Instruction const instr);
-    void exec_ORI(Instruction const instr);
-    void exec_XORI(Instruction const instr);
-    void exec_SLLI(Instruction const instr);
-    void exec_SRLI(Instruction const instr);
-    void exec_SRAI(Instruction const instr);
-    void exec_LUI(Instruction const instr);
-    void exec_AUIPC(Instruction const instr);
-    void exec_ADD(Instruction const instr);
-    void exec_SLT(Instruction const instr);
-    void exec_SLTU(Instruction const instr);
-    void exec_AND(Instruction const instr);
-    void exec_OR(Instruction const instr);
-    void exec_XOR(Instruction const instr);
-    void exec_SLL(Instruction const instr);
-    void exec_SRL(Instruction const instr);
-    void exec_SUB(Instruction const instr);
-    void exec_SRA(Instruction const instr);
-    void exec_JAL(Instruction const instr);
-    void exec_JALR(Instruction const instr);
-    void exec_BEQ(Instruction const instr);
-    void exec_BNE(Instruction const instr);
-    void exec_BLT(Instruction const instr);
-    void exec_BLTU(Instruction const instr);
-    void exec_BGE(Instruction const instr);
-    void exec_BGEU(Instruction const instr);
+    void exec_INV_OP();
+    void exec_ADDI();
+    void exec_SLTI();
+    void exec_SLTIU();
+    void exec_ANDI();
+    void exec_ORI();
+    void exec_XORI();
+    void exec_SLLI();
+    void exec_SRLI();
+    void exec_SRAI();
+    void exec_LUI();
+    void exec_AUIPC();
+    void exec_ADD();
+    void exec_SLT();
+    void exec_SLTU();
+    void exec_AND();
+    void exec_OR();
+    void exec_XOR();
+    void exec_SLL();
+    void exec_SRL();
+    void exec_SUB();
+    void exec_SRA();
+    void exec_JAL();
+    void exec_JALR();
+    void exec_BEQ();
+    void exec_BNE();
+    void exec_BLT();
+    void exec_BLTU();
+    void exec_BGE();
+    void exec_BGEU();
 
-    void exec_LB(Instruction const instr);
-    void exec_LH(Instruction const instr);
-    void exec_LW(Instruction const instr);
-    void exec_LD(Instruction const instr);
-    void exec_LBU(Instruction const instr);
-    void exec_LHU(Instruction const instr);
-    void exec_LWU(Instruction const instr);
-    void exec_SB(Instruction const instr);
-    void exec_SH(Instruction const instr);
-    void exec_SW(Instruction const instr);
-    void exec_SD(Instruction const instr);
+    void exec_LB();
+    void exec_LH();
+    void exec_LW();
+    void exec_LD();
+    void exec_LBU();
+    void exec_LHU();
+    void exec_LWU();
+    void exec_SB();
+    void exec_SH();
+    void exec_SW();
+    void exec_SD();
 
     // Does nothing in in-order implementation
-    void exec_FENCE(Instruction const instr) { this->nextPC(); }
-    void exec_FENCE_TSO(Instruction const instr) { this->nextPC(); }
+    void exec_FENCE() { this->nextPC(); }
+    void exec_FENCE_TSO() { this->nextPC(); }
 
     // todo: to be implemented
-    void exec_PAUSE(Instruction const instr) {
+    void exec_PAUSE() {
         this->raiseIllegalInstruction();
     }
 
     // Will be implemented after CSR system release
-    void exec_ECALL(Instruction const instr);
-    void exec_EBREAK(Instruction const instr);
+    void exec_ECALL();
+    void exec_EBREAK();
 
-    void exec_ADDIW(Instruction const instr);
-    void exec_SLLIW(Instruction const instr);
-    void exec_SRLIW(Instruction const instr);
-    void exec_SRAIW(Instruction const instr);
-    void exec_ADDW(Instruction const instr);
-    void exec_SUBW(Instruction const instr);
-    void exec_SLLW(Instruction const instr);
-    void exec_SRLW(Instruction const instr);
-    void exec_SRAW(Instruction const instr);
+    void exec_ADDIW();
+    void exec_SLLIW();
+    void exec_SRLIW();
+    void exec_SRAIW();
+    void exec_ADDW();
+    void exec_SUBW();
+    void exec_SLLW();
+    void exec_SRLW();
+    void exec_SRAW();
 
-    void exec_MRET(Instruction const instr);
-    void exec_SRET(Instruction const instr);
+    void exec_MRET();
+    void exec_SRET();
 
-    void exec_CSRRW(Instruction const instr);
-    void exec_CSRRS(Instruction const instr);
-    void exec_CSRRC(Instruction const instr);
+    void exec_CSRRW();
+    void exec_CSRRS();
+    void exec_CSRRC();
 
-    void exec_CSRRWI(Instruction const instr);
-    void exec_CSRRSI(Instruction const instr);
-    void exec_CSRRCI(Instruction const instr);
+    void exec_CSRRWI();
+    void exec_CSRRSI();
+    void exec_CSRRCI();
 
     void nextPC();
 

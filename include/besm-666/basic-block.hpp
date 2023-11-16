@@ -46,20 +46,27 @@ public:
     It end() { return instrs_.begin() + sz_; }
     ConstIt begin() const { return instrs_.cbegin(); }
     ConstIt end() const { return instrs_.cbegin() + sz_; }
-    ConstIt nextInstr() const {
-        auto current = currentInstr_;
+    size_t nextInstr() const {
+        return ++currentInstr_;
+    }
+    size_t currentInstr() const {
+        return currentInstr_;
+    }
+    size_t currentInstrIncrement() const {
+        return currentInstr_++;
+    }
+    void incrementInstr() const {
         currentInstr_++;
-        return current;
     }
 
-    constexpr const Instruction &operator[](int i) const { return instrs_[i]; }
-    constexpr Instruction &operator[](int i) { return instrs_[i]; }
+    constexpr const Instruction &operator[](size_t i) const { return instrs_[i]; }
+    constexpr Instruction &operator[](size_t i) { return instrs_[i]; }
 
 private:
     RV64UDWord startPC_;
     std::array<Instruction, capacity> instrs_;
     size_t sz_ = 0;
-    mutable ConstIt currentInstr_ = instrs_.begin();
+    mutable size_t currentInstr_ = 0;
 };
 
 } // namespace besm
