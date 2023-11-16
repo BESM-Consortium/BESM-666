@@ -264,10 +264,10 @@ void Hart::runCycle() {
     prevPC_ = pc + bb.size() - 1;
     instrsExecuted_ += bb.size();
 }
-
 bool Hart::finished() const { return gprf_.read(exec::GPRF::PC) == prevPC_; }
 
 void Hart::run() {
+    static_assert(sizeof(sim::Hart::HANDLER_ARR) / sizeof(sim::Hart::Handler) == (InstructionOp::MRET + 1));
     while (!this->finished()) {
         this->runCycle();
     }
@@ -296,11 +296,13 @@ void Hart::raiseException(ExceptionId id) {
 
     exceptionHappened_ = true;
 }
-
 void Hart::raiseIllegalInstruction() {
     this->raiseException(EXCEPTION_ILLEGAL_INSTR);
 }
 
+void Hart::exec_INV_OP(Instruction const instr) {
+    raiseIllegalInstruction();
+}
 void Hart::exec_ADDI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -309,7 +311,6 @@ void Hart::exec_ADDI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLTI(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 =
@@ -320,7 +321,6 @@ void Hart::exec_SLTI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLTIU(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -330,7 +330,6 @@ void Hart::exec_SLTIU(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_ORI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -340,7 +339,6 @@ void Hart::exec_ORI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_ANDI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -350,7 +348,6 @@ void Hart::exec_ANDI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_XORI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -360,7 +357,6 @@ void Hart::exec_XORI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLLI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
@@ -370,7 +366,6 @@ void Hart::exec_SLLI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRLI(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
@@ -380,7 +375,6 @@ void Hart::exec_SRLI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRAI(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(instr.immidiate);
@@ -390,7 +384,6 @@ void Hart::exec_SRAI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_LUI(Instruction const instr) {
     RV64UDWord opnd1 = util::ExtractBits<RV64UDWord, 20>(instr.immidiate);
 
@@ -398,7 +391,6 @@ void Hart::exec_LUI(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_AUIPC(Instruction const instr) {
     RV64UDWord offset = util::ExtractBits<RV64UDWord, 20>(instr.immidiate);
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
@@ -408,7 +400,6 @@ void Hart::exec_AUIPC(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_ADD(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -418,7 +409,6 @@ void Hart::exec_ADD(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLT(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(instr.rs2));
@@ -428,7 +418,6 @@ void Hart::exec_SLT(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLTU(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -438,7 +427,6 @@ void Hart::exec_SLTU(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_AND(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -448,7 +436,6 @@ void Hart::exec_AND(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_OR(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -458,7 +445,6 @@ void Hart::exec_OR(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_XOR(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -468,7 +454,6 @@ void Hart::exec_XOR(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLL(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -478,7 +463,6 @@ void Hart::exec_SLL(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRL(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -488,7 +472,6 @@ void Hart::exec_SRL(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SUB(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -498,7 +481,6 @@ void Hart::exec_SUB(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRA(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -508,7 +490,6 @@ void Hart::exec_SRA(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_JAL(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(instr.immidiate);
@@ -519,7 +500,6 @@ void Hart::exec_JAL(Instruction const instr) {
     gprf_.write(instr.rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 }
-
 void Hart::exec_JALR(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord base = gprf_.read(instr.rs1);
@@ -531,7 +511,6 @@ void Hart::exec_JALR(Instruction const instr) {
     gprf_.write(instr.rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 }
-
 void Hart::exec_BEQ(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -545,7 +524,6 @@ void Hart::exec_BEQ(Instruction const instr) {
         this->nextPC();
     }
 }
-
 void Hart::exec_BNE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -559,7 +537,6 @@ void Hart::exec_BNE(Instruction const instr) {
         this->nextPC();
     }
 }
-
 void Hart::exec_BLT(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -573,7 +550,6 @@ void Hart::exec_BLT(Instruction const instr) {
         this->nextPC();
     }
 }
-
 void Hart::exec_BLTU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -587,7 +563,6 @@ void Hart::exec_BLTU(Instruction const instr) {
         this->nextPC();
     }
 }
-
 void Hart::exec_BGE(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -601,7 +576,6 @@ void Hart::exec_BGE(Instruction const instr) {
         this->nextPC();
     }
 }
-
 void Hart::exec_BGEU(Instruction const instr) {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -751,7 +725,6 @@ void Hart::exec_ADDIW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLLIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -761,7 +734,6 @@ void Hart::exec_SLLIW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRLIW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -771,7 +743,6 @@ void Hart::exec_SRLIW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRAIW(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(instr.immidiate);
@@ -781,7 +752,6 @@ void Hart::exec_SRAIW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_ADDW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -791,7 +761,6 @@ void Hart::exec_ADDW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SUBW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -801,7 +770,6 @@ void Hart::exec_SUBW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SLLW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -811,7 +779,6 @@ void Hart::exec_SLLW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRLW(Instruction const instr) {
     RV64UDWord opnd1 = gprf_.read(instr.rs1);
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -821,7 +788,6 @@ void Hart::exec_SRLW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_SRAW(Instruction const instr) {
     RV64DWord opnd1 = util::Signify(gprf_.read(instr.rs1));
     RV64UDWord opnd2 = gprf_.read(instr.rs2);
@@ -832,7 +798,6 @@ void Hart::exec_SRAW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_MRET(Instruction const instr) {
     if (csrf_.getPrivillege() != exec::PRIVILLEGE_MACHINE) {
         this->raiseIllegalInstruction();
@@ -847,7 +812,6 @@ void Hart::exec_MRET(Instruction const instr) {
 
     gprf_.write(exec::GPRF::PC, csrf_.mepc.get<exec::MEPC::Value>());
 }
-
 void Hart::exec_SRET(Instruction const instr) {
     /*
     csrf_.setPrivillege(csrf_.mstatus.get<exec::MStatus::SPP>());
@@ -860,7 +824,6 @@ void Hart::exec_SRET(Instruction const instr) {
     */
     std::terminate();
 }
-
 void Hart::exec_CSRRW(Instruction const instr) {
     auto status = csrf_.write(instr.immidiate, gprf_.read(instr.rs1));
     if (std::holds_alternative<bool>(status)) {
@@ -872,7 +835,6 @@ void Hart::exec_CSRRW(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_CSRRS(Instruction const instr) {
     std::variant<bool, RV64UDWord> status;
     if (instr.rs1 == exec::GPRF::X0) {
@@ -901,7 +863,6 @@ void Hart::exec_CSRRC(Instruction const instr) {
 
     this->nextPC();
 }
-
 void Hart::exec_CSRRWI(Instruction const instr) {
     auto status = csrf_.write(instr.immidiate, instr.rs1);
     if (std::holds_alternative<bool>(status)) {
