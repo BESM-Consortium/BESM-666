@@ -9,13 +9,14 @@
 #include "besm-666/util/assotiative-cache.hpp"
 
 #define FETCH_BB()                                                             \
-    if (instrIt == currentBB_.size()) {                                        \
+    if (nextInstrIt == currentBB_.size()) {                                    \
+        prevPC_ = prevPC_ + currentBB_.size() - 1;                             \
+        instrsExecuted_ += currentBB_.size();                                  \
         if(this->finished())                                                   \
             return;                                                            \
         RV64UDWord pc = gprf_.read(exec::GPRF::PC);                            \
         assert(pc % 2 == 0);                                                   \
-        prevPC_ = pc + currentBB_.size() - 1;                                  \
-        instrsExecuted_ += currentBB_.size();                                  \
+        prevPC_ = pc;                                                          \
         auto &entry = cache_.find(pc);                                         \
         currentBB_ = entry.getPayload();                                       \
         if (!entry.valid() || entry.getTag() != pc) {                          \
@@ -26,7 +27,7 @@
             entry.setPayload(currentBB_, pc);                                  \
             cache_.incCounter(pc);                                             \
         }                                                                      \
-        instrIt = currentBB_.currentInstr();                                   \
+        nextInstrIt = currentBB_.currentInstr();                               \
         hookManager_->triggerBBFetchHook(currentBB_);                          \
     }
 
@@ -300,6 +301,7 @@ void Hart::run() {
     // TODO: may be macros?
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     assert(pc % 2 == 0);
+    prevPC_ = pc;
 
     auto &entry = cache_.find(pc);
     currentBB_ = entry.getPayload();
@@ -344,15 +346,24 @@ void Hart::raiseIllegalInstruction() {
 void Hart::exec_INV_OP() { raiseIllegalInstruction(); }
 void Hart::exec_ADDI() {
     size_t instrIt = currentBB_.currentInstr();
-    if (instrIt == currentBB_.size()) {
-        if(this->finished()) {
+
+    RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
+    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
+    RV64UDWord res = opnd1 + opnd2;
+
+    gprf_.write(currentBB_[instrIt].rd, res);
+
+    this->nextPC();
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    if (nextInstrIt == currentBB_.size()) {
+        prevPC_ = prevPC_ + (currentBB_.size() - 1) * sizeof(RV64UWord);
+        instrsExecuted_ += currentBB_.size();
+        if(this->finished())
             return;
-        }
         RV64UDWord pc = gprf_.read(exec::GPRF::PC);
         assert(pc % 2 == 0);
-        // out-of-program control
-        prevPC_ = pc + currentBB_.size() - 1;
-        instrsExecuted_ += currentBB_.size();
+        prevPC_ = pc;
         auto &entry = cache_.find(pc);
         currentBB_ = entry.getPayload();
         if (!entry.valid() || entry.getTag() != pc) {
@@ -363,24 +374,15 @@ void Hart::exec_ADDI() {
             entry.setPayload(currentBB_, pc);
             cache_.incCounter(pc);
         }
-        instrIt = currentBB_.currentInstr();
+        nextInstrIt = currentBB_.currentInstr();
         hookManager_->triggerBBFetchHook(currentBB_);
     }
 
-    RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
-    RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
-    RV64UDWord res = opnd1 + opnd2;
-
-    gprf_.write(currentBB_[instrIt].rd, res);
-
-    this->nextPC();
-
-    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+    (this->*HANDLER_ARR[currentBB_[nextInstrIt].operation])();
 }
 void Hart::exec_SLTI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
-    
+
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64DWord opnd2 =
         util::Signify(util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate));
@@ -389,12 +391,14 @@ void Hart::exec_SLTI() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
-    
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLTIU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -404,11 +408,13 @@ void Hart::exec_SLTIU() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ORI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -418,11 +424,13 @@ void Hart::exec_ORI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ANDI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -432,11 +440,13 @@ void Hart::exec_ANDI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_XORI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -446,11 +456,13 @@ void Hart::exec_XORI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(currentBB_[instrIt].immidiate);
@@ -460,11 +472,13 @@ void Hart::exec_SLLI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRLI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(currentBB_[instrIt].immidiate);
@@ -474,11 +488,13 @@ void Hart::exec_SRLI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64UDWord opnd2 = util::ExtractBits<RV64UDWord, 5>(currentBB_[instrIt].immidiate);
@@ -488,11 +504,13 @@ void Hart::exec_SRAI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LUI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = util::ExtractBits<RV64UDWord, 20>(currentBB_[instrIt].immidiate);
 
@@ -500,11 +518,13 @@ void Hart::exec_LUI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_AUIPC() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord offset = util::ExtractBits<RV64UDWord, 20>(currentBB_[instrIt].immidiate);
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
@@ -514,11 +534,13 @@ void Hart::exec_AUIPC() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ADD() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -528,11 +550,13 @@ void Hart::exec_ADD() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLT() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64DWord opnd2 = util::Signify(gprf_.read(currentBB_[instrIt].rs2));
@@ -542,11 +566,13 @@ void Hart::exec_SLT() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLTU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -556,11 +582,13 @@ void Hart::exec_SLTU() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_AND() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -570,11 +598,13 @@ void Hart::exec_AND() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_OR() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -584,11 +614,13 @@ void Hart::exec_OR() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_XOR() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -598,11 +630,13 @@ void Hart::exec_XOR() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLL() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -612,11 +646,13 @@ void Hart::exec_SLL() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRL() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -626,11 +662,13 @@ void Hart::exec_SRL() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SUB() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -640,11 +678,13 @@ void Hart::exec_SUB() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRA() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -654,11 +694,13 @@ void Hart::exec_SRA() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_JAL() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 20>(currentBB_[instrIt].immidiate);
@@ -669,11 +711,13 @@ void Hart::exec_JAL() {
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_JALR() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord base = gprf_.read(currentBB_[instrIt].rs1);
@@ -685,11 +729,13 @@ void Hart::exec_JALR() {
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BEQ() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -703,11 +749,13 @@ void Hart::exec_BEQ() {
         this->nextPC();
     }
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BNE() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -721,11 +769,13 @@ void Hart::exec_BNE() {
         this->nextPC();
     }
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BLT() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -738,12 +788,14 @@ void Hart::exec_BLT() {
     } else {
         this->nextPC();
     }
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BLTU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -757,11 +809,13 @@ void Hart::exec_BLTU() {
         this->nextPC();
     }
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BGE() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -775,11 +829,13 @@ void Hart::exec_BGE() {
         this->nextPC();
     }
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BGEU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     RV64UDWord offset = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -792,13 +848,15 @@ void Hart::exec_BGEU() {
     } else {
         this->nextPC();
     }
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 
 void Hart::exec_LB() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -809,11 +867,13 @@ void Hart::exec_LB() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LH() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -824,11 +884,13 @@ void Hart::exec_LH() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -839,11 +901,13 @@ void Hart::exec_LW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LD() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -853,11 +917,13 @@ void Hart::exec_LD() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LBU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -867,11 +933,13 @@ void Hart::exec_LBU() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LHU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -881,11 +949,13 @@ void Hart::exec_LHU() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LWU() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -895,11 +965,13 @@ void Hart::exec_LWU() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SB() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -909,11 +981,13 @@ void Hart::exec_SB() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SH() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -923,11 +997,13 @@ void Hart::exec_SH() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -937,11 +1013,13 @@ void Hart::exec_SW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SD() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord address = gprf_.read(currentBB_[instrIt].rs1) +
                          util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -951,12 +1029,14 @@ void Hart::exec_SD() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 
 void Hart::exec_ECALL() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     switch (csrf_.getPrivillege()) {
     case exec::PRIVILLEGE_USER:
@@ -976,20 +1056,24 @@ void Hart::exec_ECALL() {
         break;
     }
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_EBREAK() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     this->raiseException(EXCEPTION_BREAKPOINT);
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 
 void Hart::exec_ADDIW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -999,11 +1083,13 @@ void Hart::exec_ADDIW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLIW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -1013,11 +1099,13 @@ void Hart::exec_SLLIW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRLIW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -1027,11 +1115,13 @@ void Hart::exec_SRLIW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAIW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64UDWord opnd2 = util::SignExtend<RV64UDWord, 12>(currentBB_[instrIt].immidiate);
@@ -1041,11 +1131,13 @@ void Hart::exec_SRAIW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ADDW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -1055,11 +1147,13 @@ void Hart::exec_ADDW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SUBW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -1069,11 +1163,13 @@ void Hart::exec_SUBW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -1083,11 +1179,13 @@ void Hart::exec_SLLW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRLW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64UDWord opnd1 = gprf_.read(currentBB_[instrIt].rs1);
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -1097,11 +1195,13 @@ void Hart::exec_SRLW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     RV64DWord opnd1 = util::Signify(gprf_.read(currentBB_[instrIt].rs1));
     RV64UDWord opnd2 = gprf_.read(currentBB_[instrIt].rs2);
@@ -1112,11 +1212,13 @@ void Hart::exec_SRAW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_MRET() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     if (csrf_.getPrivillege() != exec::PRIVILLEGE_MACHINE) {
         this->raiseIllegalInstruction();
@@ -1131,11 +1233,14 @@ void Hart::exec_MRET() {
 
     gprf_.write(exec::GPRF::PC, csrf_.mepc.get<exec::MEPC::Value>());
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRET() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
     /*
     csrf_.setPrivillege(csrf_.mstatus.get<exec::MStatus::SPP>());
     csrf_.mstatus.set<exec::MStatus::SIE>(csrf_.mstatus.get<exec::MStatus::SPIE>());
@@ -1149,7 +1254,6 @@ void Hart::exec_SRET() {
 }
 void Hart::exec_CSRRW() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     auto status = csrf_.write(currentBB_[instrIt].immidiate, gprf_.read(currentBB_[instrIt].rs1));
     if (std::holds_alternative<bool>(status)) {
@@ -1161,11 +1265,13 @@ void Hart::exec_CSRRW() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRS() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     std::variant<bool, RV64UDWord> status;
     if (currentBB_[instrIt].rs1 == exec::GPRF::X0) {
@@ -1183,11 +1289,13 @@ void Hart::exec_CSRRS() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRC() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     auto status = csrf_.clearBits(currentBB_[instrIt].immidiate, gprf_.read(currentBB_[instrIt].rs1));
     if (std::holds_alternative<bool>(status)) {
@@ -1199,11 +1307,13 @@ void Hart::exec_CSRRC() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRWI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     auto status = csrf_.write(currentBB_[instrIt].immidiate, currentBB_[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
@@ -1215,11 +1325,13 @@ void Hart::exec_CSRRWI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRSI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     auto status = csrf_.setBits(currentBB_[instrIt].immidiate, currentBB_[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
@@ -1231,11 +1343,13 @@ void Hart::exec_CSRRSI() {
 
     this->nextPC();
 
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRCI() {
     size_t instrIt = currentBB_.currentInstr();
-    FETCH_BB();
 
     auto status = csrf_.clearBits(currentBB_[instrIt].immidiate, currentBB_[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
@@ -1246,6 +1360,9 @@ void Hart::exec_CSRRCI() {
     gprf_.write(currentBB_[instrIt].rd, std::get<RV64UDWord>(status));
 
     this->nextPC();
+
+    size_t nextInstrIt = currentBB_.currentInstr();
+    FETCH_BB();
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
