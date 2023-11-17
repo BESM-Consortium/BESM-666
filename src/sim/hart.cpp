@@ -321,7 +321,6 @@ void Hart::raiseIllegalInstruction() {
 }
 
 void Hart::exec_BB_END() {
-    // TODO: check finished
     prevPC_ = currentBB_->startPC() + (currentBB_->size() - 2) * sizeof(RV64UWord);
     instrsExecuted_ += currentBB_->size() - 1;
     if(this->finished()) {
@@ -331,13 +330,19 @@ void Hart::exec_BB_END() {
     assert(pc % 2 == 0);
     auto &entry = cache_.find(pc);
     currentBB_ = &entry.getPayload();
-    if (!entry.valid() || entry.getTag() != pc) {
+    if (entry.valid() && entry.getTag() == pc) {
+        currentBB_->resetCurrentInstr();
+    }
+    else {
         if (entry.valid()) {
             currentBB_->resetBB();
         }
         currentBB_->setStartPC(pc);
         dec_.assembleBB(*currentBB_);
+//        std::cerr << "Here?" << std::endl;
         entry.setPayload(*currentBB_, pc);
+//        std::cerr << "Here!" << std::endl;
+
         cache_.incCounter(pc);
     }
     hookManager_->triggerBBFetchHook(*currentBB_);

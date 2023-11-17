@@ -12,25 +12,25 @@ public:
     BasicBlock() : startPC_(0), sz_(0) {}
     BasicBlock(RV64UDWord startPC) : startPC_(startPC), sz_(0) {}
 
-    BasicBlock(const BasicBlock &other) {
-        startPC_ = other.startPC_;
-        instrs_ = other.instrs_;
-        sz_ = other.sz_;
-        currentInstr_ = other.currentInstr_;
-
-        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
-    }
-
-    BasicBlock& operator=(const BasicBlock &other) {
-        startPC_ = other.startPC_;
-        instrs_ = other.instrs_;
-        sz_ = other.sz_;
-        currentInstr_ = other.currentInstr_;
-
-        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
-
-        return *this;
-    }
+//    BasicBlock(const BasicBlock &other) {
+//        startPC_ = other.startPC_;
+//        instrs_ = other.instrs_;
+//        sz_ = other.sz_;
+//        currentInstr_ = other.currentInstr_;
+//
+//        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
+//    }
+//
+//    BasicBlock& operator=(const BasicBlock &other) {
+//        startPC_ = other.startPC_;
+//        instrs_ = other.instrs_;
+//        sz_ = other.sz_;
+//        currentInstr_ = other.currentInstr_;
+//
+//        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
+//
+//        return *this;
+//    }
 
     static constexpr size_t capacity = 33;
 
@@ -62,6 +62,10 @@ public:
     void resetBB() {
         sz_ = 0;
         startPC_ = -1;
+        currentInstr_ = 0;
+    }
+    void resetCurrentInstr() const {
+        currentInstr_ = 0;
     }
 
     using It = std::array<Instruction, capacity>::iterator;
