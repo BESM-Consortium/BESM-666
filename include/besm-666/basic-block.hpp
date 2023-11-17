@@ -12,6 +12,26 @@ public:
     BasicBlock() : startPC_(0), sz_(0) {}
     BasicBlock(RV64UDWord startPC) : startPC_(startPC), sz_(0) {}
 
+    BasicBlock(const BasicBlock &other) {
+        startPC_ = other.startPC_;
+        instrs_ = other.instrs_;
+        sz_ = other.sz_;
+        currentInstr_ = other.currentInstr_;
+
+        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
+    }
+
+    BasicBlock& operator=(const BasicBlock &other) {
+        startPC_ = other.startPC_;
+        instrs_ = other.instrs_;
+        sz_ = other.sz_;
+        currentInstr_ = other.currentInstr_;
+
+        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
+
+        return *this;
+    }
+
     static constexpr size_t capacity = 33;
 
     /**

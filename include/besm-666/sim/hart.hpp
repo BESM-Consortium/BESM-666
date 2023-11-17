@@ -33,9 +33,10 @@ public:
     using SPtr = std::shared_ptr<Hart>;
     using BBCache =
         besm::util::Cache<BasicBlock, RV64UDWord, RV64UDWord, BBTag, BBHash>;
+    using Handler = void (Hart::*)();
+
     static SPtr Create(std::shared_ptr<mem::PhysMem> const &pMem,
                        std::shared_ptr<HookManager> const &hookManager);
-    using Handler = void (Hart::*)();
 
 #if true
     void exec(const Instruction instr);
@@ -58,7 +59,7 @@ private:
     dec::Decoder dec_;
     exec::GPRF gprf_;
     exec::CSRF csrf_;
-    BasicBlock &currentBB_;
+    BasicBlock *currentBB_;
     std::shared_ptr<sim::HookManager> hookManager_;
 
     bool exceptionHappened_ = false;
