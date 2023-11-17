@@ -12,7 +12,7 @@ public:
     BasicBlock() : startPC_(0), sz_(0) {}
     BasicBlock(RV64UDWord startPC) : startPC_(startPC), sz_(0) {}
 
-    static constexpr size_t capacity = 32;
+    static constexpr size_t capacity = 33;
 
     /**
      * \brief Puts another instruction in the base block until it is completed.
