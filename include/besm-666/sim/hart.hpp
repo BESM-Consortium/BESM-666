@@ -117,11 +117,11 @@ private:
     void exec_SD();
 
     // Does nothing in in-order implementation
-    void exec_FENCE() { this->nextPC(); }
-    void exec_FENCE_TSO() { this->nextPC(); }
+    void exec_FENCE();
+    void exec_FENCE_TSO();
 
     // todo: to be implemented
-    void exec_PAUSE() { this->raiseIllegalInstruction(); }
+    void exec_PAUSE();
 
     // Will be implemented after CSR system release
     void exec_ECALL();

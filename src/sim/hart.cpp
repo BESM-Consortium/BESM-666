@@ -286,6 +286,7 @@ void Hart::run() {
     dec_.assembleBB(currentBB_);
     entry.setPayload(currentBB_, pc);
     cache_.incCounter(pc);
+    hookManager_->triggerBBFetchHook(currentBB_);
 
     size_t instrIt = currentBB_.currentInstr();
     if (instrIt != currentBB_.size()) {
@@ -322,10 +323,10 @@ void Hart::raiseIllegalInstruction() {
 void Hart::exec_BB_END() {
     // TODO: check finished
     prevPC_ = currentBB_.startPC() + (currentBB_.size() - 2) * sizeof(RV64UWord);
+    instrsExecuted_ += currentBB_.size() - 1;
     if(this->finished()) {
         return;
     }
-    instrsExecuted_ += currentBB_.size() - 1;
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     assert(pc % 2 == 0);
     auto &entry = cache_.find(pc);
@@ -340,7 +341,7 @@ void Hart::exec_BB_END() {
         cache_.incCounter(pc);
     }
     hookManager_->triggerBBFetchHook(currentBB_);
-    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+    (this->*HANDLER_ARR[currentBB_[currentBB_.currentInstr()].operation])();
 }
 void Hart::exec_INV_OP() { raiseIllegalInstruction(); }
 void Hart::exec_ADDI() {
@@ -354,6 +355,8 @@ void Hart::exec_ADDI() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -369,6 +372,8 @@ void Hart::exec_SLTI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLTIU() {
@@ -382,6 +387,8 @@ void Hart::exec_SLTIU() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -397,6 +404,8 @@ void Hart::exec_ORI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ANDI() {
@@ -410,6 +419,8 @@ void Hart::exec_ANDI() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -425,6 +436,8 @@ void Hart::exec_XORI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLI() {
@@ -438,6 +451,8 @@ void Hart::exec_SLLI() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -453,6 +468,8 @@ void Hart::exec_SRLI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAI() {
@@ -467,6 +484,8 @@ void Hart::exec_SRAI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LUI() {
@@ -478,6 +497,8 @@ void Hart::exec_LUI() {
     gprf_.write(currentBB_[instrIt].rd, opnd1 << 12);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -493,6 +514,8 @@ void Hart::exec_AUIPC() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ADD() {
@@ -505,6 +528,8 @@ void Hart::exec_ADD() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -519,6 +544,8 @@ void Hart::exec_SLT() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLTU() {
@@ -531,6 +558,8 @@ void Hart::exec_SLTU() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -545,6 +574,8 @@ void Hart::exec_AND() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_OR() {
@@ -557,6 +588,8 @@ void Hart::exec_OR() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -571,6 +604,8 @@ void Hart::exec_XOR() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLL() {
@@ -583,6 +618,8 @@ void Hart::exec_SLL() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -597,6 +634,8 @@ void Hart::exec_SRL() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SUB() {
@@ -610,6 +649,8 @@ void Hart::exec_SUB() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRA() {
@@ -622,6 +663,8 @@ void Hart::exec_SRA() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -638,6 +681,8 @@ void Hart::exec_JAL() {
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_JALR() {
@@ -653,6 +698,8 @@ void Hart::exec_JALR() {
 
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -672,6 +719,8 @@ void Hart::exec_BEQ() {
         this->nextPC();
     }
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BNE() {
@@ -689,6 +738,8 @@ void Hart::exec_BNE() {
     } else {
         this->nextPC();
     }
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -708,6 +759,8 @@ void Hart::exec_BLT() {
         this->nextPC();
     }
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BLTU() {
@@ -725,6 +778,8 @@ void Hart::exec_BLTU() {
     } else {
         this->nextPC();
     }
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -744,6 +799,8 @@ void Hart::exec_BGE() {
         this->nextPC();
     }
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_BGEU() {
@@ -762,6 +819,8 @@ void Hart::exec_BGEU() {
         this->nextPC();
     }
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 
@@ -778,6 +837,8 @@ void Hart::exec_LB() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LH() {
@@ -792,6 +853,8 @@ void Hart::exec_LH() {
     gprf_.write(currentBB_[instrIt].rd, extendedValue);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -808,6 +871,8 @@ void Hart::exec_LW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LD() {
@@ -821,6 +886,8 @@ void Hart::exec_LD() {
     gprf_.write(currentBB_[instrIt].rd, value);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -836,6 +903,8 @@ void Hart::exec_LBU() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LHU() {
@@ -850,6 +919,8 @@ void Hart::exec_LHU() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_LWU() {
@@ -863,6 +934,8 @@ void Hart::exec_LWU() {
     gprf_.write(currentBB_[instrIt].rd, value);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -879,6 +952,8 @@ void Hart::exec_SB() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SH() {
@@ -893,6 +968,8 @@ void Hart::exec_SH() {
     mmu_->storeHWord(address, value);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -909,6 +986,8 @@ void Hart::exec_SW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SD() {
@@ -923,6 +1002,33 @@ void Hart::exec_SD() {
     mmu_->storeDWord(address, value);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
+    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+}
+
+// Does nothing in in-order implementation
+void Hart::exec_FENCE() {
+    this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[currentBB_.currentInstr()]);
+
+    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+}
+void Hart::exec_FENCE_TSO() {
+    this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[currentBB_.currentInstr()]);
+
+    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+}
+
+// todo: to be implemented
+void Hart::exec_PAUSE() {
+    this->raiseIllegalInstruction();
+
+    hookManager_->triggerInstrExecHook(currentBB_[currentBB_.currentInstr()]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -948,12 +1054,16 @@ void Hart::exec_ECALL() {
         break;
     }
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_EBREAK() {
     size_t instrIt = currentBB_.currentInstr();
 
     this->raiseException(EXCEPTION_BREAKPOINT);
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -970,6 +1080,8 @@ void Hart::exec_ADDIW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLIW() {
@@ -983,6 +1095,8 @@ void Hart::exec_SLLIW() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -998,6 +1112,8 @@ void Hart::exec_SRLIW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAIW() {
@@ -1012,6 +1128,8 @@ void Hart::exec_SRAIW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_ADDW() {
@@ -1024,6 +1142,8 @@ void Hart::exec_ADDW() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1038,6 +1158,8 @@ void Hart::exec_SUBW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLLW() {
@@ -1050,6 +1172,8 @@ void Hart::exec_SLLW() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1064,6 +1188,8 @@ void Hart::exec_SRLW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRAW() {
@@ -1077,6 +1203,8 @@ void Hart::exec_SRAW() {
     gprf_.write(currentBB_[instrIt].rd, res);
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1096,10 +1224,14 @@ void Hart::exec_MRET() {
 
     gprf_.write(exec::GPRF::PC, csrf_.mepc.get<exec::MEPC::Value>());
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SRET() {
     size_t instrIt = currentBB_.currentInstr();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     /*
     csrf_.setPrivillege(csrf_.mstatus.get<exec::MStatus::SPP>());
@@ -1126,6 +1258,8 @@ void Hart::exec_CSRRW() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRS() {
@@ -1148,6 +1282,8 @@ void Hart::exec_CSRRS() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRC() {
@@ -1163,6 +1299,8 @@ void Hart::exec_CSRRC() {
     gprf_.write(currentBB_[instrIt].rd, std::get<RV64UDWord>(status));
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1180,6 +1318,8 @@ void Hart::exec_CSRRWI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRSI() {
@@ -1196,6 +1336,8 @@ void Hart::exec_CSRRSI() {
 
     this->nextPC();
 
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
+
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_CSRRCI() {
@@ -1211,6 +1353,8 @@ void Hart::exec_CSRRCI() {
     gprf_.write(currentBB_[instrIt].rd, std::get<RV64UDWord>(status));
 
     this->nextPC();
+
+    hookManager_->triggerInstrExecHook(currentBB_[instrIt]);
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
