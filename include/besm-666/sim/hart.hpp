@@ -72,6 +72,7 @@ private:
     void raiseException(ExceptionId id);
     void raiseIllegalInstruction();
 
+    void exec_BB_END();
     void exec_INV_OP();
     void exec_ADDI();
     void exec_SLTI();
@@ -152,6 +153,11 @@ private:
     void nextPC();
 
 public:
+    // handler index is enum value of operation (keep this invariant!!!)
+    /**
+     * @todo #39:90min Make autogen for rv-instruction-op.hpp header and this
+     * array to keep them consistent (handler index is enum value of operation)
+     */
     static constexpr Handler HANDLER_ARR[] = {
         &Hart::exec_INV_OP,    &Hart::exec_LUI,    &Hart::exec_AUIPC,
         &Hart::exec_JAL,       &Hart::exec_JALR,   &Hart::exec_BEQ,
@@ -173,7 +179,9 @@ public:
         &Hart::exec_SUBW,      &Hart::exec_SLLW,   &Hart::exec_SRLW,
         &Hart::exec_SRAW,      &Hart::exec_CSRRW,  &Hart::exec_CSRRS,
         &Hart::exec_CSRRC,     &Hart::exec_CSRRWI, &Hart::exec_CSRRSI,
-        &Hart::exec_CSRRCI,    &Hart::exec_SRET,   &Hart::exec_MRET};
+        &Hart::exec_CSRRCI,    &Hart::exec_SRET,   &Hart::exec_MRET,
+        &Hart::exec_BB_END
+    };
 };
 
 } // namespace besm::sim

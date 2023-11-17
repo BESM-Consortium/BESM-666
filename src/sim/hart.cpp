@@ -8,29 +8,6 @@
 #include "besm-666/sim/hooks.hpp"
 #include "besm-666/util/assotiative-cache.hpp"
 
-#define FETCH_BB()                                                             \
-    if (nextInstrIt == currentBB_.size()) {                                    \
-        prevPC_ = prevPC_ + currentBB_.size() - 1;                             \
-        instrsExecuted_ += currentBB_.size();                                  \
-        if(this->finished())                                                   \
-            return;                                                            \
-        RV64UDWord pc = gprf_.read(exec::GPRF::PC);                            \
-        assert(pc % 2 == 0);                                                   \
-        prevPC_ = pc;                                                          \
-        auto &entry = cache_.find(pc);                                         \
-        currentBB_ = entry.getPayload();                                       \
-        if (!entry.valid() || entry.getTag() != pc) {                          \
-            if (entry.valid())                                                 \
-                currentBB_.resetBB();                                          \
-            currentBB_.setStartPC(pc);                                         \
-            dec_.assembleBB(currentBB_);                                       \
-            entry.setPayload(currentBB_, pc);                                  \
-            cache_.incCounter(pc);                                             \
-        }                                                                      \
-        nextInstrIt = currentBB_.currentInstr();                               \
-        hookManager_->triggerBBFetchHook(currentBB_);                          \
-    }
-
 namespace besm::sim {
 
 Hart::SPtr Hart::Create(std::shared_ptr<mem::PhysMem> const &pMem,
@@ -296,7 +273,7 @@ bool Hart::finished() const { return gprf_.read(exec::GPRF::PC) == prevPC_; }
 
 void Hart::run() {
     static_assert(sizeof(sim::Hart::HANDLER_ARR) / sizeof(sim::Hart::Handler) ==
-                  (InstructionOp::MRET + 1));
+                  (InstructionOp::BB_END + 1));
 
     // TODO: may be macros?
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
@@ -343,6 +320,28 @@ void Hart::raiseIllegalInstruction() {
     this->raiseException(EXCEPTION_ILLEGAL_INSTR);
 }
 
+void Hart::exec_BB_END() {
+    // TODO: check finished
+//    prevPC_ = prevPC_ + (currentBB_.size() - 1) * sizeof(RV64UWord);
+    instrsExecuted_ += currentBB_.size();
+//    if(this->finished())
+//        return;
+    RV64UDWord pc = gprf_.read(exec::GPRF::PC);
+    assert(pc % 2 == 0);
+//    prevPC_ = pc;
+    auto &entry = cache_.find(pc);
+    currentBB_ = entry.getPayload();
+    if (!entry.valid() || entry.getTag() != pc) {
+        if (entry.valid())
+            currentBB_.resetBB();
+        currentBB_.setStartPC(pc);
+        dec_.assembleBB(currentBB_);
+        entry.setPayload(currentBB_, pc);
+        cache_.incCounter(pc);
+    }
+    hookManager_->triggerBBFetchHook(currentBB_);
+    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
+}
 void Hart::exec_INV_OP() { raiseIllegalInstruction(); }
 void Hart::exec_ADDI() {
     size_t instrIt = currentBB_.currentInstr();
@@ -355,30 +354,7 @@ void Hart::exec_ADDI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    if (nextInstrIt == currentBB_.size()) {
-        prevPC_ = prevPC_ + (currentBB_.size() - 1) * sizeof(RV64UWord);
-        instrsExecuted_ += currentBB_.size();
-        if(this->finished())
-            return;
-        RV64UDWord pc = gprf_.read(exec::GPRF::PC);
-        assert(pc % 2 == 0);
-        prevPC_ = pc;
-        auto &entry = cache_.find(pc);
-        currentBB_ = entry.getPayload();
-        if (!entry.valid() || entry.getTag() != pc) {
-            if (entry.valid())
-                currentBB_.resetBB();
-            currentBB_.setStartPC(pc);
-            dec_.assembleBB(currentBB_);
-            entry.setPayload(currentBB_, pc);
-            cache_.incCounter(pc);
-        }
-        nextInstrIt = currentBB_.currentInstr();
-        hookManager_->triggerBBFetchHook(currentBB_);
-    }
-
-    (this->*HANDLER_ARR[currentBB_[nextInstrIt].operation])();
+    (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
 void Hart::exec_SLTI() {
     size_t instrIt = currentBB_.currentInstr();
@@ -392,8 +368,7 @@ void Hart::exec_SLTI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -408,8 +383,7 @@ void Hart::exec_SLTIU() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -424,8 +398,7 @@ void Hart::exec_ORI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -440,8 +413,7 @@ void Hart::exec_ANDI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -456,8 +428,7 @@ void Hart::exec_XORI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -472,8 +443,7 @@ void Hart::exec_SLLI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -488,8 +458,7 @@ void Hart::exec_SRLI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -504,8 +473,7 @@ void Hart::exec_SRAI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -518,8 +486,7 @@ void Hart::exec_LUI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -534,8 +501,7 @@ void Hart::exec_AUIPC() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -550,8 +516,7 @@ void Hart::exec_ADD() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -566,8 +531,7 @@ void Hart::exec_SLT() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -582,8 +546,7 @@ void Hart::exec_SLTU() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -598,8 +561,7 @@ void Hart::exec_AND() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -614,8 +576,7 @@ void Hart::exec_OR() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -630,8 +591,7 @@ void Hart::exec_XOR() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -646,8 +606,7 @@ void Hart::exec_SLL() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -662,8 +621,7 @@ void Hart::exec_SRL() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -678,8 +636,7 @@ void Hart::exec_SUB() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -694,8 +651,7 @@ void Hart::exec_SRA() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -711,8 +667,7 @@ void Hart::exec_JAL() {
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -729,8 +684,7 @@ void Hart::exec_JALR() {
     gprf_.write(currentBB_[instrIt].rd, ret);
     gprf_.write(exec::GPRF::PC, target);
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -749,8 +703,7 @@ void Hart::exec_BEQ() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -769,8 +722,7 @@ void Hart::exec_BNE() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -789,8 +741,7 @@ void Hart::exec_BLT() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -809,8 +760,7 @@ void Hart::exec_BLTU() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -829,8 +779,7 @@ void Hart::exec_BGE() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -849,8 +798,7 @@ void Hart::exec_BGEU() {
         this->nextPC();
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -867,8 +815,7 @@ void Hart::exec_LB() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -884,8 +831,7 @@ void Hart::exec_LH() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -901,8 +847,7 @@ void Hart::exec_LW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -917,8 +862,7 @@ void Hart::exec_LD() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -933,8 +877,7 @@ void Hart::exec_LBU() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -949,8 +892,7 @@ void Hart::exec_LHU() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -965,8 +907,7 @@ void Hart::exec_LWU() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -981,8 +922,7 @@ void Hart::exec_SB() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -997,8 +937,7 @@ void Hart::exec_SH() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1013,8 +952,7 @@ void Hart::exec_SW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1029,8 +967,7 @@ void Hart::exec_SD() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1056,8 +993,7 @@ void Hart::exec_ECALL() {
         break;
     }
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1066,8 +1002,7 @@ void Hart::exec_EBREAK() {
 
     this->raiseException(EXCEPTION_BREAKPOINT);
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1083,8 +1018,7 @@ void Hart::exec_ADDIW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1099,8 +1033,7 @@ void Hart::exec_SLLIW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1115,8 +1048,7 @@ void Hart::exec_SRLIW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1131,8 +1063,7 @@ void Hart::exec_SRAIW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1147,8 +1078,7 @@ void Hart::exec_ADDW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1163,8 +1093,7 @@ void Hart::exec_SUBW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1179,8 +1108,7 @@ void Hart::exec_SLLW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1195,8 +1123,7 @@ void Hart::exec_SRLW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1212,8 +1139,7 @@ void Hart::exec_SRAW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1233,8 +1159,7 @@ void Hart::exec_MRET() {
 
     gprf_.write(exec::GPRF::PC, csrf_.mepc.get<exec::MEPC::Value>());
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1265,8 +1190,7 @@ void Hart::exec_CSRRW() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1289,8 +1213,7 @@ void Hart::exec_CSRRS() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1307,8 +1230,7 @@ void Hart::exec_CSRRC() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1325,8 +1247,7 @@ void Hart::exec_CSRRWI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1343,8 +1264,7 @@ void Hart::exec_CSRRSI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
@@ -1361,8 +1281,7 @@ void Hart::exec_CSRRCI() {
 
     this->nextPC();
 
-    size_t nextInstrIt = currentBB_.currentInstr();
-    FETCH_BB();
+
 
     (this->*HANDLER_ARR[currentBB_[currentBB_.nextInstr()].operation])();
 }
