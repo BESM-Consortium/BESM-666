@@ -229,7 +229,6 @@ besm::BasicBlock dec::Decoder::assembleBB(RV64Ptr address) {
     while (bb.put(parse(fetch(address + i)))) {
         i += sizeof(RV64UWord);
     }
-    bb.put(Instruction{.operation = BB_END});
     return bb;
 }
 
@@ -238,5 +237,4 @@ void dec::Decoder::assembleBB(BasicBlock &bb) {
     while (bb.put(parse(fetch(bb.startPC() + i)))) {
         i += sizeof(RV64UWord);
     }
-    bb.put(Instruction{.operation = BB_END});
 }

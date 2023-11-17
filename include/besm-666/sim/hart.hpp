@@ -58,7 +58,7 @@ private:
     dec::Decoder dec_;
     exec::GPRF gprf_;
     exec::CSRF csrf_;
-    BasicBlock& currentBB_;
+    BasicBlock &currentBB_;
     std::shared_ptr<sim::HookManager> hookManager_;
 
     bool exceptionHappened_ = false;
@@ -121,9 +121,7 @@ private:
     void exec_FENCE_TSO() { this->nextPC(); }
 
     // todo: to be implemented
-    void exec_PAUSE() {
-        this->raiseIllegalInstruction();
-    }
+    void exec_PAUSE() { this->raiseIllegalInstruction(); }
 
     // Will be implemented after CSR system release
     void exec_ECALL();
@@ -180,8 +178,7 @@ public:
         &Hart::exec_SRAW,      &Hart::exec_CSRRW,  &Hart::exec_CSRRS,
         &Hart::exec_CSRRC,     &Hart::exec_CSRRWI, &Hart::exec_CSRRSI,
         &Hart::exec_CSRRCI,    &Hart::exec_SRET,   &Hart::exec_MRET,
-        &Hart::exec_BB_END
-    };
+        &Hart::exec_BB_END};
 };
 
 } // namespace besm::sim
