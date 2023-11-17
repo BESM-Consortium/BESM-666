@@ -215,7 +215,6 @@ void Hart::exec(const Instruction instr) {
         break;
     }
 }
-
 void Hart::execBB(const BasicBlock &bb) {
     size_t instrIt = bb.currentInstr();
     while (instrIt != bb.size()) {
@@ -229,7 +228,6 @@ void Hart::execBB(const BasicBlock &bb) {
         instrIt = bb.nextInstr();
     }
 }
-
 void Hart::runCycle() {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     assert(pc % 2 == 0);
@@ -323,18 +321,19 @@ void Hart::raiseIllegalInstruction() {
 
 void Hart::exec_BB_END() {
     // TODO: check finished
-    //    prevPC_ = prevPC_ + (currentBB_.size() - 1) * sizeof(RV64UWord);
-    instrsExecuted_ += currentBB_.size();
-    //    if(this->finished())
-    //        return;
+    prevPC_ = currentBB_.startPC() + (currentBB_.size() - 2) * sizeof(RV64UWord);
+    if(this->finished()) {
+        return;
+    }
+    instrsExecuted_ += currentBB_.size() - 1;
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     assert(pc % 2 == 0);
-    //    prevPC_ = pc;
     auto &entry = cache_.find(pc);
     currentBB_ = entry.getPayload();
     if (!entry.valid() || entry.getTag() != pc) {
-        if (entry.valid())
+        if (entry.valid()) {
             currentBB_.resetBB();
+        }
         currentBB_.setStartPC(pc);
         dec_.assembleBB(currentBB_);
         entry.setPayload(currentBB_, pc);

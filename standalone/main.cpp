@@ -15,7 +15,7 @@
 #include "besm-666/util/range.hpp"
 
 bool optionDumpInstructions = false;
-bool optionDumpRegisters = false;
+bool optionDumpRegisters = true;
 
 csh CapstoneHandler;
 std::shared_ptr<besm::sim::Machine> Machine;
