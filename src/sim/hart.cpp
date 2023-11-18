@@ -272,8 +272,6 @@ bool Hart::finished() const { return gprf_.read(exec::GPRF::PC) == prevPC_; }
 void Hart::run() {
     static_assert(sizeof(sim::Hart::HANDLER_ARR) / sizeof(sim::Hart::Handler) ==
                   (InstructionOp::BB_END + 1));
-
-    // TODO: may be macros?
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
     assert(pc % 2 == 0);
     prevPC_ = pc;
@@ -339,7 +337,7 @@ void Hart::exec_BB_END() {
         currentBB_->setStartPC(pc);
         dec_.assembleBB(*currentBB_);
         entry.setTag(pc);
-//        entry.setPayload(*currentBB_, pc);
+        //        entry.setPayload(*currentBB_, pc);
         cache_.incCounter(pc);
     }
     hookManager_->triggerBBFetchHook(*currentBB_);

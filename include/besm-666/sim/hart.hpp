@@ -121,7 +121,9 @@ private:
     void exec_FENCE();
     void exec_FENCE_TSO();
 
-    // todo: to be implemented
+    /**
+     * @todo #81:90min to be implemented
+     */
     void exec_PAUSE();
 
     // Will be implemented after CSR system release
