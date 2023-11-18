@@ -20,8 +20,7 @@ Hart::Hart(std::shared_ptr<mem::PhysMem> const &pMem,
     : mmu_(mem::MMU::Create(pMem)), dec_(mmu_),
       hookManager_(std::move(hookManager)),
       prevPC_(std::numeric_limits<RV64UDWord>::max()), instrsExecuted_(0),
-      cache_(4, 128),
-      currentBB_(nullptr) {}
+      cache_(4, 128), currentBB_(nullptr) {}
 
 #if true
 void Hart::exec(const Instruction instr) {
@@ -321,9 +320,10 @@ void Hart::raiseIllegalInstruction() {
 }
 
 void Hart::exec_BB_END() {
-    prevPC_ = currentBB_->startPC() + (currentBB_->size() - 2) * sizeof(RV64UWord);
+    prevPC_ =
+        currentBB_->startPC() + (currentBB_->size() - 2) * sizeof(RV64UWord);
     instrsExecuted_ += currentBB_->size() - 1;
-    if(this->finished()) {
+    if (this->finished()) {
         return;
     }
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
@@ -332,16 +332,15 @@ void Hart::exec_BB_END() {
     currentBB_ = &entry.getPayload();
     if (entry.valid() && entry.getTag() == pc) {
         currentBB_->resetCurrentInstr();
-    }
-    else {
+    } else {
         if (entry.valid()) {
             currentBB_->resetBB();
         }
         currentBB_->setStartPC(pc);
         dec_.assembleBB(*currentBB_);
-//        std::cerr << "Here?" << std::endl;
+        std::cerr << "Here?" << std::endl;
         entry.setPayload(*currentBB_, pc);
-//        std::cerr << "Here!" << std::endl;
+        std::cerr << "Here!" << std::endl;
 
         cache_.incCounter(pc);
     }
@@ -1017,14 +1016,16 @@ void Hart::exec_SD() {
 void Hart::exec_FENCE() {
     this->nextPC();
 
-    hookManager_->triggerInstrExecHook((*currentBB_)[currentBB_->currentInstr()]);
+    hookManager_->triggerInstrExecHook(
+        (*currentBB_)[currentBB_->currentInstr()]);
 
     (this->*HANDLER_ARR[(*currentBB_)[currentBB_->nextInstr()].operation])();
 }
 void Hart::exec_FENCE_TSO() {
     this->nextPC();
 
-    hookManager_->triggerInstrExecHook((*currentBB_)[currentBB_->currentInstr()]);
+    hookManager_->triggerInstrExecHook(
+        (*currentBB_)[currentBB_->currentInstr()]);
 
     (this->*HANDLER_ARR[(*currentBB_)[currentBB_->nextInstr()].operation])();
 }
@@ -1033,7 +1034,8 @@ void Hart::exec_FENCE_TSO() {
 void Hart::exec_PAUSE() {
     this->raiseIllegalInstruction();
 
-    hookManager_->triggerInstrExecHook((*currentBB_)[currentBB_->currentInstr()]);
+    hookManager_->triggerInstrExecHook(
+        (*currentBB_)[currentBB_->currentInstr()]);
 
     (this->*HANDLER_ARR[(*currentBB_)[currentBB_->nextInstr()].operation])();
 }
@@ -1312,8 +1314,8 @@ void Hart::exec_CSRRC() {
 void Hart::exec_CSRRWI() {
     size_t instrIt = currentBB_->currentInstr();
 
-    auto status =
-        csrf_.write((*currentBB_)[instrIt].immidiate, (*currentBB_)[instrIt].rs1);
+    auto status = csrf_.write((*currentBB_)[instrIt].immidiate,
+                              (*currentBB_)[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
         return;
@@ -1330,8 +1332,8 @@ void Hart::exec_CSRRWI() {
 void Hart::exec_CSRRSI() {
     size_t instrIt = currentBB_->currentInstr();
 
-    auto status =
-        csrf_.setBits((*currentBB_)[instrIt].immidiate, (*currentBB_)[instrIt].rs1);
+    auto status = csrf_.setBits((*currentBB_)[instrIt].immidiate,
+                                (*currentBB_)[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
         return;
@@ -1348,8 +1350,8 @@ void Hart::exec_CSRRSI() {
 void Hart::exec_CSRRCI() {
     size_t instrIt = currentBB_->currentInstr();
 
-    auto status =
-        csrf_.clearBits((*currentBB_)[instrIt].immidiate, (*currentBB_)[instrIt].rs1);
+    auto status = csrf_.clearBits((*currentBB_)[instrIt].immidiate,
+                                  (*currentBB_)[instrIt].rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
         return;
