@@ -14,6 +14,7 @@ public:
         static_assert(capacity > 1);
     }
 
+#if true
     BasicBlock(const BasicBlock &other) {
         startPC_ = other.startPC_;
         instrs_ = other.instrs_;
@@ -33,6 +34,7 @@ public:
 
         return *this;
     }
+#endif
 
     /**
      * \brief Basic block capacity taking into account the last \p BB_END

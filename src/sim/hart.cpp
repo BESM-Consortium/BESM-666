@@ -283,7 +283,7 @@ void Hart::run() {
     currentBB_->resetBB();
     currentBB_->setStartPC(pc);
     dec_.assembleBB(*currentBB_);
-    entry.setPayload(*currentBB_, pc);
+    entry.setTag(pc);
     cache_.incCounter(pc);
     hookManager_->triggerBBFetchHook(*currentBB_);
 
@@ -338,10 +338,8 @@ void Hart::exec_BB_END() {
         }
         currentBB_->setStartPC(pc);
         dec_.assembleBB(*currentBB_);
-        std::cerr << "Here?" << std::endl;
         entry.setTag(pc);
 //        entry.setPayload(*currentBB_, pc);
-        std::cerr << "Here!" << std::endl;
         cache_.incCounter(pc);
     }
     hookManager_->triggerBBFetchHook(*currentBB_);
