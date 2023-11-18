@@ -1,4 +1,5 @@
 #include "besm-666/decoder/decoder.hpp"
+#include "besm-666/exec/gprf.hpp"
 #include "besm-666/util/bit-magic.hpp"
 #include <iostream>
 
@@ -110,7 +111,8 @@ Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
         }
         break;
     }
-    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+    Register rd = ExtractRegister<RD_SHIFT>(bytecode);
+    return Instruction{.rd = rd ? rd : besm::exec::GPRF::SYNC,
                        .rs1 = ExtractRegister<RS1_SHIFT>(bytecode),
                        .rs2 = ExtractRegister<RS2_SHIFT>(bytecode),
                        .immidiate = Instruction::IMMIDIATE_POISON,
@@ -121,7 +123,8 @@ inline Instruction dec::Decoder::parse_U(const RV64UWord bytecode,
                                          const InstructionOp operation) {
     constexpr int IMM_SHIFT = 12;
     constexpr RV64UWord IMM_MASK = 0b11111111111111111111 << IMM_SHIFT;
-    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+    Register rd = ExtractRegister<RD_SHIFT>(bytecode);
+    return Instruction{.rd = rd ? rd : besm::exec::GPRF::SYNC,
                        .immidiate = (bytecode & IMM_MASK),
                        .operation = operation};
 }
@@ -133,7 +136,7 @@ Instruction dec::Decoder::parse_I(const RV64UWord bytecode,
     const auto rs1 = ExtractRegister<RS1_SHIFT>(bytecode);
     if (operation != INV_OP) {
         return Instruction{
-            .rd = rd, .rs1 = rs1, .immidiate = imm, .operation = operation};
+            .rd = rd ? rd : besm::exec::GPRF::SYNC, .rs1 = rs1, .immidiate = imm, .operation = operation};
     }
     const uint8_t func3 =
         util::ExtractBits<RV64UWord, 3, FUNC3_SHIFT>(bytecode);
@@ -219,7 +222,8 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
     const auto bit12_19 = util::ExtractBits<RV64UWord, 8, 12 + 0>(bytecode)
                           << 12;
     assert((bit20 & bit1_10 & bit11 & bit12_19) == 0b0);
-    return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
+    Register rd =  ExtractRegister<RD_SHIFT>(bytecode);
+    return Instruction{.rd = rd ? rd : besm::exec::GPRF::SYNC,
                        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
                        .operation = operation};
 }

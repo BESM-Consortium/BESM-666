@@ -14,7 +14,7 @@ namespace besm::exec {
 /// General purpose register file
 class GPRF {
 public:
-    // x0 - x31 + PC
+    // x0 - x31 + SYNK + PC
     static constexpr const size_t X0 = 0;
     static constexpr const size_t X1 = 1;
     static constexpr const size_t X2 = 2;
@@ -47,8 +47,9 @@ public:
     static constexpr const size_t X29 = 29;
     static constexpr const size_t X30 = 30;
     static constexpr const size_t X31 = 31;
-    static constexpr const size_t PC = 32;
-    static constexpr const size_t Size = 33;
+    static constexpr const Register SYNC = 32;
+    static constexpr const size_t PC = 33;
+    static constexpr const size_t Size = 34;
 
     inline GPRF() { registers_[PC] = 0; }
 
@@ -66,7 +67,7 @@ inline void GPRF::write(Register regId, RV64UDWord value) {
 
 inline RV64UDWord GPRF::read(Register regId) const {
     assert(regId < Size);
-    return regId == X0 ? 0 : registers_[regId];
+    return registers_[regId];
 }
 
 class GPRFStateDumper {
