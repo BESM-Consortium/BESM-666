@@ -336,8 +336,8 @@ void Hart::exec_BB_END() {
         }
         currentBB_->setStartPC(pc);
         dec_.assembleBB(*currentBB_);
-        //        entry.setTag(pc);
-        entry.setPayload(*currentBB_, pc);
+        entry.setTag(pc);
+//        entry.setPayload(*currentBB_, pc);
         cache_.incCounter(pc);
     }
     hookManager_->triggerBBFetchHook(*currentBB_);

@@ -14,28 +14,6 @@ public:
         static_assert(capacity > 1);
     }
 
-#if true
-    BasicBlock(const BasicBlock &other) {
-        startPC_ = other.startPC_;
-        instrs_ = other.instrs_;
-        sz_ = other.sz_;
-        currentInstr_ = other.currentInstr_;
-
-        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
-    }
-
-    BasicBlock &operator=(const BasicBlock &other) {
-        startPC_ = other.startPC_;
-        instrs_ = other.instrs_;
-        sz_ = other.sz_;
-        currentInstr_ = other.currentInstr_;
-
-        std::cerr << "Balls explosion! BB copy ctor" << std::endl;
-
-        return *this;
-    }
-#endif
-
     /**
      * \brief Basic block capacity taking into account the last \p BB_END
      * instruction.
