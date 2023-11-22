@@ -46,14 +46,13 @@ private:
 
     std::shared_ptr<sim::HookManager> hookManager_;
 
-    bool exceptionHappened_ = false;
-
     size_t instrsExecuted_;
 
     explicit Hart(std::shared_ptr<mem::PhysMem> const &pMem,
                   std::shared_ptr<HookManager> hookManager);
 
     void assembleBB(exec::BasicBlock& bb, RV64Ptr pc);
+    void fetchBB();
     void execNextInstr();
 
     void raiseException(ExceptionId id);

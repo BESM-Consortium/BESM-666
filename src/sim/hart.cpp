@@ -46,9 +46,7 @@ void Hart::raiseException(ExceptionId id) {
     csrf_.mepc.set<exec::MEPC::Value>(gprf_.read(exec::GPRF::PC));
     gprf_.write(exec::GPRF::PC, newPC);
 
-    exceptionHappened_ = true;
-
-    this->exec_BB_END();
+    this->fetchBB();
 }
 void Hart::raiseIllegalInstruction() {
     this->raiseException(EXCEPTION_ILLEGAL_INSTR);
@@ -62,16 +60,7 @@ void Hart::assembleBB(exec::BasicBlock& bb, RV64Ptr pc) {
     }
 }
 
-void Hart::execNextInstr() {
-    ++instrsExecuted_;
-
-    hookManager_->triggerInstrExecHook(*currentInstr_);
-
-    ++currentInstr_;
-    (this->*HANDLER_ARR[currentInstr_->operation])();
-}
-
-void Hart::exec_BB_END() {
+void Hart::fetchBB() {
     RV64UDWord pc = gprf_.read(exec::GPRF::PC);
 
     auto [bbFound, bb] = bbCache_.lookup(pc);
@@ -82,6 +71,19 @@ void Hart::exec_BB_END() {
     hookManager_->triggerBBFetchHook(bb);
 
     currentInstr_ = bb.getInstructions();
+}
+
+void Hart::execNextInstr() {
+    ++instrsExecuted_;
+
+    hookManager_->triggerInstrExecHook(*currentInstr_);
+
+    ++currentInstr_;
+    (this->*HANDLER_ARR[currentInstr_->operation])();
+}
+
+void Hart::exec_BB_END() {
+    this->fetchBB();
 
     (this->*HANDLER_ARR[currentInstr_->operation])();
 }
@@ -733,14 +735,14 @@ void Hart::exec_SRAW() {
 void Hart::exec_MRET() {
     if (csrf_.getPrivillege() != exec::PRIVILLEGE_MACHINE) {
         this->raiseIllegalInstruction();
+    } else {
+        csrf_.setPrivillege(csrf_.mstatus.get<exec::MStatus::MPP>());
+        csrf_.mstatus.set<exec::MStatus::MIE>(
+            csrf_.mstatus.get<exec::MStatus::MPIE>());
+        csrf_.mstatus.set<exec::MStatus::MPIE>(1);
+        csrf_.mstatus.set<exec::MStatus::MPP>(exec::PRIVILLEGE_USER);
+        // csrf_.mstatus.set<exec::MStatus::MPRV>(0);
     }
-
-    csrf_.setPrivillege(csrf_.mstatus.get<exec::MStatus::MPP>());
-    csrf_.mstatus.set<exec::MStatus::MIE>(
-        csrf_.mstatus.get<exec::MStatus::MPIE>());
-    csrf_.mstatus.set<exec::MStatus::MPIE>(1);
-    csrf_.mstatus.set<exec::MStatus::MPP>(exec::PRIVILLEGE_USER);
-    // csrf_.mstatus.set<exec::MStatus::MPRV>(0);
 
     gprf_.write(exec::GPRF::PC, csrf_.mepc.get<exec::MEPC::Value>());
     this->execNextInstr();
@@ -762,10 +764,10 @@ void Hart::exec_CSRRW() {
         csrf_.write(currentInstr_->immidiate, gprf_.read(currentInstr_->rs1));
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
-
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
 
     this->execNextInstr();
 }
@@ -780,12 +782,11 @@ void Hart::exec_CSRRS() {
 
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
 
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
-
-    this->nextPC();
     this->execNextInstr();
 }
 void Hart::exec_CSRRC() {
@@ -793,48 +794,44 @@ void Hart::exec_CSRRC() {
                                   gprf_.read(currentInstr_->rs1));
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
 
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
-
-    this->nextPC();
     this->execNextInstr();
 }
 void Hart::exec_CSRRWI() {
     auto status = csrf_.write(currentInstr_->immidiate, currentInstr_->rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
 
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
-
-    this->nextPC();
     this->execNextInstr();
 }
 void Hart::exec_CSRRSI() {
     auto status = csrf_.setBits(currentInstr_->immidiate, currentInstr_->rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
 
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
-
-    this->nextPC();
     this->execNextInstr();
 }
 void Hart::exec_CSRRCI() {
     auto status = csrf_.clearBits(currentInstr_->immidiate, currentInstr_->rs1);
     if (std::holds_alternative<bool>(status)) {
         this->raiseIllegalInstruction();
-        return;
+    } else {
+        gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
+        this->nextPC();
     }
 
-    gprf_.write(currentInstr_->rd, std::get<RV64UDWord>(status));
-
-    this->nextPC();
     this->execNextInstr();
 }
 
