@@ -26,7 +26,7 @@ format:
 
 .PHONY: build
 build:
-	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR)
+	cmake -S $(PWD) -B $(PWD)/$(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PWD)/$(BUILD_DIR) --parallel $(JOBS)
 
 .PHONY: build-val

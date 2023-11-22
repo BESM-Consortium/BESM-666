@@ -17,5 +17,5 @@ int is_prime(rv64dw value) {
 }
 
 rv64dw start() {
-    return is_prime(1787); //155003 or 65003 for long count
+    return is_prime(155003); //155003 or 65003 for long count
 }

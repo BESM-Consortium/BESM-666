@@ -2,7 +2,7 @@
 
 #include "besm-666/memory/mmu.hpp"
 
-namespace besm::dec {
+namespace besm::mem {
 
 /**
  * This class provides fetching of raw instructions, keeping

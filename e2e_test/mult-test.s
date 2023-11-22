@@ -50,4 +50,4 @@ start:
 .finish:
     ld ra, 0(sp)
     add sp, sp, 8
-    jalr zero, ra, 0
+    ebreak

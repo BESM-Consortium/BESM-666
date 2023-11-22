@@ -51,8 +51,7 @@ _start:
     // jalr ra, t0
     call start // THE POWER OF PSEUDO INSTRUCTIONS!
 
-.0:
-    j .0
+    ebreak
 
 .section .data
 

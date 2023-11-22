@@ -1,48 +1,27 @@
 #pragma once
 
-#include "besm-666/basic-block.hpp"
 #include "besm-666/decoder/decoder.hpp"
+#include "besm-666/exec/basic-block.hpp"
 #include "besm-666/exec/csrf.hpp"
 #include "besm-666/exec/gprf.hpp"
 #include "besm-666/memory/mmu.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/memory/prefetcher.hpp"
 #include "besm-666/util/assotiative-cache.hpp"
 
 #include <memory>
 
 namespace besm::sim {
 
-template <typename PayloadType, typename TagType>
-TagType BBTag(PayloadType const &payload) {
-    return payload.startPC();
-}
-
-template <typename TagType, typename HashType>
-HashType BBHash(TagType const &tag) {
-    // Can be used: tag % sets, std::hash<TagType>{}(tag) % sets, (tag & 0x1FC)
-    // >> 2. (tag & 0x1FC) >> 2 repeats hash every 128 byte aka num of set.
-    // Value range of (tag & 0x1FC) >> 2 is [0, 128].
-
-    return (tag & 0x1FC) >> 2;
-}
-
 class HookManager;
 
 class Hart : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<Hart>;
-    using BBCache =
-        besm::util::Cache<BasicBlock, RV64UDWord, RV64UDWord, BBTag, BBHash>;
     using Handler = void (Hart::*)();
 
     static SPtr Create(std::shared_ptr<mem::PhysMem> const &pMem,
                        std::shared_ptr<HookManager> const &hookManager);
-
-#if true
-    void exec(const Instruction instr);
-    void execBB(const BasicBlock &bb);
-    void runCycle();
-#endif
 
     exec::GPRF const &getGPRF() const { return gprf_; }
     exec::CSRF const &getCSRF() const { return csrf_; }
@@ -54,21 +33,28 @@ public:
     void run();
 
 private:
-    BBCache cache_;
-    mem::MMU::SPtr mmu_;
+    exec::BasicBlockCache bbCache_;
+    Instruction const *currentInstr_;
+
     dec::Decoder dec_;
+
+    mem::MMU::SPtr mmu_;
+    mem::Prefetcher prefetcher_;
+
     exec::GPRF gprf_;
     exec::CSRF csrf_;
-    BasicBlock *currentBB_;
+
     std::shared_ptr<sim::HookManager> hookManager_;
 
     bool exceptionHappened_ = false;
 
-    RV64UDWord prevPC_;
     size_t instrsExecuted_;
 
     explicit Hart(std::shared_ptr<mem::PhysMem> const &pMem,
                   std::shared_ptr<HookManager> hookManager);
+
+    void assembleBB(exec::BasicBlock& bb, RV64Ptr pc);
+    void execNextInstr();
 
     void raiseException(ExceptionId id);
     void raiseIllegalInstruction();

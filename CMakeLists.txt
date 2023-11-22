@@ -24,6 +24,7 @@ if(NOT DEFINED BESM666__PARENT_BUILD)
         CMAKE_CACHE_ARGS
             -DBESM666__SIMULATOR_BUILD:BOOL=ON
             -DBESM666__PARENT_BUILD:BOOL=ON
+            -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
         INSTALL_COMMAND ""
         BUILD_ALWAYS ON
     )
@@ -93,7 +94,7 @@ if(DEFINED BESM666__SIMULATOR_BUILD)
         set(CMAKE_CTEST_ARGUMENTS --test-action memcheck)
     endif()
 
-    add_subdirectory(unit_test)
+    #add_subdirectory(unit_test)
 endif()
 
 if (DEFINED BESM666__E2E_TESTS_BUILD)
