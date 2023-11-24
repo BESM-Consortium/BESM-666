@@ -24,4 +24,4 @@ RV64UWord Prefetcher::loadWord(RV64Ptr vaddress) {
     }
 }
 
-} // namespace besm::dec
+} // namespace besm::mem

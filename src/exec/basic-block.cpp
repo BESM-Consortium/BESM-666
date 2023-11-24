@@ -1,7 +1,7 @@
 #include "besm-666/exec/basic-block.hpp"
 #include "besm-666/decoder/decoder.hpp"
-#include <limits>
 #include <iostream>
+#include <limits>
 
 namespace besm::exec {
 
@@ -11,7 +11,7 @@ BasicBlock::BasicBlock() {
 }
 
 BasicBlockCache::BasicBlockCache() {
-    for(auto& lruRower : lruRowers_) {
+    for (auto &lruRower : lruRowers_) {
         lruRower = 0;
     }
 }
@@ -22,10 +22,10 @@ std::pair<bool, BasicBlock &> BasicBlockCache::lookup(RV64Ptr pc) {
     RV64Ptr hash = (pc & (kSetMask << 5)) >> 5;
     size_t setPos = hash * kWays;
 
-    for(size_t i = 0; i < kWays; ++i) {
+    for (size_t i = 0; i < kWays; ++i) {
         size_t index = setPos + i;
 
-        if(bbs_[index].getPC() == pc) {
+        if (bbs_[index].getPC() == pc) {
             return std::make_pair(true, std::ref(bbs_[index]));
         }
     }
@@ -37,8 +37,8 @@ std::pair<bool, BasicBlock &> BasicBlockCache::lookup(RV64Ptr pc) {
     return std::make_pair(false, std::ref(bbs_[index]));
 }
 
-BasicBlockRebuilder::BasicBlockRebuilder(BasicBlock &targetBB, size_t pc) :
-        bb_(targetBB), count_(0) {
+BasicBlockRebuilder::BasicBlockRebuilder(BasicBlock &targetBB, size_t pc)
+    : bb_(targetBB), count_(0) {
     bb_.pc_ = pc;
 }
 
@@ -46,7 +46,7 @@ bool BasicBlockRebuilder::append(Instruction const &instr) noexcept {
     bb_.instrs_[count_] = instr;
 
     ++count_;
-    if(instr.isJump() || count_ == BasicBlock::kCapacity - 1) {
+    if (instr.isJump() || count_ == BasicBlock::kCapacity - 1) {
         bb_.instrs_[count_].operation = BB_END;
         return false;
     }

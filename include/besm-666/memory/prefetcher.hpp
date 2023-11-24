@@ -39,4 +39,4 @@ private:
     RV64Size len_;
 };
 
-} // namespace besm::dec
+} // namespace besm::mem

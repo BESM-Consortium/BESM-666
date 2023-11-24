@@ -18,7 +18,9 @@ public:
     BasicBlock();
 
     RV64Ptr getPC() const noexcept { return pc_; }
-    Instruction const *getInstructions() const noexcept { return instrs_.data(); }
+    Instruction const *getInstructions() const noexcept {
+        return instrs_.data();
+    }
 
 private:
     friend class BasicBlockRebuilder;
@@ -58,4 +60,4 @@ private:
     size_t count_;
 };
 
-} // namespace besm
+} // namespace besm::exec

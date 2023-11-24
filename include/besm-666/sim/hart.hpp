@@ -18,7 +18,7 @@ class HookManager;
 class Hart : public INonCopyable {
 public:
     using SPtr = std::shared_ptr<Hart>;
-    using Handler = void (Hart::*)();
+    using Handler = void (*)(Hart &);
 
     static SPtr Create(std::shared_ptr<mem::PhysMem> const &pMem,
                        std::shared_ptr<HookManager> const &hookManager);
@@ -51,90 +51,90 @@ private:
     explicit Hart(std::shared_ptr<mem::PhysMem> const &pMem,
                   std::shared_ptr<HookManager> hookManager);
 
-    void assembleBB(exec::BasicBlock& bb, RV64Ptr pc);
+    void assembleBB(exec::BasicBlock &bb, RV64Ptr pc);
     void fetchBB();
-    void execNextInstr();
+    inline static void execNextInstr(Hart &hart);
 
     void raiseException(ExceptionId id);
     void raiseIllegalInstruction();
 
-    void exec_BB_END();
-    void exec_INV_OP();
-    void exec_ADDI();
-    void exec_SLTI();
-    void exec_SLTIU();
-    void exec_ANDI();
-    void exec_ORI();
-    void exec_XORI();
-    void exec_SLLI();
-    void exec_SRLI();
-    void exec_SRAI();
-    void exec_LUI();
-    void exec_AUIPC();
-    void exec_ADD();
-    void exec_SLT();
-    void exec_SLTU();
-    void exec_AND();
-    void exec_OR();
-    void exec_XOR();
-    void exec_SLL();
-    void exec_SRL();
-    void exec_SUB();
-    void exec_SRA();
-    void exec_JAL();
-    void exec_JALR();
-    void exec_BEQ();
-    void exec_BNE();
-    void exec_BLT();
-    void exec_BLTU();
-    void exec_BGE();
-    void exec_BGEU();
+    static void exec_BB_END(Hart &hart);
+    static void exec_INV_OP(Hart &hart);
+    static void exec_ADDI(Hart &hart);
+    static void exec_SLTI(Hart &hart);
+    static void exec_SLTIU(Hart &hart);
+    static void exec_ANDI(Hart &hart);
+    static void exec_ORI(Hart &hart);
+    static void exec_XORI(Hart &hart);
+    static void exec_SLLI(Hart &hart);
+    static void exec_SRLI(Hart &hart);
+    static void exec_SRAI(Hart &hart);
+    static void exec_LUI(Hart &hart);
+    static void exec_AUIPC(Hart &hart);
+    static void exec_ADD(Hart &hart);
+    static void exec_SLT(Hart &hart);
+    static void exec_SLTU(Hart &hart);
+    static void exec_AND(Hart &hart);
+    static void exec_OR(Hart &hart);
+    static void exec_XOR(Hart &hart);
+    static void exec_SLL(Hart &hart);
+    static void exec_SRL(Hart &hart);
+    static void exec_SUB(Hart &hart);
+    static void exec_SRA(Hart &hart);
+    static void exec_JAL(Hart &hart);
+    static void exec_JALR(Hart &hart);
+    static void exec_BEQ(Hart &hart);
+    static void exec_BNE(Hart &hart);
+    static void exec_BLT(Hart &hart);
+    static void exec_BLTU(Hart &hart);
+    static void exec_BGE(Hart &hart);
+    static void exec_BGEU(Hart &hart);
 
-    void exec_LB();
-    void exec_LH();
-    void exec_LW();
-    void exec_LD();
-    void exec_LBU();
-    void exec_LHU();
-    void exec_LWU();
-    void exec_SB();
-    void exec_SH();
-    void exec_SW();
-    void exec_SD();
+    static void exec_LB(Hart &hart);
+    static void exec_LH(Hart &hart);
+    static void exec_LW(Hart &hart);
+    static void exec_LD(Hart &hart);
+    static void exec_LBU(Hart &hart);
+    static void exec_LHU(Hart &hart);
+    static void exec_LWU(Hart &hart);
+    static void exec_SB(Hart &hart);
+    static void exec_SH(Hart &hart);
+    static void exec_SW(Hart &hart);
+    static void exec_SD(Hart &hart);
 
     // Does nothing in in-order implementation
-    void exec_FENCE();
-    void exec_FENCE_TSO();
+    static void exec_FENCE(Hart &hart);
+    static void exec_FENCE_TSO(Hart &hart);
 
     /**
      * @todo #81:90min to be implemented
      */
-    void exec_PAUSE();
+    static void exec_PAUSE(Hart &hart);
 
     // Will be implemented after CSR system release
-    void exec_ECALL();
-    void exec_EBREAK();
+    static void exec_ECALL(Hart &hart);
+    static void exec_EBREAK(Hart &hart);
 
-    void exec_ADDIW();
-    void exec_SLLIW();
-    void exec_SRLIW();
-    void exec_SRAIW();
-    void exec_ADDW();
-    void exec_SUBW();
-    void exec_SLLW();
-    void exec_SRLW();
-    void exec_SRAW();
+    static void exec_ADDIW(Hart &hart);
+    static void exec_SLLIW(Hart &hart);
+    static void exec_SRLIW(Hart &hart);
+    static void exec_SRAIW(Hart &hart);
+    static void exec_ADDW(Hart &hart);
+    static void exec_SUBW(Hart &hart);
+    static void exec_SLLW(Hart &hart);
+    static void exec_SRLW(Hart &hart);
+    static void exec_SRAW(Hart &hart);
 
-    void exec_MRET();
-    void exec_SRET();
+    static void exec_MRET(Hart &hart);
+    static void exec_SRET(Hart &hart);
 
-    void exec_CSRRW();
-    void exec_CSRRS();
-    void exec_CSRRC();
+    static void exec_CSRRW(Hart &hart);
+    static void exec_CSRRS(Hart &hart);
+    static void exec_CSRRC(Hart &hart);
 
-    void exec_CSRRWI();
-    void exec_CSRRSI();
-    void exec_CSRRCI();
+    static void exec_CSRRWI(Hart &hart);
+    static void exec_CSRRSI(Hart &hart);
+    static void exec_CSRRCI(Hart &hart);
 
     void nextPC();
 
