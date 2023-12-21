@@ -28,6 +28,15 @@ struct Instruction {
                 operation == SRET || operation == ECALL);
     }
 
+    bool isLoad() const {
+        return (operation == LB || operation == LH || operation == LW ||
+                operation == LBU || operation == LHU);
+    }
+
+    bool isStore() const {
+        return (operation == SB || operation == SH || operation == SW);
+    }
+
     static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
 };
 
