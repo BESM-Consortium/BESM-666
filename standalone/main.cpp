@@ -5,6 +5,9 @@
 #include <stdexcept>
 
 #include "besm-666/instruction.hpp"
+#include "besm-666/riscv-types.hpp"
+#include "besm-666/rv-instruction-op.hpp"
+#include "besm-666/util/bit-magic.hpp"
 #include "capstone/capstone.h"
 
 #include "CLI/CLI.hpp"
@@ -84,20 +87,61 @@ void OnInstrExecuted(besm::Instruction const &instr) {
         }
 
         if (optionTracingEnabled) {
+            std::string mnem = str_toupper(disassembly->mnemonic);
+            if(mnem == "MV") {
+                mnem = "ADDI";
+            }
+            if(mnem == "BNEZ") {
+                mnem = "BNE";
+            }
+
             traceFile << std::hex << CurrentPC << std::dec << ": "
-                      << str_toupper(disassembly->mnemonic) << '\n';
-            traceFile << "\tReg [" << std::setw(2) << std::setfill('0')
-                      << std::hex << (int)instr.rd << std::setw(1)
-                      << std::setfill(' ') << std::dec << "] <= " << std::hex
-                      << Machine->getHart().getGPRF().read(instr.rd)
-                      << std::endl;
+                      << mnem << '\n';
+
+            if (instr.rd != besm::exec::GPRF::X0) {
+                traceFile << "\tReg [" << std::setw(2) << std::setfill('0')
+                          << std::hex << (int)instr.rd << std::setw(1)
+                          << std::setfill(' ') << std::dec
+                          << "] <= " << std::hex
+                          << Machine->getHart().getGPRF().read(instr.rd)
+                          << std::endl;
+            }
             if (instr.isJump()) {
                 traceFile << "\tPc <= " << std::hex
                           << Machine->getHart().getGPRF().read(
                                  besm::exec::GPRF::PC)
                           << std::dec << std::endl;
             }
+
+            if (instr.isStore()) {
+                besm::RV64UDWord addr =
+                    Machine->getHart().getGPRF().read(instr.rs1) +
+                    besm::util::SignExtend<besm::RV64UDWord, 12>(
+                        instr.immidiate);
+
+                besm::RV64UDWord val;
+
+                switch (instr.operation) {
+                case besm::InstructionOp::SB:
+                    val = Machine->getHart().getMMU().loadByte(addr);
+                    break;
+                case besm::InstructionOp::SH:
+                    val = Machine->getHart().getMMU().loadHWord(addr);
+                    break;
+                case besm::InstructionOp::SW:
+                    val = Machine->getHart().getMMU().loadWord(addr);
+                    break;
+                case besm::InstructionOp::SD:
+                    val = Machine->getHart().getMMU().loadDWord(addr);
+                    break;
+                }
+
+                traceFile << "\tMem [" << std::hex << addr << "] <= " << val
+                          << std::dec << std::endl;
+            }
         }
+
+        cs_free(disassembly, 1);
     }
 
     CurrentPC += 4;
