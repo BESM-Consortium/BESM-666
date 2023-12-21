@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "besm-666/exec/executor.hpp"
 #include "besm-666/exec/gprf.hpp"
+#include "besm-666/memory/mmu.hpp"
 #include "besm-666/memory/phys-mem.hpp"
+#include "besm-666/sim/hart.hpp"
 #include "besm-666/sim/hooks.hpp"
 #include "besm-666/util/bit-magic.hpp"
 
@@ -14,7 +15,8 @@ public:
         : pMem(mem::PhysMemBuilder()
                    .mapRAM(0, 1 * 1024 * 1024, 4096, 2 * 1024 * 1024)
                    .build()),
-          mmu(mem::MMU::Create(pMem)), exec(mmu, hookManager_) {}
+          mmu(mem::MMU::Create(pMem)),
+          hart(sim::Hart::Create(pMem, hookManager_)) {}
 
 protected:
     void SetupInstrR(InstructionOp op, Register rd, Register rs1,
@@ -57,18 +59,18 @@ protected:
         Exec();
     }
 
-    RV64UDWord ReadReg(Register r) { return exec.getState().read(r); }
+    RV64UDWord ReadReg(Register r) { return hart->getGPRF().read(r); }
     RV64DWord ReadRegS(Register r) {
-        return util::Signify(exec.getState().read(r));
+        return util::Signify(hart->getGPRF().read(r));
     }
 
-    void Exec() { exec.exec(instr); }
+    void Exec() { hart->exec(instr); }
 
     Instruction instr;
     std::shared_ptr<mem::PhysMem> pMem;
     mem::MMU::SPtr mmu;
     sim::HookManager::SPtr hookManager_ = sim::HookManager::Create();
-    exec::Executor exec;
+    sim::Hart::SPtr hart;
 };
 
 TEST_F(RV64IExecutorTest, MOVI) {

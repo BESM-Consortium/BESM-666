@@ -3,7 +3,7 @@
 *.gch
 
 # CMake build files
-build/
+build*
 
 # ide stuff
 .idea

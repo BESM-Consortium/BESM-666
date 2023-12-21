@@ -6,6 +6,7 @@ target_sources(besm666_memory PRIVATE
     ./mmu.cpp
     ./phys-mem-device.cpp
     ./ram.cpp
+    ./prefetcher.cpp
 )
 target_link_libraries(besm666_memory PRIVATE
     besm666_include

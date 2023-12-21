@@ -9,3 +9,6 @@ target_link_libraries(besm666_standalone PRIVATE
     CLI11::CLI11
     capstone::capstone
 )
+
+#target_compile_options(besm666_standalone PRIVATE -fsanitize=address -g -fsanitize=leak -fsanitize=undefined)
+#target_link_options(besm666_standalone PRIVATE -fsanitize=address -fsanitize=leak  -fsanitize=undefined)

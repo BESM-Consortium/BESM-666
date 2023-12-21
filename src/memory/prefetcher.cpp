@@ -1,10 +1,10 @@
-#include "besm-666/decoder/prefetcher.hpp"
+#include "besm-666/memory/prefetcher.hpp"
 #include <cassert>
 
-namespace besm::dec {
+namespace besm::mem {
 
 Prefetcher::Prefetcher(mem::MMU::SPtr mmu)
-    : mmu_(std::move(mmu)), saved_(nullptr), start_(-1), len_(0) {}
+    : mmu_(mmu), saved_(nullptr), start_(-1), len_(0) {}
 
 RV64UWord Prefetcher::loadWord(RV64Ptr vaddress) {
     if (vaddress > start_ && vaddress < start_ + len_) {
@@ -24,4 +24,4 @@ RV64UWord Prefetcher::loadWord(RV64Ptr vaddress) {
     }
 }
 
-} // namespace besm::dec
+} // namespace besm::mem

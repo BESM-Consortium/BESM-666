@@ -24,11 +24,11 @@ besm::RV64Ptr CurrentPC;
 
 // TD: Dev CSR dumper
 // TD: Move pc to instr callback and remove bb fetch callback
-void OnBBFetch(besm::BasicBlock const &bb) {
+void OnBBFetch(besm::exec::BasicBlock const &bb) {
     std::clog << "[BESM-666] VERBOSE: Fetched basic block at PC = "
-              << bb.startPC() << std::endl;
+              << bb.getPC() << std::endl;
 
-    CurrentPC = bb.startPC();
+    CurrentPC = bb.getPC();
 }
 
 void DumpReg(besm::Register regId, besm::exec::GPRF const &gprf) {

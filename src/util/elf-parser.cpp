@@ -72,7 +72,7 @@ ElfParser::getLoadableSegments() & {
             if (seg->get_type() == ELFIO::PT_LOAD) {
                 loadableSegments_.emplace_back(
                     seg->get_virtual_address(), seg->get_data(),
-                    static_cast<RV64Size>(seg->get_memory_size()));
+                    static_cast<RV64Size>(seg->get_file_size()));
             }
         }
     }

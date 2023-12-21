@@ -70,7 +70,8 @@ enum InstructionOp {
     CSRRSI, // 1110011 , 110     , I
     CSRRCI, // 1110011 , 111     , I
     SRET,
-    MRET
+    MRET,
+    BB_END // keep it last instruction
 };
 
 }

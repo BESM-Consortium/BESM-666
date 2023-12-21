@@ -20,6 +20,7 @@ public:
         std::is_nothrow_copy_constructible_v<PayloadType>);
     void setPayload(PayloadType &&payload, TagType tag) noexcept(
         std::is_nothrow_move_constructible_v<PayloadType>);
+    void setTag(TagType tag) noexcept;
 
     PayloadType const &getPayload() const noexcept;
     PayloadType &getPayload() noexcept;
@@ -279,6 +280,12 @@ void CacheEntry<PayloadType, TagType>::setPayload(
     PayloadType &&payload,
     TagType tag) noexcept(std::is_nothrow_move_constructible_v<PayloadType>) {
     payload_ = std::move(payload);
+    tag_ = tag;
+    valid_ = true;
+}
+
+template <typename PayloadType, typename TagType>
+void CacheEntry<PayloadType, TagType>::setTag(TagType tag) noexcept {
     tag_ = tag;
     valid_ = true;
 }

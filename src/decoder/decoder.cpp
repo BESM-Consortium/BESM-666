@@ -42,8 +42,11 @@ Instruction dec::Decoder::parse(const RV64UWord bytecode) const {
     case J:
         return parse_J(bytecode, operation);
         break;
+
+    default:
+        return Instruction{.operation = INV_OP};
+        break;
     }
-    return Instruction{.operation = INV_OP};
 }
 
 Instruction dec::Decoder::parse_R(const RV64UWord bytecode, const Opcode opcode,
@@ -222,19 +225,4 @@ Instruction dec::Decoder::parse_J(const RV64UWord bytecode,
     return Instruction{.rd = ExtractRegister<RD_SHIFT>(bytecode),
                        .immidiate = bit20 | bit1_10 | bit11 | bit12_19,
                        .operation = operation};
-}
-besm::BasicBlock dec::Decoder::assembleBB(RV64Ptr address) {
-    BasicBlock bb{address};
-    int i = 0;
-    while (bb.put(parse(fetch(address + i)))) {
-        i += sizeof(RV64UWord);
-    }
-    return bb;
-}
-
-void dec::Decoder::assembleBB(BasicBlock &bb) {
-    int i = 0;
-    while (bb.put(parse(fetch(bb.startPC() + i)))) {
-        i += sizeof(RV64UWord);
-    }
 }
