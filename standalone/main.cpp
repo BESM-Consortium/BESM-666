@@ -1,9 +1,13 @@
 #include <chrono>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
 #include "besm-666/instruction.hpp"
+#include "besm-666/riscv-types.hpp"
+#include "besm-666/rv-instruction-op.hpp"
+#include "besm-666/util/bit-magic.hpp"
 #include "capstone/capstone.h"
 
 #include "CLI/CLI.hpp"
@@ -16,17 +20,29 @@
 
 bool optionDumpInstructions = false;
 bool optionDumpRegisters = false;
+bool optionTracingEnabled = false;
+
+std::ofstream traceFile;
 
 csh CapstoneHandler;
 std::shared_ptr<besm::sim::Machine> Machine;
 
 besm::RV64Ptr CurrentPC;
 
+std::string str_toupper(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c) { return std::toupper(c); } // correct
+    );
+    return s;
+}
+
 // TD: Dev CSR dumper
 // TD: Move pc to instr callback and remove bb fetch callback
 void OnBBFetch(besm::exec::BasicBlock const &bb) {
-    std::clog << "[BESM-666] VERBOSE: Fetched basic block at PC = "
-              << bb.getPC() << std::endl;
+    if (optionDumpInstructions) {
+        std::clog << "[BESM-666] VERBOSE: Fetched basic block at PC = "
+                  << bb.getPC() << std::endl;
+    }
 
     CurrentPC = bb.getPC();
 }
@@ -46,7 +62,6 @@ void OnInstrExecuted(besm::Instruction const &instr) {
     besm::sim::Hart const &hart = Machine->getHart();
 
     besm::RV64UWord bytecode = hart.getMMU().loadWord(CurrentPC);
-    CurrentPC += 4;
 
     cs_insn *disassembly;
     size_t count =
@@ -56,29 +71,98 @@ void OnInstrExecuted(besm::Instruction const &instr) {
     if (count != 1) {
         std::clog << "\tunimp" << std::endl;
     } else {
-        std::clog << std::hex << disassembly->address << std::dec << ": ";
-        std::clog << disassembly->mnemonic << ' ' << disassembly->op_str
-                  << std::endl;
+        if (optionDumpInstructions) {
+            std::clog << std::hex << disassembly->address << std::dec << ": ";
+            std::clog << disassembly->mnemonic << ' ' << disassembly->op_str
+                      << std::endl;
 
-        if (optionDumpRegisters) {
-            DumpReg(instr.rd, hart.getGPRF());
-            DumpReg(instr.rs1, hart.getGPRF());
-            DumpReg(instr.rs2, hart.getGPRF());
-            std::clog << "imm = "
-                      << "0x" << std::hex << instr.immidiate << std::dec
-                      << " / " << instr.immidiate << std::endl;
+            if (optionDumpRegisters) {
+                DumpReg(instr.rd, hart.getGPRF());
+                DumpReg(instr.rs1, hart.getGPRF());
+                DumpReg(instr.rs2, hart.getGPRF());
+                std::clog << "imm = "
+                          << "0x" << std::hex << instr.immidiate << std::dec
+                          << " / " << instr.immidiate << std::endl;
+            }
         }
+
+        if (optionTracingEnabled) {
+            std::string mnem = str_toupper(disassembly->mnemonic);
+            if(mnem == "MV") {
+                mnem = "ADDI";
+            }
+            if(mnem == "BNEZ") {
+                mnem = "BNE";
+            }
+
+            traceFile << std::hex << CurrentPC << std::dec << ": "
+                      << mnem << '\n';
+
+            if (instr.rd != besm::exec::GPRF::X0) {
+                traceFile << "\tReg [" << std::setw(2) << std::setfill('0')
+                          << std::hex << (int)instr.rd << std::setw(1)
+                          << std::setfill(' ') << std::dec
+                          << "] <= " << std::hex
+                          << Machine->getHart().getGPRF().read(instr.rd)
+                          << std::endl;
+            }
+            if (instr.isJump()) {
+                traceFile << "\tPc <= " << std::hex
+                          << Machine->getHart().getGPRF().read(
+                                 besm::exec::GPRF::PC)
+                          << std::dec << std::endl;
+            }
+
+            if (instr.isStore()) {
+                besm::RV64UDWord addr =
+                    Machine->getHart().getGPRF().read(instr.rs1) +
+                    besm::util::SignExtend<besm::RV64UDWord, 12>(
+                        instr.immidiate);
+
+                besm::RV64UDWord val;
+
+                switch (instr.operation) {
+                case besm::InstructionOp::SB:
+                    val = Machine->getHart().getMMU().loadByte(addr);
+                    break;
+                case besm::InstructionOp::SH:
+                    val = Machine->getHart().getMMU().loadHWord(addr);
+                    break;
+                case besm::InstructionOp::SW:
+                    val = Machine->getHart().getMMU().loadWord(addr);
+                    break;
+                case besm::InstructionOp::SD:
+                    val = Machine->getHart().getMMU().loadDWord(addr);
+                    break;
+                }
+
+                traceFile << "\tMem [" << std::hex << addr << "] <= " << val
+                          << std::dec << std::endl;
+            }
+        }
+
+        cs_free(disassembly, 1);
     }
+
+    CurrentPC += 4;
+}
+
+void InitCapstone() {
+    static bool initialized = false;
+    if (initialized) {
+        return;
+    }
+
+    cs_open(CS_ARCH_RISCV, CS_MODE_RISCV64, &CapstoneHandler);
+    std::atexit([]() { cs_close(&CapstoneHandler); });
+
+    initialized = true;
 }
 
 void InitVerboseLogging() {
     besm::sim::HookManager const &hookManager = Machine->getHookManager();
 
-    cs_open(CS_ARCH_RISCV, CS_MODE_RISCV64, &CapstoneHandler);
-    std::atexit([]() {
-        std::clog << "[BESM-666] VERBOSE: Verbose logger finished" << std::endl;
-        cs_close(&CapstoneHandler);
-    });
+    InitCapstone();
 
     std::clog << "[BESM-666] VERBOSE: Verbose logging enabled" << std::endl;
 
@@ -161,6 +245,9 @@ int main(int argc, char *argv[]) {
         ->default_val(false)
         ->group("Debug");
 
+    std::string traceFilename;
+    app.add_option("-t,--trace-dump", traceFilename)->group("Debug");
+
     bool a0Validation = false;
     app.add_flag("--a0-validation", a0Validation, "Enable a0 validator mode")
         ->default_val(false)
@@ -172,7 +259,12 @@ int main(int argc, char *argv[]) {
     besm::sim::Config config = configBuilder.build();
     Machine = std::make_unique<besm::sim::Machine>(config);
 
-    if (optionDumpInstructions) {
+    if (!traceFilename.empty()) {
+        optionTracingEnabled = true;
+        traceFile.open(traceFilename);
+    }
+
+    if (optionDumpInstructions || optionTracingEnabled) {
         InitVerboseLogging();
     }
 

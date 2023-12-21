@@ -53,6 +53,9 @@ _start:
 
     ebreak
 
+.0:
+    j .0
+
 .section .data
 
 // allocate 4K aligned memory page for stack

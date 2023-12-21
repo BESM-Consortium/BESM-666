@@ -16,7 +16,7 @@ rv64dw array[] = {
 void bubble_sort(rv64dw* array, rv64dw size) {
     rv64dw* last = array + size - 1;
     for(rv64dw* i = array; i < last; ++i) {
-        for(rv64dw* j = i; j < last; ++j) {
+        for(rv64dw* j = array; j < last; ++j) {
             rv64dw* cur = j;
             rv64dw* next = j + 1;
 

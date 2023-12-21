@@ -34,7 +34,7 @@ struct Instruction {
     }
 
     bool isStore() const {
-        return (operation == SB || operation == SH || operation == SW);
+        return (operation == SB || operation == SH || operation == SW || operation == SD);
     }
 
     static constexpr RV64UDWord IMMIDIATE_POISON = UINT32_MAX;
